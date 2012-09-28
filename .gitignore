@@ -10,3 +10,5 @@ thumbs.db
 *.history
 *.index
 .log
+
+Dev/MainWorkspace/.metadata/.plugins/
