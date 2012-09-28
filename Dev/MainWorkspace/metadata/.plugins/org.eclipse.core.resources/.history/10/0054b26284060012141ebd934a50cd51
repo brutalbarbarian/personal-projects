@@ -1,0 +1,32 @@
+package com.lwan.strcom.gui;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+
+public class GSettings {
+	private static Object getValueOf(Property<?> property) {
+		if (property == gridCoverArtModeProperty()) {
+			return true;
+		}
+		
+		return null;
+	}
+	
+	private static Property<Boolean> ignoreWhiteSpace;
+	public static Property<Boolean> ignoreWhiteSpace() {
+		if (ignoreWhiteSpace == null) {
+			ignoreWhiteSpace = new SimpleBooleanProperty(true);	//TODo
+		}
+		return ignoreWhiteSpace;
+	}
+	
+	private static Property<Boolean> gridCoverArtMode;
+	public static Property<Boolean> gridCoverArtModeProperty() {
+		if (gridCoverArtMode == null) {
+			gridCoverArtMode = new SimpleBooleanProperty();
+			gridCoverArtMode.setValue((Boolean)getValueOf(gridCoverArtMode));
+		}
+		return gridCoverArtMode;
+	}
+}

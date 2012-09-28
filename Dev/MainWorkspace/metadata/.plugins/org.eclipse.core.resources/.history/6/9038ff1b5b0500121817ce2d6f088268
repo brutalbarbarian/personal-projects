@@ -1,0 +1,40 @@
+package com.lwan.strcom.gui;
+
+//import com.lwan.javafx.scene.control.StrComFX;
+import com.lwan.swing.StrCom;
+import com.lwan.util.SwingUtil;
+
+public class Main {
+	protected static boolean useSwing = true;
+	
+	public static void main (String[] args) {
+		try {
+//			SwingUtil.setLookAndFeel("Metal");
+//			SwingUtil.setLookAndFeel("Nimbus");
+			SwingUtil.setSystemLookAndFeel();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		//check parameters
+		if (args.length > 0) {
+			switch(args[0]) {
+			case "--help":
+				System.out.println("String Comparator v1.0 by brutalbarbarian\n" +
+						"Simply start up to launch the GUI interface" +
+						"or pass in two paths of files as parameters to initilise comparison");
+				return;
+			default:
+				if (args.length == 2) {
+					//TODO
+				}
+			}
+		} 
+		
+		if (useSwing) {
+			new StrCom();
+		} else {
+//			StrComFX.launchApp(args);
+		}
+	}
+}

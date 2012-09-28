@@ -1,0 +1,14 @@
+package com.lwan.musicsync.main;
+
+import javafx.beans.property.Property;
+import javafx.scene.layout.GridPane;
+
+public class RatingsEdit extends GridPane {
+	public RatingsEdit(Property<Integer> valueProperty){
+		
+	}
+	
+	protected Shape createStar() {
+		
+	}
+}

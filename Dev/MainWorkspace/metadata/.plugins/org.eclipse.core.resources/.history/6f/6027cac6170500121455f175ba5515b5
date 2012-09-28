@@ -1,0 +1,35 @@
+package com.lwan.bo;
+
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
+public class BOObject implements ChangeListener<BOObject> {
+	
+	// properties
+	// active
+	// change listener
+	// parent
+	private Property<BOObject> owner;
+	private Property<Boolean> active;
+	
+//	private HashMap<o-o>
+	
+	public BOObject(BOObject parent, String name) {
+		
+	}
+	
+	public void addAsChild(BOObject object) {
+		
+	}
+	
+	public Property<BOObject> owner() {
+		return (owner = BOUtils.getProperty(owner));
+	}
+
+	@Override
+	public void changed(ObservableValue<? extends BOObject> observableValue,
+			BOObject newValue, BOObject oldValue) {
+		
+	}
+}

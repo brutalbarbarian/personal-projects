@@ -1,0 +1,11 @@
+package com.lwan.musicsync.main;
+
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.util.Callback;
+
+public class CustomRowFactory {
+	public static Callback<TableView<AudioInfo>, TableRow<AudioInfo>> getRowFactory () {
+		
+	}
+}
