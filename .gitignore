@@ -1,0 +1,12 @@
+## operating system files
+thumbs.db
+
+## java files
+*.class
+
+## eclipse files
+.lock
+
+*.history
+*.index
+.log
