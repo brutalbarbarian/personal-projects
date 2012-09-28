@@ -5,10 +5,5 @@ thumbs.db
 *.class
 
 ## eclipse files
-.lock
+.metadata/
 
-*.history
-*.index
-.log
-
-Dev/MainWorkspace/.metadata/.plugins/
