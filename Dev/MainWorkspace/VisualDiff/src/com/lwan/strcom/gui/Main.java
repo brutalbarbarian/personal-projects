@@ -22,12 +22,14 @@ public class Main {
 				return;
 			default:
 				if (args.length == 2) {
-					//TODO
+					new StrCom(args[0], args[1]);
 				}
 			}
-		} 
+		}  else {
+			new StrCom();			
+		}
 		
-		new StrCom();
+
 //		StrComFX.launchApp(args);
 	}
 }

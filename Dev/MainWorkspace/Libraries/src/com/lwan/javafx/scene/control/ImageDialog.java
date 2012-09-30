@@ -106,15 +106,6 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 	protected ImageView imgView;
 	protected ToolBar toolbar;
 	protected Stage stage;	//only not null when showing
-	// string of ctrl names
-	protected static String[] ctrls = {"Cancel", "Save", "Clear", "From File", "From Clipboard", "From URL"};
-	protected static final int aCancel = 0;
-	protected static final int aSet = 1;
-	protected static final int aClear = 2;
-	protected static final int aFile = 3;
-	protected static final int aURL = 4;
-	protected static final int aClipboard = 5;
-	
 
 	// initImage is the inital image shown 
 	public ImageDialog(Image initImage) {
@@ -138,25 +129,25 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 		imgView.imageProperty().addListener(this);
 		imgView.setSmooth(true);
 		imgView.setPreserveRatio(true);
-		imgView.boundsInParentProperty().addListener(new ChangeListener<Bounds> () {
+		boundsInLocalProperty().addListener(new ChangeListener<Bounds> () {
 			public void changed(ObservableValue<? extends Bounds> arg0,
 					Bounds oldValue, Bounds newValue) {
 				imgView.setFitWidth(getWidth());
 				imgView.setFitHeight(getHeight() - toolbar.getHeight());
 			}
 		});
-		
-		btnCancel = new Button(ctrls[aCancel]);
+
+		btnCancel = new Button("Cancel");
 		btnCancel.setOnAction(this);
-		btnSet = new Button(ctrls[aSet]);
+		btnSet = new Button("Save");
 		btnSet.setOnAction(this);
-		btnLoadFromURL = new Button(ctrls[aURL]);
+		btnLoadFromURL = new Button("From URL");
 		btnLoadFromURL.setOnAction(this);
-		btnLoadFromClipboard = new Button(ctrls[aClipboard]);
+		btnLoadFromClipboard = new Button("From Clipboard");
 		btnLoadFromClipboard.setOnAction(this);
-		btnClear = new Button(ctrls[aClear]);
+		btnClear = new Button("Clear");
 		btnClear.setOnAction(this);
-		btnLoadFromFile = new Button(ctrls[aFile]);
+		btnLoadFromFile = new Button("From File");
 		btnLoadFromFile.setOnAction(this);
 		
 		toolbar = ToolBarBuilder.create().items(btnCancel, btnSet, btnClear, new Separator(), 
@@ -196,7 +187,23 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 				imageProperty().setValue(Clipboard.getSystemClipboard().getImage());
 			}
 		} else if (src == btnLoadFromURL) {
-			
+			SimpleTextInputDialog dialog = new SimpleTextInputDialog("Load Image from URL...", "URL:");
+			dialog.show(getScene().getWindow(), new ResultCallback<SimpleTextInputDialog>() {
+				public void call(SimpleTextInputDialog result) {
+					if (result.resultProperty().get() == SimpleTextInputDialog.ResultOK)  {
+						String url = result.textProperty().getValue();
+						try {
+							Image img = new Image(url);
+							if (img != null) {
+								imageProperty().setValue(img);
+							}
+						} catch (Exception ex) {
+							JavaFXUtil.ShowErrorDialog(stage, "File is not a valid image");
+							ex.printStackTrace();
+						}
+					}
+				}
+			});
 		}
 	}
 	

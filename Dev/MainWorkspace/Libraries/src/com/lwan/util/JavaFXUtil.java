@@ -1,5 +1,7 @@
 package com.lwan.util;
 
+import com.lwan.util.wrappers.ResultCallback;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;

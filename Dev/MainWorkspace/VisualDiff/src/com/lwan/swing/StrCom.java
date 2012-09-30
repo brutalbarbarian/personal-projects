@@ -57,6 +57,13 @@ public class StrCom {
 		fWindow.setVisible(true);
 	}
 	
+	public StrCom(String f1, String f2) {
+		this();
+		txtOldFile.setText(f1);
+		txtNewFile.setText(f2);
+		compListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_FIRST, "Start"));
+	}
+	
 	private JPanel initializeComponents() {
 		//setup listeners
 		compListener = new CompareListener();
