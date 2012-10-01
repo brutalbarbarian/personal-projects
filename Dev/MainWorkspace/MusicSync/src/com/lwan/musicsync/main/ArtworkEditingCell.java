@@ -30,8 +30,8 @@ public class ArtworkEditingCell extends BaseEditingCell<Image> {
 				new Callback<Object, Boolean>() {
 			@Override
 			public Boolean call(Object arg0) {
-				// always allow edit? TODO
-				return true;
+				int selectedNum = getTableView().getSelectionModel().getSelectedItems().size();
+				return selectedNum == 0 || (selectedNum == 1 && isSelected());
 			}
 		}, new Callback<Object, AudioInfoArtworkProperty>() {
 			public AudioInfoArtworkProperty call(Object arg0) {
@@ -45,7 +45,7 @@ public class ArtworkEditingCell extends BaseEditingCell<Image> {
 	
 	@Override
 	public void startEdit() {
-//		showBasicEditScreen();
+		artworkEdit.showBasicEditScreen();
 	}
 
 	@Override

@@ -69,8 +69,8 @@ public class Start extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		allMusic = new HashMap<String, AudioInfo>();
-		populateMusic(allMusic, "D:\\User Files\\Brutalbarbarian\\Music");
-//		populateMusic(allMusic, "C:\\Users\\Brutalbarbarian\\Music");
+//		populateMusic(allMusic, "D:\\User Files\\Brutalbarbarian\\Music");
+		populateMusic(allMusic, "C:\\Users\\Brutalbarbarian\\Music");
 //		populateMusic(allMusic, "C:\\Users\\Brutalbarbarian\\Desktop\\test");
 		
 		StackPaneBuilder<?> spb = StackPaneBuilder.create();

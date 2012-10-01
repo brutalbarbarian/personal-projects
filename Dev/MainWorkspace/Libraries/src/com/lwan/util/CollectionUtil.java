@@ -34,6 +34,12 @@ public class CollectionUtil {
 		return new ObservableListWrapper<T>(Arrays.asList(items));
 	}
 	
+	public static <T> void addIfNotExist (T item, Collection<T> col) {
+		if (!col.contains(item)) {
+			col.add(item);
+		}
+	}
+	
 	/**
 	 * Print out all values in the order that the iterator returns them
 	 * Each value is seperated by the passed in seperator

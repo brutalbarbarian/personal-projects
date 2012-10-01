@@ -18,6 +18,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
@@ -187,7 +188,8 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 				imageProperty().setValue(Clipboard.getSystemClipboard().getImage());
 			}
 		} else if (src == btnLoadFromURL) {
-			SimpleTextInputDialog dialog = new SimpleTextInputDialog("Load Image from URL...", "URL:");
+			SimpleTextInputDialog dialog = new SimpleTextInputDialog("Load Image from URL...", "URL:",
+					Orientation.VERTICAL, "Enter url of image", "http://", 20);
 			dialog.show(getScene().getWindow(), new ResultCallback<SimpleTextInputDialog>() {
 				public void call(SimpleTextInputDialog result) {
 					if (result.resultProperty().get() == SimpleTextInputDialog.ResultOK)  {

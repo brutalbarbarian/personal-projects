@@ -300,9 +300,23 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 				
 //				double minWidth = 0;
 				if (key == FieldKey.COVER_ART) {
-					// TODO
-					// show the coverart... if clicked, bring up same popup window as the cell??
-					// make the popup window for cover art more generic?
+					HBox pane = new HBox();
+					Label lbl = new Label(EnumUtil.processEnumName(key));
+					lbl.setPrefWidth(100);
+					
+					ArtworkEdit edit = new ArtworkEdit(info.cover_artProperty(), 
+							new Callback<Object, Boolean>() {
+						public Boolean call(Object o) {
+							return true;
+						}
+						}, new Callback<Object, AudioInfoArtworkProperty>() {
+							public AudioInfoArtworkProperty call(Object arg0) {
+								return info.cover_artProperty();
+							}
+						});
+					
+					pane.getChildren().addAll(lbl, edit);
+					nodes.add(pane);
 				} else if (key == FieldKey.RATING) {
 					HBox pane = new HBox();
 					
@@ -332,6 +346,10 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 				
 				if (value == notCommonRef) {
 					info.properties.get(key).nonRefProperty().set(true);
+				} else if (key == FieldKey.COVER_ART){
+					// we know they're all equal 
+					info.cover_artProperty().setAsBufferedImage(
+							 entry.getValue().get(0).cover_artProperty().getAsBufferedImage());
 				} else {
 					info.properties.get(key).setValue(value);
 				}

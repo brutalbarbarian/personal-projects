@@ -9,21 +9,21 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Label;
+import javafx.scene.effect.Shadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBuilder;
 import javafx.stage.Popup;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
 public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
@@ -32,6 +32,8 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 	Callback<Object, AudioInfoArtworkProperty> artworkProperty;
 	CheckBox simpleGraphic;
 	ImageView imgView;
+	Rectangle imgShadow, nullValue;
+	Label nullText;
 	Property<Image> imgProperty;
 	protected Popup popup;
 	
@@ -52,7 +54,16 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 			getChildren().add(simpleGraphic);
 		} else {
 			imgView = new ImageView();
+			imgShadow = new Rectangle(100, 100);	
+			imgShadow.setEffect(new Shadow(2, Color.BLACK));
+			nullValue = new Rectangle(100, 100, Color.WHITE);
+			nullText = new Label("No Image");
+			nullText.alignmentProperty().set(Pos.CENTER);
+			nullText.relocate(20, 35);
+			getChildren().add(imgShadow);
 			getChildren().add(imgView);
+			getChildren().add(nullValue);
+			getChildren().add(nullText);
 		}
 		
 		setOnMouseExited(this);
@@ -94,11 +105,20 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 	@Override
 	public void changed(ObservableValue<? extends Image> arg0, Image oldValue,
 			Image newValue) {
+		if (!isSimpleMode()) {
+//			imgShadow.setVisible(newValue != null);
+			nullValue.setVisible(newValue == null);
+			nullText.setVisible(newValue == null);
+		}
+		
 		if (newValue != null) {
 			if (isSimpleMode()) {
 				simpleGraphic.selectedProperty().set(true);
 			} else {
 				imgView.setImage(newValue);
+				
+				imgShadow.setVisible(true);
+				nullValue.setVisible(false);
 			}
 		} else {
 			setNullValue();
@@ -124,7 +144,7 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 		}
 	}
 	
-	protected void showBasicEditScreen() {
+	public void showBasicEditScreen() {
 		ImageDialog id = new ImageDialog(
 				artworkProperty.call(this).getArtworkAsFullSizedImage());
 		id.show(getScene().getWindow(), new ResultCallback<ImageDialog>() {

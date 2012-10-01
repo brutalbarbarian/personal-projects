@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -37,7 +38,7 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 	public static final int ResultOK = 1;
 	public static final int ResultCancel = 2;
 	
-//	private static final int margin = 10;
+	private static final int margin = 10;
 	
 	// properties
 	private Property<String> labelProperty;
@@ -47,6 +48,7 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 	private Property<Orientation> orientationProperty;	// where the textfield is relative to the label 
 	private IntegerProperty resultProperty;	// result of showing this dialog
 	private BooleanProperty shownProperty;	// if this dialog is still being shown
+	private IntegerProperty columnCountProperty;	// the pref column count of the textfield
 	
 	// public property accessors
 	public Property<String> labelProperty() {
@@ -76,6 +78,13 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 			textProperty = new SimpleStringProperty();
 		}
 		return textProperty;
+	}
+	
+	public IntegerProperty columnCountProperty() {
+		if (columnCountProperty == null){
+			columnCountProperty = new SimpleIntegerProperty();
+		}
+		return columnCountProperty;
 	}
 	
 	public ReadOnlyProperty<Orientation> orientationProperty() {
@@ -119,21 +128,23 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 	protected Stage stage;
 	
 	public SimpleTextInputDialog(String title, String label) {
-		this(title, label, Orientation.HORIZONTAL, "", "");
+		this(title, label, Orientation.HORIZONTAL, "", "", 10);
 	}
 	
-	public SimpleTextInputDialog(String title, String label, Orientation orientation, String hint, String initialText) {
+	public SimpleTextInputDialog(String title, String label, Orientation orientation, String hint, String initialText, int initColumnCount) {
 		_orientationProperty().setValue(orientation);
 		textProperty().setValue(initialText);
 		hintProperty().setValue(hint);
 		titleProperty().setValue(label);
 		labelProperty().setValue(label);
+		columnCountProperty().set(initColumnCount);
 		
 		buildControls();
 		
 		// bind properties to the actual controls
 		textField.textProperty().bindBidirectional(textProperty());
 		textField.tooltipProperty().get().textProperty().bind(hintProperty());
+		textField.prefColumnCountProperty().bind(columnCountProperty());
 		this.label.textProperty().bind(labelProperty());
 		
 	}
@@ -153,6 +164,7 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 		textField.tooltipProperty().set(new Tooltip());
 		
 		centralPane.getChildren().addAll(label, textField);
+		centralPane.setStyle("-fx-background-insets:10");
 		
 		btnOK = new Button("OK");
 		btnCancel = new Button("Cancel");
@@ -160,6 +172,7 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 		btnCancel.setOnAction(this);
 		
 		setCenter(centralPane);
+		setMargin(centralPane, new Insets(margin));
 		setBottom(ToolBarBuilder.create().items(btnOK, btnCancel).build());
 	}
 	
@@ -208,10 +221,9 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 		
 		// position and show window
 		displayDetailState();
-		stage.setWidth(400);
-		stage.setHeight(400);
+//		stage.setWidth(400);
+//		stage.setHeight(400);
 		stage.show();
 		stage.centerOnScreen();
 	}
-	
 }
