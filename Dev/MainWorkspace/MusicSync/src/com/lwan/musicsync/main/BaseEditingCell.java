@@ -37,6 +37,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ContextMenuEvent;
@@ -55,8 +56,14 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 		return this;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	protected AudioInfo getAudioInfo() {
-		return (AudioInfo) getTableRow().getItem();
+		TableRow row = getTableRow();
+		if (row != null) {
+			return (AudioInfo) row.getItem();
+		} else {
+			return null;
+		}
 	}
 	
 	public abstract boolean allowsCellEdit();
@@ -298,7 +305,6 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 					} 
 				}
 				
-//				double minWidth = 0;
 				if (key == FieldKey.COVER_ART) {
 					HBox pane = new HBox();
 					Label lbl = new Label(EnumUtil.processEnumName(key));

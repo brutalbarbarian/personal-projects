@@ -20,9 +20,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextBuilder;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 
@@ -53,17 +50,18 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 			});
 			getChildren().add(simpleGraphic);
 		} else {
+			int size = Constants.gridImageSizeProperty().get();
 			imgView = new ImageView();
-			imgShadow = new Rectangle(100, 100);	
+			imgShadow = new Rectangle(size, size);	
 			imgShadow.setEffect(new Shadow(2, Color.BLACK));
-			nullValue = new Rectangle(100, 100, Color.WHITE);
-			nullText = new Label("No Image");
-			nullText.alignmentProperty().set(Pos.CENTER);
-			nullText.relocate(20, 35);
+			nullValue = new Rectangle(size, size, Color.WHITE);
+//			nullText = new Label("No Image");
+//			nullText.alignmentProperty().set(Pos.CENTER);
+//			nullText.relocate(15, 20);
 			getChildren().add(imgShadow);
 			getChildren().add(imgView);
 			getChildren().add(nullValue);
-			getChildren().add(nullText);
+//			getChildren().add(nullText);
 		}
 		
 		setOnMouseExited(this);

@@ -1,7 +1,9 @@
 package com.lwan.musicsync.main;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 import org.jaudiotagger.tag.FieldKey;
 
@@ -12,6 +14,8 @@ public class Constants {
 	private static Object getValueOf(Object property) {
 		if (property == gridCoverArtModeProperty()) {
 			return true;
+		} else if (property == gridImageSizeProperty()) {
+			return 20;
 		}
 		
 		return null;
@@ -42,5 +46,14 @@ public class Constants {
 			gridCoverArtMode.setValue((Boolean)getValueOf(gridCoverArtMode));
 		}
 		return gridCoverArtMode;
+	}
+	
+	private static IntegerProperty gridImageSize;
+	public static IntegerProperty gridImageSizeProperty() {
+		if (gridImageSize == null) {
+			gridImageSize = new SimpleIntegerProperty();
+			gridImageSize.setValue((Integer)getValueOf(gridImageSize));
+		}
+		return gridImageSize;
 	}
 }

@@ -44,7 +44,8 @@ public class AudioInfoArtworkProperty extends ObjectPropertyBase<Image> implemen
 		if (aw != null) {
 			bytes = aw.getBinaryData();
 			if (bytes != null) {
-				img = new CustomImageFX(new ByteArrayInputStream(bytes), 100, 100, true, true);
+				int size = Constants.gridImageSizeProperty().get();
+				img = new CustomImageFX(new ByteArrayInputStream(bytes), size, size, true, true);
 			}
 		}
 		// clear imgFX
