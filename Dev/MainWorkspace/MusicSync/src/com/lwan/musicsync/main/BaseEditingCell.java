@@ -319,7 +319,7 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 							public AudioInfoArtworkProperty call(Object arg0) {
 								return info.cover_artProperty();
 							}
-						});
+						}, true);
 					
 					pane.getChildren().addAll(lbl, edit);
 					nodes.add(pane);

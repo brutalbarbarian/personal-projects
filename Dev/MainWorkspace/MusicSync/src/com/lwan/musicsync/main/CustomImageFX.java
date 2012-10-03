@@ -38,6 +38,8 @@ public class CustomImageFX extends Image implements Runnable{
 	}
 	
 	public boolean equals(Object other) {
+		if (other == null) return false;
+		
 		BufferedImage oImg;
 		if (other instanceof Image) {
 			if (other instanceof CustomImageFX) {

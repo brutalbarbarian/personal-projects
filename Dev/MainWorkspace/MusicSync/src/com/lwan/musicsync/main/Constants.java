@@ -13,9 +13,9 @@ import com.lwan.util.media.JAudioTaggerUtil;
 public class Constants {
 	private static Object getValueOf(Object property) {
 		if (property == gridCoverArtModeProperty()) {
-			return true;
+			return false;
 		} else if (property == gridImageSizeProperty()) {
-			return 20;
+			return 60;
 		}
 		
 		return null;

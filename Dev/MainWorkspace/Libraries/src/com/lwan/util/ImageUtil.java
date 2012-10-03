@@ -24,12 +24,17 @@ public final class ImageUtil {
 	
 	/**
 	 * Get a buffered image from a javaFX image.
+	 * Will return null if the passed in image is null, or if
+	 * img.impl_getPlatformImage() returned null.
 	 * 
 	 * @param img
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
 	public static BufferedImage imageFXToAWT (Image img) {
+		if (img == null) {
+			return null;
+		}
 		com.sun.prism.Image imgP = (com.sun.prism.Image) img.impl_getPlatformImage();
 		if (imgP != null) {
 			return com.sun.prism.BufferedImageTools.exportBufferedImage(imgP, "");

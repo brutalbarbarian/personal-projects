@@ -29,8 +29,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.FileChooserBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -137,6 +135,7 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 				imgView.setFitHeight(getHeight() - toolbar.getHeight());
 			}
 		});
+		setStyle("-fx-background-color:GRAY");
 
 		btnCancel = new Button("Cancel");
 		btnCancel.setOnAction(this);
@@ -168,8 +167,7 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 		} else if (src == btnClear) {
 			imageProperty.setValue(null);
 		} else if (src == btnLoadFromFile) {
-			FileChooser chooser = FileChooserBuilder.create().extensionFilters(new ExtensionFilter("jpg", "jpeg", "jpg"),
-					new ExtensionFilter("png", "png")).build();
+			FileChooser chooser = new FileChooser();
 			File f = chooser.showOpenDialog(stage);
 			
 			if (f != null) {
@@ -186,6 +184,8 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 		} else if (src == btnLoadFromClipboard) {
 			if (Clipboard.getSystemClipboard().hasImage()) {
 				imageProperty().setValue(Clipboard.getSystemClipboard().getImage());
+			} else {
+				JavaFXUtil.ShowErrorDialog(stage, "No valid image found in clipboard");
 			}
 		} else if (src == btnLoadFromURL) {
 			SimpleTextInputDialog dialog = new SimpleTextInputDialog("Load Image from URL...", "URL:",
@@ -281,8 +281,9 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 	public void changed(ObservableValue<? extends Image> arg0, Image oldValue,
 			Image newValue) {
 		if (shownProperty().get()) {
-			if (!GenericsUtil.Equals(newValue, oldValue)) {
+			if (!GenericsUtil.Equals(oldValue, newValue)) {
 				_modifiedProperty().set(true);
+				displayDetailState();
 			}
 		}
 	}

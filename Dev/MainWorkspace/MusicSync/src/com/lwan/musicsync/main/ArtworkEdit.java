@@ -8,6 +8,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -32,41 +33,45 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 	Rectangle imgShadow, nullValue;
 	Label nullText;
 	Property<Image> imgProperty;
+	boolean isAlwaysArtwork;
 	protected Popup popup;
 	
 	public ArtworkEdit(Property<Image> valueProperty, Callback<Object, Boolean> allowEdit, 
-			Callback<Object, AudioInfoArtworkProperty> callback) {
+			Callback<Object, AudioInfoArtworkProperty> callback, boolean alwaysUseArtwork) {
 		imgProperty = new SimpleObjectProperty<Image>();	// this is read only..
 		artworkProperty = callback;
 		this.allowEdit = allowEdit; 
+		isAlwaysArtwork = alwaysUseArtwork;
 		
 		if (isSimpleMode()) {
 			simpleGraphic = new CheckBox("Has Artwork");
-			simpleGraphic.selectedProperty().addListener(new ChangeListener<Boolean>() {
-				public void changed(ObservableValue<? extends Boolean> arg0,
-						Boolean oldValue, Boolean newValue) {
-					showBasicEditScreen();	// just show
+			simpleGraphic.setOnAction(new EventHandler<ActionEvent>() {
+				public void handle(ActionEvent e) {
+					// Throw away the change first
+					simpleGraphic.selectedProperty().set(imgProperty.getValue() != null);
+					showBasicEditScreen();	// just show	
 				}
 			});
 			getChildren().add(simpleGraphic);
+			
+			simpleGraphic.setOnMouseMoved(this);
+			setOnMouseExited(this);
 		} else {
 			int size = Constants.gridImageSizeProperty().get();
 			imgView = new ImageView();
 			imgShadow = new Rectangle(size, size);	
 			imgShadow.setEffect(new Shadow(2, Color.BLACK));
 			nullValue = new Rectangle(size, size, Color.WHITE);
-//			nullText = new Label("No Image");
-//			nullText.alignmentProperty().set(Pos.CENTER);
-//			nullText.relocate(15, 20);
+			nullText = new Label("No Image");
+			nullText.alignmentProperty().set(Pos.CENTER);
+			nullText.relocate(15, 20);
 			getChildren().add(imgShadow);
 			getChildren().add(imgView);
 			getChildren().add(nullValue);
-//			getChildren().add(nullText);
+			getChildren().add(nullText);
+			
+			setOnMouseClicked(this);
 		}
-		
-		setOnMouseExited(this);
-		setOnMouseClicked(this);
-		setOnMouseMoved(this);
 		
 		imgProperty.addListener(this);
 		imgProperty.bindBidirectional(valueProperty);
@@ -74,7 +79,9 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 
 	@Override
 	public void handle(MouseEvent e) {
+		System.out.println(e.getEventType().toString() + "::Type");
 		if (e.getEventType() == MouseEvent.MOUSE_EXITED) {
+			System.out.println("exited");
 			if (popup != null) {
 				popup.hide();
 				popup = null;
@@ -85,7 +92,9 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 				showBasicEditScreen();
 			}
 		} else if (e.getEventType() == MouseEvent.MOUSE_MOVED) {
+			System.out.println("moved");
 			if (popup == null && imgProperty.getValue() != null && isSimpleMode()) {
+				System.out.println("isSimpleMode");
 				ImageView view = new ImageView(imgProperty.getValue());
 				
 				popup = new Popup();
@@ -93,6 +102,7 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 				popup.show(getScene().getWindow());
 			}
 			if (popup != null) {
+				System.out.println("moving popup");
 				// offset so dosen't interfare with mouse movements
 				popup.setX(e.getScreenX() + 5);
 				popup.setY(e.getScreenY() + 5);
@@ -104,7 +114,6 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 	public void changed(ObservableValue<? extends Image> arg0, Image oldValue,
 			Image newValue) {
 		if (!isSimpleMode()) {
-//			imgShadow.setVisible(newValue != null);
 			nullValue.setVisible(newValue == null);
 			nullText.setVisible(newValue == null);
 		}
@@ -124,7 +133,7 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 	}
 	
 	protected boolean isSimpleMode() {
-		return !Constants.gridCoverArtModeProperty().getValue();
+		return !isAlwaysArtwork && !Constants.gridCoverArtModeProperty().getValue();
 	}
 	
 	protected void setNullValue() {
