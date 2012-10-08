@@ -1,4 +1,4 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.audioinfo;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -7,6 +7,8 @@ import java.io.IOException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.images.Artwork;
 
+import com.lwan.musicsync.javafx.CustomImageFX;
+import com.lwan.musicsync.main.Constants;
 import com.lwan.util.media.JAudioTaggerUtil;
 
 import javafx.beans.property.BooleanProperty;

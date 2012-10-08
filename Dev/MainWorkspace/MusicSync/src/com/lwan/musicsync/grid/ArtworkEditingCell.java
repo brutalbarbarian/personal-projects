@@ -1,4 +1,7 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.grid;
+
+import com.lwan.musicsync.audioinfo.AudioInfo;
+import com.lwan.musicsync.audioinfo.AudioInfoArtworkProperty;
 
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;

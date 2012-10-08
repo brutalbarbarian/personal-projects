@@ -1,4 +1,4 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.audioinfo;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;

@@ -1,4 +1,4 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.enums;
 
 public enum FileBasicInfo {
 	NAME,

@@ -1,4 +1,4 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.audioinfo;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,11 +11,16 @@ import javafx.scene.image.Image;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.CannotWriteException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagException;
 
+import com.lwan.musicsync.enums.FieldKeyEx;
+import com.lwan.musicsync.enums.FileAdvancedInfo;
+import com.lwan.musicsync.enums.FileBasicInfo;
+import com.lwan.musicsync.main.Constants;
 import com.lwan.util.media.JAudioTaggerUtil;
 
 /**
@@ -29,16 +34,27 @@ import com.lwan.util.media.JAudioTaggerUtil;
 public class AudioInfo {
 	public Map<Enum<?>, Object> tags;
 	public Map<Enum<?>, AudioInfoProperty> properties;
-	public AudioFile audio;
 	
-	public String root;
+	// free this after loading to save memory?
+//	public AudioFile audio;
 	
+//	public String root;
 	public AudioInfo(File f, String rootDir) throws IOException, CannotReadException, 
 			TagException, ReadOnlyFileException, InvalidAudioFrameException {
-		audio = AudioFileIO.read(f);
+		AudioFile audio = AudioFileIO.read(f);
 		tags = JAudioTaggerUtil.getAllTags(audio, true, Constants.getFieldKeyFilter());
-		root = rootDir;
-		FieldKeyEx.populateAllNonFieldKeyTags(this, tags);
+		tags.put(FileAdvancedInfo.ROOT_DIR, rootDir);
+		FieldKeyEx.populateAllNonFieldKeyTags(audio, tags);
+		
+		// setup properties
+		setupProperties();
+	}
+	
+	// create an empty audioinfo record.
+	public AudioInfo() {
+		// this will populate all properties with null as audio has no keys. 
+		tags = JAudioTaggerUtil.getAllTags(Constants.getFieldKeyFilter());
+		FieldKeyEx.populateAllNonFieldKeyTags(tags);
 		
 		// setup properties
 		setupProperties();
@@ -50,15 +66,23 @@ public class AudioInfo {
 		}
 	}
 	
-	// create an empty audioinfo record.
-	public AudioInfo() {
-		// this will populate all properties with null as audio has no keys. 
-		tags = JAudioTaggerUtil.getAllTags(Constants.getFieldKeyFilter());
-		root = "";
-		FieldKeyEx.populateAllNonFieldKeyTags(tags);
+//	public void savePropertiesToTags() {
+//		JAudioTaggerUtil.setAllTags(audio, tags);
+//	}
+	
+	public void saveAudio() throws CannotReadException, IOException, TagException, ReadOnlyFileException, 
+			InvalidAudioFrameException, CannotWriteException {
+		// First refetch the AudioFile,
+		String dir = properties.get(FileAdvancedInfo.ROOT_DIR).getValue().toString() + File.separator +
+				properties.get(FileBasicInfo.RELATIVE_PATH).getValue().toString();
+		System.out.println(dir);
 		
-		// setup properties
-		setupProperties();
+		// Save the tags to the file
+		AudioFile audio = AudioFileIO.read(new File(dir));
+		JAudioTaggerUtil.setAllTags(audio, tags);
+		AudioFileIO.write(audio);
+		// TODO
+		// Then move the file to the new location based on root + relative path properties
 	}
 	
 	protected void setupProperties() {

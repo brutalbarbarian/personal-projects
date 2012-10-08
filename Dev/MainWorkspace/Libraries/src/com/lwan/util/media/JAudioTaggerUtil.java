@@ -145,7 +145,7 @@ public class JAudioTaggerUtil {
 		return art;
 	}
 	
-	public static void setAllTags (AudioFile file, Map<FieldKey, Object> tags) {
+	public static void setAllTags (AudioFile file, Map<Enum<?>, Object> tags) {
 		// create a new set of tags for the file
 		Tag tag = file.getTagOrCreateAndSetDefault();
 		// we don't want any of the original tags to remain

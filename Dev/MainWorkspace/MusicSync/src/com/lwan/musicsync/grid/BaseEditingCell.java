@@ -1,4 +1,4 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.grid;
 
 import java.awt.Toolkit;
 import java.util.Collection;
@@ -12,6 +12,10 @@ import java.util.Vector;
 import org.jaudiotagger.tag.FieldKey;
 
 import com.lwan.javafx.scene.control.FloatingShadowPane;
+import com.lwan.musicsync.audioinfo.AudioInfo;
+import com.lwan.musicsync.audioinfo.AudioInfoArtworkProperty;
+import com.lwan.musicsync.audioinfo.AudioInfoProperty;
+import com.lwan.musicsync.enums.FieldKeyEx;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.EnumUtil;
 import com.lwan.util.GenericsUtil;
@@ -350,14 +354,15 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 					nodes.add(pane);
 				}
 				
-				if (value == notCommonRef) {
-					info.properties.get(key).nonRefProperty().set(true);
-				} else if (key == FieldKey.COVER_ART){
-					// we know they're all equal 
-					info.cover_artProperty().setAsBufferedImage(
-							 entry.getValue().get(0).cover_artProperty().getAsBufferedImage());
-				} else {
-					info.properties.get(key).setValue(value);
+				info.properties.get(key).nonRefProperty().set(value == notCommonRef);
+				if (value != notCommonRef) {
+					if (key == FieldKey.COVER_ART){
+						// we know they're all equal 
+						info.cover_artProperty().setAsBufferedImage(
+								 entry.getValue().get(0).cover_artProperty().getAsBufferedImage());
+					} else {
+						info.properties.get(key).setValue(value);
+					}
 				}
 			}
 			
@@ -373,7 +378,16 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 					if (src == btnCancel) {
 						getScene().getWindow().hide();	// no changes will be saved
 					} else if (src == btnSet) {
-						// save changes... TODO
+						for(Entry<Enum<?>, List<AudioInfo>> entry : selected.entrySet()) {
+							Enum<?> key = entry.getKey();
+							AudioInfoProperty<?> property = info.properties.get(key);
+							if (property.modifiedProperty().get()) {
+								Object value = property.getValue();
+								for (AudioInfo ai : entry.getValue()) {
+									ai.properties.get(key).setValue(value);
+								}
+							}
+						}
 						getScene().getWindow().hide();
 					} else if (src == btnClearAll) {
 						for (AudioInfoProperty<?> p : info.properties.values()) {
@@ -397,8 +411,10 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 					}
 				}
 			};
-			
+						
 			for (AudioInfoProperty p :info.properties.values()) {
+				// Reset modified
+				p.modifiedProperty().set(false);
 				p.modifiedProperty().addListener(cl);
 			}
 			

@@ -1,4 +1,4 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.audioinfo;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -35,8 +35,8 @@ public class AudioInfoStringProperty extends StringPropertyBase implements Audio
 		} else {
 			val = val.trim();	//we don't want excess white spaces	
 		}
+		modifiedProperty().set(true);
 		if (!val.equals(getValue())) {
-			modifiedProperty().set(true);
 			parent.tags.put(fkey, val);
 			super.setValue(val);
 		}

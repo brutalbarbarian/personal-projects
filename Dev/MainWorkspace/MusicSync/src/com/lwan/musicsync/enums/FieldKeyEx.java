@@ -1,8 +1,9 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.enums;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
 
@@ -16,12 +17,12 @@ public class FieldKeyEx {
 	private static Enum<?>[] ALL_VALUES;
 	private static HashMap<String, Enum<?>> TITLE_ENUM_TABLE;
 
-	public static void populateAllNonFieldKeyTags(AudioInfo info, Map<Enum<?>, Object> map) {
-		AudioHeader header = info.audio.getAudioHeader();
-		map.put(NAME, info.audio.getFile().getName());
-		map.put(RELATIVE_PATH, IOUtil.getRelativePath(info.root, info.audio.getFile().getPath()));
+	public static void populateAllNonFieldKeyTags(AudioFile audio, Map<Enum<?>, Object> map) {
+		AudioHeader header = audio.getAudioHeader();
+		map.put(NAME, audio.getFile().getName());
+		map.put(RELATIVE_PATH, IOUtil.getRelativePath(map.get(ROOT_DIR).toString(), audio.getFile().getPath()));
 		map.put(BITRATE, header.getBitRate());
-		map.put(EXTENSION, StringUtil.getFileExtension(info.audio.getFile().getName()));
+		map.put(EXTENSION, StringUtil.getFileExtension(audio.getFile().getName()));
 		map.put(LENGTH, TimeUtil.secondsToString(header.getTrackLength()));
 	}
 	
@@ -71,6 +72,9 @@ public class FieldKeyEx {
 		return getTitleEnumTable().get(s);
 	}
 
+	
+	public static final FileAdvancedInfo ROOT_DIR = FileAdvancedInfo.ROOT_DIR;
+	
 	// Modifiable File info
 	public static final FileBasicInfo NAME = FileBasicInfo.NAME;
 	public static final FileBasicInfo RELATIVE_PATH = FileBasicInfo.RELATIVE_PATH;

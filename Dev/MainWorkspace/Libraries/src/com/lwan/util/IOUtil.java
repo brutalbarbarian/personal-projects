@@ -35,13 +35,14 @@ public class IOUtil {
 		StringBuffer bf = new StringBuffer();
 		// add in .../ for the diff between rt.length and lastSharedPos
 		for (int i = lastSharedPos + 1; i < rt.length; i++) {
-			bf.append("..").append(File.pathSeparatorChar);
+			bf.append("..").append(File.separatorChar);
 		}
 		
 		// append the rest of file starting from lastSharedPos
-		for (int i = lastSharedPos + 1; i < f.length; i++) {
-			bf.append(f[i]).append(File.pathSeparatorChar);
+		for (int i = lastSharedPos + 1; i < f.length - 1; i++) {
+			bf.append(f[i]).append(File.separatorChar);
 		}
+		bf.append(f[f.length - 1]);
 		
 		return bf.toString();
 	}

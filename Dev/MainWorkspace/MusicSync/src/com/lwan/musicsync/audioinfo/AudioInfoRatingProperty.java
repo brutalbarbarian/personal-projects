@@ -1,10 +1,8 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.audioinfo;
 
 import org.jaudiotagger.tag.FieldKey;
 
 import com.lwan.util.GenericsUtil;
-import com.lwan.util.media.JAudioTaggerUtil;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,30 +18,36 @@ public class AudioInfoRatingProperty extends IntegerPropertyBase implements Audi
 		name = FieldKey.COVER_ART.name().toLowerCase();
 		String item = GenericsUtil.Coalice(info.tags.get(FieldKey.RATING), "").toString();
 		if (item.length() > 0) {
-			super.setValue(Integer.parseInt(item));	
+			setValue(Integer.parseInt(item));	
 		} else {
-			super.setValue(null);
+			setValue(null);
 		}
-		
+		doSet = true;
+	}
+	
+	public void set(int value) {
+		if (doSet) {
+			setValue(value);
+		} else {
+			super.set(value);
+		}
 	}
 
+	boolean doSet;
 	public void setValue(Number value) {
 		if (!getValue().equals(GenericsUtil.Coalice(value, -1))) {
+			modifiedProperty().set(true);
+			doSet = false;
 			if (value != null) {
-				int val = JAudioTaggerUtil.RatingStars[value.intValue() - 1];
-				parent.tags.put(FieldKey.RATING, val);
-				super.setValue(val);
+				parent.tags.put(FieldKey.RATING, value);
+				super.setValue(value);
 			} else {
 				// clears value
 				parent.tags.put(FieldKey.RATING, null);
 				super.setValue(-1);
 			}
-			modifiedProperty().set(true);
+			doSet = true;
 		}
-	}
-	
-	public Integer getValue () {
-		return JAudioTaggerUtil.getRating(super.getValue());
 	}
 	
 	@Override
@@ -60,7 +64,7 @@ public class AudioInfoRatingProperty extends IntegerPropertyBase implements Audi
 	@Override
 	public BooleanProperty modifiedProperty() {
 		if (modifiedProperty == null) {
-			modifiedProperty = new SimpleBooleanProperty();
+			modifiedProperty = new SimpleBooleanProperty(false);
 		}
 		return modifiedProperty;
 	}

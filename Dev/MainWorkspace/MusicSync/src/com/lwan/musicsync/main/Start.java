@@ -1,5 +1,6 @@
 package com.lwan.musicsync.main;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,30 +11,46 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.CannotWriteException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagException;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Stage;
 
+import com.lwan.musicsync.audioinfo.AudioInfo;
+import com.lwan.musicsync.enums.FieldKeyEx;
+import com.lwan.musicsync.enums.FileAdvancedInfo;
+import com.lwan.musicsync.grid.ArtworkEditingCell;
+import com.lwan.musicsync.grid.RatingEditingCell;
+import com.lwan.musicsync.grid.StringEditingCell;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.EnumUtil;
 import com.lwan.util.StringUtil;
 import com.sun.javafx.collections.ObservableListWrapper;
 
-public class Start extends Application {
+public class Start extends Application implements EventHandler<ActionEvent> {
 	Map<String, AudioInfo> allMusic;	// title, audio info
 	Map<FieldKey, TableColumn<AudioInfo, String>> columns;
+	Stage mainWindow;
 	
 	public static void main(String[] args) {		
 		Application.launch(args);
@@ -66,26 +83,26 @@ public class Start extends Application {
 		return new ObservableListWrapper<AudioInfo>(CollectionUtil.toList(allMusic.values()));
 	}
 	
+	TextField txtRoot;
+	Button btnFindRoot, btnLoadRoot, btnSaveRoot;
+	TableView<AudioInfo> table;
+	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		mainWindow = primaryStage;
+		
 		allMusic = new HashMap<String, AudioInfo>();
-//		populateMusic(allMusic, "D:\\User Files\\Brutalbarbarian\\Music");
-		populateMusic(allMusic, "C:\\Users\\Brutalbarbarian\\Music");
-//		populateMusic(allMusic, "C:\\Users\\Brutalbarbarian\\Desktop\\test");
 		
-		StackPaneBuilder<?> spb = StackPaneBuilder.create();
-		
-		TableView<AudioInfo> table = new TableView<>();
+		// Build table
+		table = new TableView<>();
 		table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		table.getSelectionModel().setCellSelectionEnabled(true);
-		ObservableList<AudioInfo> audioInfos = getObservableList();
-		table.setItems(audioInfos);
 		table.setEditable(true);
 		
 		List<TableColumn<AudioInfo, ?>> cols = new Vector<>();
 		Enum<?>[] keys = CollectionUtil.removeAll(FieldKeyEx.values(), Constants.getFieldKeyFilter(), false);
 		for (Enum<?> fk : keys) {
-			if (fk != FieldKey.COVER_ART) {
+			if (fk != FieldKey.COVER_ART && fk != FileAdvancedInfo.ROOT_DIR) {
 				if (fk == FieldKey.RATING) {
 					TableColumn<AudioInfo, Integer> col = new TableColumn<>(EnumUtil.processEnumName(fk));
 					col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Integer>(fk.name().toLowerCase()));
@@ -107,28 +124,70 @@ public class Start extends Application {
 		table.getColumns().setAll(cols);
 		table.setTableMenuButtonVisible(true);
 		
-		spb.children(table);
+		// Build toolbar
+		Label lblRoot = new Label("Root:");
+		txtRoot = new TextField();
+		txtRoot.setOnAction(this);
+		txtRoot.prefColumnCountProperty().set(15);
+		btnFindRoot = new Button("...");
+		btnFindRoot.setOnAction(this);
+		btnLoadRoot = new Button("Open");
+		btnLoadRoot.setOnAction(this);
+		btnSaveRoot = new Button("Commit");
+		btnSaveRoot.setOnAction(this);
 		
 		
-		StackPane pane = spb.build();
+		ToolBar tb = ToolBarBuilder.create().items(lblRoot, txtRoot, btnFindRoot, btnLoadRoot, 
+				new Separator(), btnSaveRoot).build();
+		
+		// Build Container
+		BorderPane pane = new BorderPane();
+		pane.setCenter(table);
+		pane.setTop(tb);
 		
 		Scene s = new Scene(pane);
-		
+
 		primaryStage.setScene(s);
 		
-
-//		for (Entry<FieldKey,Object> e : allTags.entrySet()) {
-//			System.out.println(EnumUtil.processEnumName(e.getKey()) + ": " + e.getValue());
-//		}
-//		
-//		BufferedImage img = ImageIO.read(new File("C:\\21.jpg"));
-//		Artwork art = JAudioTaggerUtil.createArtwork(img);
-//		allTags.put(FieldKey.COVER_ART, art);
-//		
-//		JAudioTaggerUtil.setAllTags(a, allTags);
-//		
-//		AudioFileIO.write(a);
-		
 		primaryStage.show();
+		
+		// do after initialised
+		
+//		txtRoot.setText("D:\\User Files\\Brutalbarbarian\\Music");
+		txtRoot.setText("C:\\Users\\Brutalbarbarian\\Music");
+	}
+
+	@Override
+	public void handle(ActionEvent e) {
+		Object src = e.getSource();
+		if (src == txtRoot || src == btnLoadRoot) {
+			try {
+				allMusic.clear();
+				populateMusic(allMusic, txtRoot.getText());
+				ObservableList<AudioInfo> audioInfos = getObservableList();
+				table.setItems(audioInfos);
+				
+			} catch (IOException | CannotReadException | TagException
+					| ReadOnlyFileException | InvalidAudioFrameException e1) {
+				e1.printStackTrace();
+			}
+		} else if (src == btnFindRoot) {
+			// Note this will return null if user attempts to choose a windows library
+			File file = DirectoryChooserBuilder.create().title("Choose root dir...").
+					build().showDialog(mainWindow);
+			if (file != null) {
+				txtRoot.setText(file.getAbsolutePath());
+			}
+		} else if (src == btnSaveRoot) {
+			for (AudioInfo info : allMusic.values()) {
+				try {
+					System.out.println("Writing to audio :" + info.nameProperty().get()+ " ...");
+					info.saveAudio();
+					System.out.println("Successful");
+				} catch (CannotWriteException | CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e1) {
+					System.out.println("Failed");
+				}
+			}
+		}
 	}
 }

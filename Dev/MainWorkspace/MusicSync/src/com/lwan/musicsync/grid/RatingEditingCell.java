@@ -1,4 +1,6 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.grid;
+
+import com.lwan.musicsync.audioinfo.AudioInfo;
 
 import javafx.beans.property.Property;
 import javafx.scene.control.ContentDisplay;

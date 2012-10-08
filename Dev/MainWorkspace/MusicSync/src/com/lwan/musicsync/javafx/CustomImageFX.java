@@ -1,4 +1,4 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.javafx;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;

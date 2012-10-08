@@ -1,6 +1,8 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.grid;
 
 import com.lwan.javafx.scene.control.ImageDialog;
+import com.lwan.musicsync.audioinfo.AudioInfoArtworkProperty;
+import com.lwan.musicsync.main.Constants;
 import com.lwan.util.ImageUtil;
 import com.lwan.util.wrappers.ResultCallback;
 
@@ -79,9 +81,7 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 
 	@Override
 	public void handle(MouseEvent e) {
-		System.out.println(e.getEventType().toString() + "::Type");
 		if (e.getEventType() == MouseEvent.MOUSE_EXITED) {
-			System.out.println("exited");
 			if (popup != null) {
 				popup.hide();
 				popup = null;
@@ -92,17 +92,16 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 				showBasicEditScreen();
 			}
 		} else if (e.getEventType() == MouseEvent.MOUSE_MOVED) {
-			System.out.println("moved");
 			if (popup == null && imgProperty.getValue() != null && isSimpleMode()) {
-				System.out.println("isSimpleMode");
-				ImageView view = new ImageView(imgProperty.getValue());
+//				ImageView view = new ImageView(imgProperty.getValue());
+				// Bit meh but this shoud ensure the artwork in the popup is always correct.
+				ImageView view = new ImageView(artworkProperty.call(this).get());
 				
 				popup = new Popup();
 				popup.getContent().setAll(view);
 				popup.show(getScene().getWindow());
 			}
 			if (popup != null) {
-				System.out.println("moving popup");
 				// offset so dosen't interfare with mouse movements
 				popup.setX(e.getScreenX() + 5);
 				popup.setY(e.getScreenY() + 5);

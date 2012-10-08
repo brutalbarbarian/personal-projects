@@ -1,6 +1,8 @@
-package com.lwan.musicsync.main;
+package com.lwan.musicsync.grid;
 
 import java.awt.Point;
+
+import com.lwan.util.media.JAudioTaggerUtil;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -60,11 +62,15 @@ public class RatingsEdit extends GridPane implements EventHandler<MouseEvent>{
 		for (int i = 0; i < 5; i++) {
 			Star s = stars[i];
 			if(isMouseOver) {
-				s.setMouseOver(i < Math.max(ratingsProperty().getValue().intValue(), mouseOverRatings));
+				s.setMouseOver(i < Math.max(getActualStars(), mouseOverRatings));
 			} else {
-				s.setDefault(i < ratingsProperty().getValue().intValue());
+				s.setDefault(i < getActualStars());
 			}
 		}
+	}
+	
+	protected int getActualStars () {
+		return JAudioTaggerUtil.getRating(ratingsProperty().getValue().intValue());
 	}
 	
 	public Property<Number> ratingsProperty() {
@@ -141,7 +147,7 @@ public class RatingsEdit extends GridPane implements EventHandler<MouseEvent>{
 				} else if (e.getEventType() == MouseEvent.MOUSE_CLICKED &&
 						minDist < cutoffPoint && e.getButton() == MouseButton.PRIMARY &&
 						editCheck.call(e)) {
-					ratingsProperty().setValue(minIndex + 1);
+					ratingsProperty().setValue(JAudioTaggerUtil.RatingStars[minIndex]);
 				} 
 						
 			}
