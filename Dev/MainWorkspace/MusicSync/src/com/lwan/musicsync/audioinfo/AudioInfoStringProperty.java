@@ -15,7 +15,7 @@ public class AudioInfoStringProperty extends StringPropertyBase implements Audio
 		parent = info;
 		fkey = key;
 		name = key.name().toLowerCase();
-		super.setValue((String) parent.tags.get(fkey));	//ensure the stored value is correct
+		super.setValue((String) parent.tags().get(fkey));	//ensure the stored value is correct
 	}
 	
 	@Override
@@ -37,7 +37,7 @@ public class AudioInfoStringProperty extends StringPropertyBase implements Audio
 		}
 		modifiedProperty().set(true);
 		if (!val.equals(getValue())) {
-			parent.tags.put(fkey, val);
+			parent.tags().put(fkey, val);
 			super.setValue(val);
 		}
 	}

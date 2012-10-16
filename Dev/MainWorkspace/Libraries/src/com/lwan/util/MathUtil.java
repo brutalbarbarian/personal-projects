@@ -10,6 +10,22 @@ import java.awt.Polygon;
  *
  */
 public class MathUtil {
+	/**
+	 * Convenience method for int powers.
+	 * Power must be a positive number as the returned result is expected to be an integer 
+	 * 
+	 * @param base
+	 * @param power
+	 * @return
+	 */
+	public static int pow(int base, int power) {
+		int result = 1;
+		for (int i = 0; i < power; i++) {
+			result = result * base;
+		}
+		return result;
+	}
+	
 	public static boolean isOdd (int i) {
 		return i%2 == 1;
 	}

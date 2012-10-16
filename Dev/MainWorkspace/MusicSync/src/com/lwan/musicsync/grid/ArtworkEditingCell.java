@@ -42,7 +42,7 @@ public class ArtworkEditingCell extends BaseEditingCell<Image> {
 			}
 		}, false);
 		
-		setText("Has Graphic...");
+//		setText("Has Graphic...");
 		setGraphic(artworkEdit);
 		setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 	}

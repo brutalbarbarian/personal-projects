@@ -37,8 +37,6 @@ import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Stage;
 
 import com.lwan.musicsync.audioinfo.AudioInfo;
-import com.lwan.musicsync.enums.FieldKeyEx;
-import com.lwan.musicsync.enums.FileAdvancedInfo;
 import com.lwan.musicsync.grid.ArtworkEditingCell;
 import com.lwan.musicsync.grid.RatingEditingCell;
 import com.lwan.musicsync.grid.StringEditingCell;
@@ -52,12 +50,33 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 	Map<FieldKey, TableColumn<AudioInfo, String>> columns;
 	Stage mainWindow;
 	
+	String path1, path2;	// the 2 paths that are set upon load
+	static Start app;	// this class for global access
+	
 	public static void main(String[] args) {		
 		Application.launch(args);
 	}
 	
+	public static Start getApp() {
+		return app;
+	}
+	
+	public String getOtherPath(String root) {
+		if (root.equals(path1)) {
+			return path2;
+		} else if (root.equals(path2)){
+			return path1;
+		} else {
+			// Invalid root
+			return "";
+		}
+	}
+	
 	protected void populateMusic(Map<String, AudioInfo> map, String rootDir) throws IOException, CannotReadException, TagException, ReadOnlyFileException, InvalidAudioFrameException {
-		populateMusic(map, rootDir, rootDir);
+		File f = new File(rootDir);
+		if (f.exists() && f.isDirectory()) {
+			populateMusic(map, rootDir, rootDir);
+		}
 	}
 	
 	protected void populateMusic(Map<String, AudioInfo> map, String path, String rootDir) throws IOException, CannotReadException, TagException, ReadOnlyFileException, InvalidAudioFrameException {
@@ -69,12 +88,31 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 		} else {
 			if (StringUtil.endsWith(path, ".mp3")) {
 				AudioInfo ai = new AudioInfo(file.toFile(), rootDir);
-				// use title as key...
-				String title = (String) ai.tags.get(FieldKey.TITLE);
-				if (StringUtil.isNullOrBlank(title)) {
-					title = StringUtil.trimFileExtension(file.getName(file.getNameCount() - 1).toString());
+				// determine conflicts using a combination of title, artist and album
+				String key =
+						StringUtil.getDelimitedString("||", 
+								(String) ai.tags().get(FieldKey.TITLE), 
+								(String) ai.tags().get(FieldKey.ARTIST),
+								(String) ai.tags().get(FieldKey.ALBUM));
+				AudioInfo conflictAI = map.get(key);
+				if (conflictAI == null) {
+					map.put(key, ai);
+				} else {
+					// Problem with this method...
+					// If the user decides 2 files should be separate instead of linked...
+					// They lose all info
+					// Answer... still store the audio info?... could really bloat memory though.
+					
+					
+					// If title, artist and album are all equal... most likely we're talking about
+					// the same file here.
+					if (!conflictAI.merge(ai)) {
+						// Attach current time at end... not really elegant and means this file
+						// is pretty much guaranteed to never conflict
+						key += System.currentTimeMillis();
+						map.put(key, ai);
+					}
 				}
-				map.put(title, ai);
 			}
 		}
 	}
@@ -85,10 +123,13 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 	
 	TextField txtRoot;
 	Button btnFindRoot, btnLoadRoot, btnSaveRoot;
+	TextField txtRoot2;
+	Button btnFindRoot2;
 	TableView<AudioInfo> table;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		app = this;
 		mainWindow = primaryStage;
 		
 		allMusic = new HashMap<String, AudioInfo>();
@@ -100,31 +141,30 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 		table.setEditable(true);
 		
 		List<TableColumn<AudioInfo, ?>> cols = new Vector<>();
-		Enum<?>[] keys = CollectionUtil.removeAll(FieldKeyEx.values(), Constants.getFieldKeyFilter(), false);
-		for (Enum<?> fk : keys) {
-			if (fk != FieldKey.COVER_ART && fk != FileAdvancedInfo.ROOT_DIR) {
-				if (fk == FieldKey.RATING) {
-					TableColumn<AudioInfo, Integer> col = new TableColumn<>(EnumUtil.processEnumName(fk));
-					col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Integer>(fk.name().toLowerCase()));
-					col.setCellFactory(RatingEditingCell.getRatingEditingCellFactory(true));
-					cols.add(col);
-				} else {
-					TableColumn<AudioInfo, String> col = new TableColumn<>(EnumUtil.processEnumName(fk));
-					col.setCellValueFactory(new PropertyValueFactory<AudioInfo, String>(fk.name().toLowerCase()));
-					col.setCellFactory(StringEditingCell.getStringEditingCellFactory(true));
-					cols.add(col);
-				}
+		for (Enum<?> fk : Constants.getFilteredProperties()) {
+			// We don't want private columns in here
+			if (fk == FieldKey.RATING) {
+				TableColumn<AudioInfo, Integer> col = new TableColumn<>(EnumUtil.processEnumName(fk));
+				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Integer>(fk.name().toLowerCase()));
+				col.setCellFactory(RatingEditingCell.getRatingEditingCellFactory(true));
+				cols.add(col);
+			} else if (fk == FieldKey.COVER_ART) {
+				TableColumn<AudioInfo, Image> col = new TableColumn<>(EnumUtil.processEnumName(FieldKey.COVER_ART));
+				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Image>(FieldKey.COVER_ART.name().toLowerCase()));
+				col.setCellFactory(ArtworkEditingCell.getArtworkEditingCellFactory(true));
+				cols.add(col);
+			} else {
+				TableColumn<AudioInfo, String> col = new TableColumn<>(EnumUtil.processEnumName(fk));
+				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, String>(fk.name().toLowerCase()));
+				col.setCellFactory(StringEditingCell.getStringEditingCellFactory(true));
+				cols.add(col);
 			}
 		}
-		TableColumn<AudioInfo, Image> col = new TableColumn<>(EnumUtil.processEnumName(FieldKey.COVER_ART));
-		col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Image>(FieldKey.COVER_ART.name().toLowerCase()));
-		col.setCellFactory(ArtworkEditingCell.getArtworkEditingCellFactory(true));
-		cols.add(col);
 		
 		table.getColumns().setAll(cols);
 		table.setTableMenuButtonVisible(true);
 		
-		// Build toolbar
+		// Build ToolBar
 		Label lblRoot = new Label("Root:");
 		txtRoot = new TextField();
 		txtRoot.setOnAction(this);
@@ -136,9 +176,17 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 		btnSaveRoot = new Button("Commit");
 		btnSaveRoot.setOnAction(this);
 		
+		txtRoot2 = new TextField();
+		txtRoot2.setOnAction(this);
+		txtRoot2.prefColumnCountProperty().set(15);
+		btnFindRoot2 = new Button("...");
+		btnFindRoot2.setOnAction(this);
 		
-		ToolBar tb = ToolBarBuilder.create().items(lblRoot, txtRoot, btnFindRoot, btnLoadRoot, 
-				new Separator(), btnSaveRoot).build();
+		
+		ToolBar tb = ToolBarBuilder.create().items(
+				lblRoot, txtRoot, btnFindRoot, 
+				new Separator(), txtRoot2, btnFindRoot2,
+				new Separator(), btnLoadRoot, btnSaveRoot).build();
 		
 		// Build Container
 		BorderPane pane = new BorderPane();
@@ -154,38 +202,53 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 		// do after initialised
 		
 //		txtRoot.setText("D:\\User Files\\Brutalbarbarian\\Music");
-		txtRoot.setText("C:\\Users\\Brutalbarbarian\\Music");
+//		txtRoot.setText("C:\\Users\\Brutalbarbarian\\Music");
+		txtRoot.setText("C:\\TEST\\root1");
+		txtRoot2.setText("C:\\TEST\\root2");
 	}
 
 	@Override
 	public void handle(ActionEvent e) {
 		Object src = e.getSource();
-		if (src == txtRoot || src == btnLoadRoot) {
+		if (src == txtRoot || src == btnLoadRoot || src == txtRoot2) {
 			try {
+				path1 = txtRoot.getText();
+				path2 = txtRoot2.getText();
+				
 				allMusic.clear();
 				populateMusic(allMusic, txtRoot.getText());
+				populateMusic(allMusic, txtRoot2.getText());
 				ObservableList<AudioInfo> audioInfos = getObservableList();
+				for (AudioInfo ai : audioInfos) {
+					ai.setupProperties();
+					ai.resetModified();
+				}
 				table.setItems(audioInfos);
 				
 			} catch (IOException | CannotReadException | TagException
-					| ReadOnlyFileException | InvalidAudioFrameException e1) {
-				e1.printStackTrace();
+					| ReadOnlyFileException | InvalidAudioFrameException ex) {
+				ex.printStackTrace();
 			}
-		} else if (src == btnFindRoot) {
+		} else if (src == btnFindRoot || src == btnFindRoot2) {
 			// Note this will return null if user attempts to choose a windows library
 			File file = DirectoryChooserBuilder.create().title("Choose root dir...").
 					build().showDialog(mainWindow);
 			if (file != null) {
-				txtRoot.setText(file.getAbsolutePath());
+				if (src == btnFindRoot) {
+					txtRoot.setText(file.getAbsolutePath());
+				} else {
+					txtRoot2.setText(file.getAbsolutePath());
+				}
 			}
 		} else if (src == btnSaveRoot) {
 			for (AudioInfo info : allMusic.values()) {
 				try {
-					System.out.println("Writing to audio :" + info.nameProperty().get()+ " ...");
 					info.saveAudio();
 					System.out.println("Successful");
-				} catch (CannotWriteException | CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e1) {
+				} catch (CannotWriteException | CannotReadException | IOException | 
+						TagException | ReadOnlyFileException | InvalidAudioFrameException ex) {
 					System.out.println("Failed");
+					ex.printStackTrace();
 				}
 			}
 		}

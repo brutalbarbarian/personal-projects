@@ -1,10 +1,10 @@
 package com.lwan.musicsync.grid;
 
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Vector;
@@ -15,7 +15,9 @@ import com.lwan.javafx.scene.control.FloatingShadowPane;
 import com.lwan.musicsync.audioinfo.AudioInfo;
 import com.lwan.musicsync.audioinfo.AudioInfoArtworkProperty;
 import com.lwan.musicsync.audioinfo.AudioInfoProperty;
+import com.lwan.musicsync.audioinfo.AudioInfoRatingProperty;
 import com.lwan.musicsync.enums.FieldKeyEx;
+import com.lwan.musicsync.main.Constants;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.EnumUtil;
 import com.lwan.util.GenericsUtil;
@@ -31,8 +33,8 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -46,15 +48,17 @@ import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBoxBuilder;
-import javafx.scene.layout.VBoxBuilder;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
 public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 	private ContextMenu menu;
-	private static final int A_EDIT = 0, A_CLEAR = 1, A_ROW = 2, A_COLUMN = 3;
+	private static final int A_EDIT = 0, A_CLEAR = 1, A_ROW = 2, A_COLUMN = 3,
+			A_TRACK = 4;
 
 	private BaseEditingCell<T> self() {
 		return this;
@@ -72,7 +76,8 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 	
 	public abstract boolean allowsCellEdit();
 	
-	MenuItem iEdit, iClear, iRow, iColumn;
+	MenuItem iEdit, iClear, iRow, iColumn,
+		iSelectTracks;	// kinda pointless... exactly same as iColumn + iEdit
 	
 	@SuppressWarnings("rawtypes")
 	protected BaseEditingCell(boolean allowContextMenu) {
@@ -84,6 +89,9 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 				}
 				if (menu == null) {
 					MenuItemBuilder<?> builder = MenuItemBuilder.create();
+					builder.text("Edit Track(s)");
+					builder.onAction(new ContextHandler(A_TRACK));
+					iSelectTracks = builder.build();
 					builder.text("Edit Selected");
 					builder.onAction(new ContextHandler(A_EDIT));
 					iEdit = builder.build();
@@ -101,7 +109,8 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 					// edit track..
 					// edit track(s)...
 					// set 
-					menu = new ContextMenu(iEdit, iClear, new SeparatorMenuItem(), iRow, iColumn);
+					menu = new ContextMenu(iSelectTracks, iEdit, iClear, 
+							new SeparatorMenuItem(), iRow, iColumn);
 				}
 				
 				TableViewSelectionModel<AudioInfo> sel = getTableView().getSelectionModel();
@@ -155,6 +164,7 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 			case A_CLEAR: HandleClear(e); break;
 			case A_ROW: HandleRow(e); break;
 			case A_COLUMN: HandleColumn(e); break;
+			case A_TRACK: HandleEditTrack(e); break;
 			}
 		}
 		
@@ -167,6 +177,9 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 			}
 		}
 		
+		void HandleEditTrack(ActionEvent e) {
+			showEditingPopup(false);
+		}
 		
 		
 		@SuppressWarnings("rawtypes")
@@ -243,17 +256,31 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 	public void showEditingPopup(Boolean useCells) {
 		EditingPopup pane = new EditingPopup(useCells);
 		
-		Stage stage = FloatingShadowPane.createShadowedStage(pane, true);
+		final Stage stage = FloatingShadowPane.createShadowedStage(pane, true);
+		stage.initModality(Modality.APPLICATION_MODAL);
 		pane.initialise();
 		
 		stage.initOwner(getScene().getWindow());
 		Point2D cent = JavaFXUtil.screenPositionOf(self());
 		stage.setX(cent.getX());
 		stage.setY(cent.getY());
-		double maxWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-		if (cent.getX() + stage.getWidth() > maxWidth) {
-			stage.setX(maxWidth - stage.getWidth());
-		}
+		
+		// This will ensure the popup window isn't positioned off screen.
+		stage.onShownProperty().set(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent arg0) {
+				Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
+				double maxWidth = ss.getWidth();
+				double maxHeight = ss.getHeight();
+				if (stage.getX() + stage.getWidth() > maxWidth) {
+					stage.setX(maxWidth - stage.getWidth() - 20);
+				}
+				if (stage.getY() + stage.getHeight() > maxHeight) {
+					stage.setY(maxHeight - stage.getHeight() - 20);
+				}
+			}
+			
+		});
+		
 		stage.show();
 	}
 
@@ -276,21 +303,33 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 			List<AudioInfo> selectedRecords = sel.getSelectedItems();
 			// split the cells by columns
 			selected = new HashMap<>();
-			for (int i = 0; i < selectedCells.size(); i++) {
-				TablePosition pos = selectedCells.get(i);
-				AudioInfo item = selectedRecords.get(i);
-				TableColumn col = pos.getTableColumn();
-				Enum key = FieldKeyEx.getEnumOfTitle(col.getText());
-				// create a new list if needed
-				List<AudioInfo> li = selected.get(key);
-				if (li == null) {
-					li = new Vector<AudioInfo>();
-					selected.put(key, li);
+			
+			if (useCells) {
+				for (int i = 0; i < selectedCells.size(); i++) {
+					TablePosition pos = selectedCells.get(i);
+					AudioInfo item = selectedRecords.get(i);
+					TableColumn col = pos.getTableColumn();
+					Enum key = FieldKeyEx.getEnumOfTitle(col.getText());
+					// create a new list if needed
+					List<AudioInfo> li = selected.get(key);
+					if (li == null) {
+						li = new Vector<AudioInfo>();
+						selected.put(key, li);
+					}
+					li.add(item);
 				}
-				li.add(item);
+			} else {
+				// Get a list of all unique audio info
+				List<AudioInfo> infos = new Vector(CollectionUtil.getAllDistinct(selectedRecords));
+				for (Enum<?> key : Constants.getFilteredProperties()) {
+					selected.put(key, infos);
+				}
 			}
+			
 			info = new AudioInfo();
-			List<Node> nodes = new LinkedList<>();
+			info.setupProperties();	// So we can start accessing properties immediately 
+			int row = 0;
+			GridPane grid = new GridPane();
 			
 			for (Entry<Enum<?>, List<AudioInfo>> entry : selected.entrySet()) {
 				Enum<?> key = entry.getKey();
@@ -309,49 +348,44 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 					} 
 				}
 				
+				grid.add(new Label(EnumUtil.processEnumName(key)), 0, row);
+				
 				if (key == FieldKey.COVER_ART) {
-					HBox pane = new HBox();
-					Label lbl = new Label(EnumUtil.processEnumName(key));
-					lbl.setPrefWidth(100);
-					
 					ArtworkEdit edit = new ArtworkEdit(info.cover_artProperty(), 
-							new Callback<Object, Boolean>() {
-						public Boolean call(Object o) {
-							return true;
-						}
-						}, new Callback<Object, AudioInfoArtworkProperty>() {
+						new Callback<Object, Boolean>() {
+							public Boolean call(Object o) {
+								return true;
+							}
+						}, 	
+						new Callback<Object, AudioInfoArtworkProperty>() {
 							public AudioInfoArtworkProperty call(Object arg0) {
 								return info.cover_artProperty();
 							}
 						}, true);
 					
-					pane.getChildren().addAll(lbl, edit);
-					nodes.add(pane);
-				} else if (key == FieldKey.RATING) {
-					HBox pane = new HBox();
-					
-					Label lbl = new Label(EnumUtil.processEnumName(key));
-					lbl.setPrefWidth(100);
-					
-					RatingsEdit edit = new RatingsEdit(info.ratingProperty(), new Callback<Object, Boolean>() {
-						public Boolean call(Object arg0) {
-							return true;
-						}
-					});
+					grid.add(edit, 1, row);
 
-					pane.getChildren().addAll(lbl, edit);
+				} else if (key == FieldKey.RATING) {
+					RatingsEdit edit = new RatingsEdit(info.ratingProperty(), 
+						new Callback<Object, Boolean>() {
+							public Boolean call(Object arg0) {
+								return true;
+							}
+						},
+						new Callback<Object, AudioInfoRatingProperty>() {
+							public AudioInfoRatingProperty call(Object arg0) {
+								return info.ratingProperty();
+							}								
+						});
+
+					grid.add(edit, 1, row);
 					
-					nodes.add(pane);
 				} else {
-					HBox pane = new HBox();
 					TextField field = new TextField();
 					field.textProperty().bindBidirectional(info.properties.get(key));
-					Label lbl = new Label(EnumUtil.processEnumName(key));
-					lbl.setPrefWidth(100);
+					field.editableProperty().set(FieldKeyEx.isModifiable(key));
 					
-					pane.getChildren().addAll(lbl, field);
-					
-					nodes.add(pane);
+					grid.add(field, 1, row);
 				}
 				
 				info.properties.get(key).nonRefProperty().set(value == notCommonRef);
@@ -364,6 +398,14 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 						info.properties.get(key).setValue(value);
 					}
 				}
+				
+				if (FieldKeyEx.isModifiable(key)) {
+					CheckBox chk = new CheckBox("Override");
+					chk.selectedProperty().bindBidirectional(info.properties.get(key).modifiedProperty());
+					grid.add(chk, 2, row);
+				}
+				
+				row++;
 			}
 			
 			
@@ -408,12 +450,21 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 						Boolean oldValue, Boolean newValue) {
 					if (newValue) {
 						btnSet.setVisible(true);
+					} else {
+						boolean modified = false;
+						for (AudioInfoProperty p : info.properties.values()) {
+							if (p.modifiedProperty().get()) {
+								modified = true;
+								break;
+							}
+						}
+						btnSet.setVisible(modified);
 					}
 				}
 			};
 						
 			for (AudioInfoProperty p :info.properties.values()) {
-				// Reset modified
+				// Reset modified and add modified listener
 				p.modifiedProperty().set(false);
 				p.modifiedProperty().addListener(cl);
 			}
@@ -422,13 +473,10 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 			builder.spacing(5);
 			builder.padding(new Insets(5, 0, 0, 0));
 			
-			VBoxBuilder mainBuilder = VBoxBuilder.create();
-			mainBuilder.children(nodes);
-			
 			BorderPane pane = new BorderPane();
 			
 			pane.setBottom(builder.build());
-			pane.setCenter(mainBuilder.build());
+			pane.setCenter(grid);
 			pane.paddingProperty().set(new Insets(10));
 			
 			getChildren().add(pane);

@@ -38,6 +38,18 @@ public class TimeUtil {
 		return timeToString(hours, minutes, seconds);
 	}
 	
+	/**
+	 * 
+	 */
+	public static int parseTime(String time) {
+		int result = 0;
+		String[] t = time.split(":");
+		for(int i = 0; i < t.length; i++) {
+			result = Integer.parseInt(t[t.length - 1 - i]) * MathUtil.pow(60, i); 
+		}
+		return result;
+	}
+	
 	public static String timeToString(int hours, int minutes, int seconds) {
 		StringBuilder sb = new StringBuilder();
 		if (hours != 0) {

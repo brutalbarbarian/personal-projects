@@ -175,5 +175,6 @@ public class JAudioTaggerUtil {
 				}
 			}
 		}
+		file.setTag(tag);
 	}
 }

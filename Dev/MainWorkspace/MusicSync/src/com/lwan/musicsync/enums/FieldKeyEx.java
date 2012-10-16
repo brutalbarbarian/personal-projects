@@ -17,17 +17,20 @@ public class FieldKeyEx {
 	private static Enum<?>[] ALL_VALUES;
 	private static HashMap<String, Enum<?>> TITLE_ENUM_TABLE;
 
-	public static void populateAllNonFieldKeyTags(AudioFile audio, Map<Enum<?>, Object> map) {
+	public static void populateAllNonFieldKeyTags(AudioFile audio, String rootDir, Map<Enum<?>, Object> map) {
 		AudioHeader header = audio.getAudioHeader();
-		map.put(NAME, audio.getFile().getName());
-		map.put(RELATIVE_PATH, IOUtil.getRelativePath(map.get(ROOT_DIR).toString(), audio.getFile().getPath()));
+		String relativePath = IOUtil.getRelativePath(rootDir, audio.getFile().getAbsolutePath());
+//		map.put(NAME, audio.getFile().getName());
+		map.put(RELATIVE_PATH, relativePath);
 		map.put(BITRATE, header.getBitRate());
 		map.put(EXTENSION, StringUtil.getFileExtension(audio.getFile().getName()));
 		map.put(LENGTH, TimeUtil.secondsToString(header.getTrackLength()));
+//		map.put(ROOT_DIR, rootDir);
+//		map.put(ORIG_DIR, relativePath);
 	}
 	
 	public static void populateAllNonFieldKeyTags(Map<Enum<?>, Object> map) {
-		map.put(NAME, null);
+//		map.put(NAME, null);
 		map.put(RELATIVE_PATH, null);
 		map.put(BITRATE, null);
 		map.put(EXTENSION, null);
@@ -67,22 +70,25 @@ public class FieldKeyEx {
 		}
 		return TITLE_ENUM_TABLE;
 	}
+//	
+//	public static boolean IsPrivate(Enum<?> e) {
+//		return FileAdvancedInfo.isPrivate(e);
+//	}
 
 	public static Enum<?> getEnumOfTitle(String s) {
 		return getTitleEnumTable().get(s);
 	}
-
-	
-	public static final FileAdvancedInfo ROOT_DIR = FileAdvancedInfo.ROOT_DIR;
 	
 	// Modifiable File info
-	public static final FileBasicInfo NAME = FileBasicInfo.NAME;
+//	public static final FileBasicInfo NAME = FileBasicInfo.NAME;
 	public static final FileBasicInfo RELATIVE_PATH = FileBasicInfo.RELATIVE_PATH;
 
 	// Unmodifiable File info
 	public static final FileAdvancedInfo BITRATE = FileAdvancedInfo.BITRATE;
 	public static final FileAdvancedInfo EXTENSION = FileAdvancedInfo.EXTENSION;
 	public static final FileAdvancedInfo LENGTH = FileAdvancedInfo.LENGTH;
+//	public static final FileAdvancedInfo ROOT_DIR = FileAdvancedInfo.ROOT_DIR;
+//	public static final FileAdvancedInfo ORIG_DIR = FileAdvancedInfo.ORIG_DIR;
 
 	// Modifiable FieldKey tag Fields
 	public static final FieldKey ALBUM = FieldKey.ALBUM;

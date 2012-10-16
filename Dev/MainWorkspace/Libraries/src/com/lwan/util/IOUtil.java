@@ -15,10 +15,50 @@ public class IOUtil {
 	public static final String CHARSET_DEFAULT_WINDOWS = "cp1252";
 	public static final String CHARSET_DEFAULT_UBUNTU = "utf-8";
 	
+	/**
+	 * Assuming relative path is correct relative to root.
+	 * See getRelativePath
+	 * 
+	 * @param root
+	 * @param relativePath
+	 * @return
+	 */
+	public static String getAbsolutePath(String root, String relativePath) {
+		String sep = Character.toString(File.separatorChar);
+		if (sep.equals("\\")) {
+			sep = "\\\\";	// This is as 'split' interprets single \ as escape character
+		}
+		String[] rt = root.split(sep);
+		String[] rel = relativePath.split(sep);
+		
+		int rootPos = rt.length;
+		int relPos = 0;
+		
+		while (relPos < rel.length && rel[relPos].equals("..")) {
+			relPos++;
+			rootPos--;
+		}
+		
+		if (rootPos <= 0) {
+			throw new IllegalArgumentException("Relative Path: " + relativePath + 
+					"cannot be relative to root: " + root);
+		}
+		
+		Vector<String> res = new Vector<String>(rootPos + rel.length - relPos);
+		for (int i = 0; i < rootPos; i++) {
+			res.add(rt[i]);
+		}
+		for (int i = relPos; i < rel.length; i++) {
+			res.add(rel[i]);;
+		}
+		
+		return CollectionUtil.CollapseStringList(res, File.separator);
+	}
+	
 	public static String getRelativePath(String root, String file) {
 		String sep = Character.toString(File.separatorChar);
 		if (sep.equals("\\")) {
-			sep = "\\\\";
+			sep = "\\\\";	// This is as 'split' interprets single \ as escape character
 		}
 		String[] rt = root.split(sep);
 		String[] f = file.split(sep);

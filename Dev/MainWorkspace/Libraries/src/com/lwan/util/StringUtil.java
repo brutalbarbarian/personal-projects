@@ -1,5 +1,6 @@
 package com.lwan.util;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -131,9 +132,17 @@ public class StringUtil {
 	}
 	
 	public static String createString(String...strings) {
+		return getDelimitedString("", strings);
+	}
+
+	public static String getDelimitedString(String delimiter, String... strings) {
 		StringBuilder sb = new StringBuilder();
-		for (String s : strings) {
-			sb.append(s);
+		Iterator<String> it = CollectionUtil.getIterator(strings);
+		while (it.hasNext()) {
+			sb.append(it.next());
+			if (it.hasNext()) {
+				sb.append(delimiter);
+			}
 		}
 		return sb.toString();
 	}

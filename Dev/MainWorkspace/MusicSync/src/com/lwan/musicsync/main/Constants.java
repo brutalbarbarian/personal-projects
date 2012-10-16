@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 import org.jaudiotagger.tag.FieldKey;
 
+import com.lwan.musicsync.enums.FieldKeyEx;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.media.JAudioTaggerUtil;
 
@@ -32,6 +33,15 @@ public class Constants {
 					JAudioTaggerUtil.OtherFields);
 		}
 		return fieldKeyFilter;
+	}
+	
+	private static Enum<?>[] filteredProperties;
+	
+	public static Enum<?>[] getFilteredProperties() {
+		if (filteredProperties == null) {
+			filteredProperties = CollectionUtil.removeAll(FieldKeyEx.values(), getFieldKeyFilter(), false);
+		}
+		return filteredProperties;
 	}
 	
 	public static String getTextCellStyle() {

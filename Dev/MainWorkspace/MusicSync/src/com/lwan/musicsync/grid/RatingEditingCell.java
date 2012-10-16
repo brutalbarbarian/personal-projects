@@ -1,6 +1,7 @@
 package com.lwan.musicsync.grid;
 
 import com.lwan.musicsync.audioinfo.AudioInfo;
+import com.lwan.musicsync.audioinfo.AudioInfoRatingProperty;
 
 import javafx.beans.property.Property;
 import javafx.scene.control.ContentDisplay;
@@ -29,7 +30,12 @@ public class RatingEditingCell extends BaseEditingCell<Integer> implements  Call
 		
 		setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		
-		setGraphic(new RatingsEdit((Property)itemProperty(), this));
+		setGraphic(new RatingsEdit((Property)itemProperty(), this,
+				new Callback<Object, AudioInfoRatingProperty>() {
+					public AudioInfoRatingProperty call(Object arg0) {
+						return getAudioInfo().ratingProperty();
+					}
+		}));
 	}
 	
 	public void startEdit() {
@@ -47,7 +53,8 @@ public class RatingEditingCell extends BaseEditingCell<Integer> implements  Call
 		// other things are being selected.
 		// This is to mainly stop anything from happening if user is
 		// attempting to select multiple cells (e.g. holding shift).
-		return getTableView().getSelectionModel().getSelectedItems().size() == 0 || isSelected();
+		int selected = getTableView().getSelectionModel().getSelectedItems().size();
+		return selected == 0 || (selected == 1 && isSelected());
 	}
 }
 

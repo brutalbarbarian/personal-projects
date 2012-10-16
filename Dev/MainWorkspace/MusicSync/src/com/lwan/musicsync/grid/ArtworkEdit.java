@@ -57,6 +57,7 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 			getChildren().add(simpleGraphic);
 			
 			simpleGraphic.setOnMouseMoved(this);
+			simpleGraphic.setOnMouseClicked(this);
 			setOnMouseExited(this);
 		} else {
 			int size = Constants.gridImageSizeProperty().get();
@@ -72,7 +73,7 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 			getChildren().add(nullValue);
 			getChildren().add(nullText);
 			
-			setOnMouseClicked(this);
+			setOnMouseClicked(this);	
 		}
 		
 		imgProperty.addListener(this);
@@ -90,6 +91,9 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 			if (e.getButton() == MouseButton.PRIMARY && !isSimpleMode() &&
 					allowEdit.call(e)) {
 				showBasicEditScreen();
+			} else {
+				System.out.println(e);
+				getParent().fireEvent(e);
 			}
 		} else if (e.getEventType() == MouseEvent.MOUSE_MOVED) {
 			if (popup == null && imgProperty.getValue() != null && isSimpleMode()) {
@@ -167,7 +171,5 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 			}
 		});
 	}
-
-	
 	
 }

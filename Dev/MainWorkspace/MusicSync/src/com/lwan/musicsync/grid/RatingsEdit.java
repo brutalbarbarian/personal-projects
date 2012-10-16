@@ -2,6 +2,7 @@ package com.lwan.musicsync.grid;
 
 import java.awt.Point;
 
+import com.lwan.musicsync.audioinfo.AudioInfoRatingProperty;
 import com.lwan.util.media.JAudioTaggerUtil;
 
 import javafx.beans.property.Property;
@@ -34,9 +35,12 @@ public class RatingsEdit extends GridPane implements EventHandler<MouseEvent>{
 	protected int mouseOverRatings;
 	
 	protected Callback<Object, Boolean> editCheck;
+	protected Callback<Object, AudioInfoRatingProperty> callback;
 	
-	public RatingsEdit(Property<Number> valueProperty, Callback<Object, Boolean> edit){
+	public RatingsEdit(Property<Number> valueProperty, Callback<Object, Boolean> edit,
+			Callback<Object, AudioInfoRatingProperty> callback){
 		editCheck = edit;
+		this.callback = callback;
 		
 		stars = new Star[5];
 		for (int i = 0; i < 5; i++) {
@@ -145,9 +149,12 @@ public class RatingsEdit extends GridPane implements EventHandler<MouseEvent>{
 						isMouseOver = false;
 					}
 				} else if (e.getEventType() == MouseEvent.MOUSE_CLICKED &&
-						minDist < cutoffPoint && e.getButton() == MouseButton.PRIMARY &&
-						editCheck.call(e)) {
-					ratingsProperty().setValue(JAudioTaggerUtil.RatingStars[minIndex]);
+						minDist < cutoffPoint && e.getButton() == MouseButton.PRIMARY) {
+					if (editCheck.call(e)) {
+						callback.call(this).setValue(JAudioTaggerUtil.RatingStars[minIndex]);
+					} else {
+						getParent().fireEvent(e);
+					}
 				} 
 						
 			}

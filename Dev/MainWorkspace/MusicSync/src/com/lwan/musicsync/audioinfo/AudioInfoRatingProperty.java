@@ -16,7 +16,7 @@ public class AudioInfoRatingProperty extends IntegerPropertyBase implements Audi
 	public AudioInfoRatingProperty (AudioInfo info) {
 		parent = info;
 		name = FieldKey.COVER_ART.name().toLowerCase();
-		String item = GenericsUtil.Coalice(info.tags.get(FieldKey.RATING), "").toString();
+		String item = GenericsUtil.Coalice(info.tags().get(FieldKey.RATING), "").toString();
 		if (item.length() > 0) {
 			setValue(Integer.parseInt(item));	
 		} else {
@@ -39,11 +39,11 @@ public class AudioInfoRatingProperty extends IntegerPropertyBase implements Audi
 			modifiedProperty().set(true);
 			doSet = false;
 			if (value != null) {
-				parent.tags.put(FieldKey.RATING, value);
+				parent.tags().put(FieldKey.RATING, value);
 				super.setValue(value);
 			} else {
 				// clears value
-				parent.tags.put(FieldKey.RATING, null);
+				parent.tags().put(FieldKey.RATING, null);
 				super.setValue(-1);
 			}
 			doSet = true;

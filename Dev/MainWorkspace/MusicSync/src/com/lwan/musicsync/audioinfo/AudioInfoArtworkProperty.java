@@ -40,7 +40,7 @@ public class AudioInfoArtworkProperty extends ObjectPropertyBase<Image> implemen
 	}
 	
 	protected void setImage() {
-		Artwork aw = (Artwork)bean.tags.get(FieldKey.COVER_ART);
+		Artwork aw = (Artwork)bean.tags().get(FieldKey.COVER_ART);
 		byte[] bytes = null;
 		Image img = null;
 		if (aw != null) {
@@ -61,16 +61,16 @@ public class AudioInfoArtworkProperty extends ObjectPropertyBase<Image> implemen
 	public void setAsBufferedImage(BufferedImage img) {
 		imgAWT = img;
 		if (img == null) {
-			bean.tags.put(FieldKey.COVER_ART, null);
+			bean.tags().put(FieldKey.COVER_ART, null);
 		} else {
-			bean.tags.put(FieldKey.COVER_ART, JAudioTaggerUtil.createArtwork(img));
+			bean.tags().put(FieldKey.COVER_ART, JAudioTaggerUtil.createArtwork(img));
 		}
 		setImage();
 	}
 	
 	public BufferedImage getAsBufferedImage() {
 		if (imgAWT == null) {
-			Artwork aw = (Artwork)bean.tags.get(FieldKey.COVER_ART);
+			Artwork aw = (Artwork)bean.tags().get(FieldKey.COVER_ART);
 			if (aw != null) {
 				Object image = null;
 				try {
@@ -99,7 +99,7 @@ public class AudioInfoArtworkProperty extends ObjectPropertyBase<Image> implemen
 	}
 
 	public Image getArtworkAsFullSizedImage() {
-		Artwork aw = (Artwork)bean.tags.get(FieldKey.COVER_ART);
+		Artwork aw = (Artwork)bean.tags().get(FieldKey.COVER_ART);
 		byte[] bytes = null;
 		Image img = null;
 		if (aw != null) {

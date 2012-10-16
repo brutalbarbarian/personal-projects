@@ -8,7 +8,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.Map;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 
@@ -59,6 +61,18 @@ public class CollectionUtil {
 			}
 		}
 		System.out.println();
+	}
+	
+	public static final <K, V> void printM(Map<K, V> map, String sep) {
+		Iterator <Entry<K, V>> it = map.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<K, V> e = it.next();
+			System.out.append(e.getKey().toString()).append("::").append(e.getValue().toString());
+			if (it.hasNext()) {
+				System.out.append(sep);
+			}
+		}
+		
 	}
 	
 	/**

@@ -10,6 +10,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -45,6 +46,9 @@ public class StringEditingCell extends BaseEditingCell<String> {
 				}
 			}
 		});
+		Tooltip tip = new Tooltip();
+		tip.textProperty().bind(textProperty());
+		setTooltip(tip);
 	}
 
 	@Override
