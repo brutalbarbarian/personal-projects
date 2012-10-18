@@ -18,4 +18,8 @@ public class AudioFileInfo {
 	public int hashCode() {
 		return getFullPath().hashCode();
 	}
+	
+	public String toString() {
+		return getFullPath();
+	}
 }

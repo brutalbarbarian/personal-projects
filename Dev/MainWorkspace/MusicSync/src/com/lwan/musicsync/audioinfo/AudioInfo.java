@@ -9,7 +9,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.image.Image;
-
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -59,6 +58,28 @@ public class AudioInfo {
 	 */
 	public AudioInfo(AudioFileInfo file, Map<Enum<?>, Object> tags) {
 		initialise(file, tags);
+	}
+	
+	public void changePrimary(String value) {
+		// Do nothing if its just an empty string
+		System.out.println("change primary: " + value);
+		if (StringUtil.isNullOrBlank(value)) {
+			return;
+		}
+		
+		AudioFileInfo newFile = null;
+		for (AudioFileInfo afi : allTags.keySet()) {
+			if (afi.getFullPath().equals(value)) {
+				newFile = afi;
+			}
+		}
+		if  (newFile != null) System.out.println(newFile.toString());
+		else System.out.println("no file found");
+		// If actually a different primary... no need to do extra work if the same
+		if (newFile != primaryFile) {
+			primaryFile = newFile;
+			setupProperties();
+		}
 	}
 	
 	// create an empty audioinfo record.
@@ -117,7 +138,7 @@ public class AudioInfo {
 		String newDir = IOUtil.getAbsolutePath(primaryFile.rootDir, tags().get(FileBasicInfo.RELATIVE_PATH).toString());
 		if (!newDir.equals(dir)) {
 			Files.move(Paths.get(dir), Paths.get(newDir), StandardCopyOption.REPLACE_EXISTING, 
-					StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.ATOMIC_MOVE);
+					StandardCopyOption.COPY_ATTRIBUTES);
 		}
 		
 		System.out.println("Primary File moved");
@@ -127,7 +148,7 @@ public class AudioInfo {
 		if (otherRt.length() > 0) {
 			otherRt = IOUtil.getAbsolutePath(otherRt, tags().get(FileBasicInfo.RELATIVE_PATH).toString());
 			Files.copy(Paths.get(newDir), Paths.get(otherRt), StandardCopyOption.REPLACE_EXISTING, 
-					StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.ATOMIC_MOVE);
+					StandardCopyOption.COPY_ATTRIBUTES);
 			
 			System.out.println("Copied to other root");
 		}
@@ -188,18 +209,26 @@ public class AudioInfo {
 	 * 
 	 */
 	public void setupProperties() {
-		properties = new HashMap<Enum<?>, AudioInfoProperty>();
-		for (Enum<?> key : tags().keySet()) {
-			if (key == FieldKey.COVER_ART) {
-				properties.put(key, new AudioInfoArtworkProperty(this));
-			} else if (key == FieldKey.RATING) {
-				properties.put(key, new AudioInfoRatingProperty(this));
-			} else {
-				properties.put(key, new AudioInfoStringProperty(this, key));
+		if (properties == null) {
+			properties = new HashMap<Enum<?>, AudioInfoProperty>();
+			for (Enum<?> key : tags().keySet()) {
+				if (key == FieldKey.COVER_ART) {
+					properties.put(key, new AudioInfoArtworkProperty(this));
+				} else if (key == FieldKey.RATING) {
+					properties.put(key, new AudioInfoRatingProperty(this));
+				} else if (key == FieldKeyEx.PRIMARY_DIRECTORY) {
+					properties.put(key, new AudioInfoFileProperty(this));
+				} else {
+					properties.put(key, new AudioInfoStringProperty(this, key));
+				}
+			}
+			// set all properties to default to not modified.
+			resetModified();
+		} else {
+			for (AudioInfoProperty property : properties.values()) {
+				property.ensurePropertyUpdated();
 			}
 		}
-		// set all properities to default to not modified.
-		resetModified();
 	}
 
 	public BufferedImage getArtworkAsBufferedImage() {
@@ -252,5 +281,9 @@ public class AudioInfo {
 	}
 	public AudioInfoArtworkProperty cover_artProperty() {
 		return (AudioInfoArtworkProperty)properties.get(FieldKey.COVER_ART);
+	}
+	
+	public AudioInfoFileProperty primary_directoryProperty() {
+		return (AudioInfoFileProperty)properties.get(FieldKeyEx.PRIMARY_DIRECTORY);
 	}
 }

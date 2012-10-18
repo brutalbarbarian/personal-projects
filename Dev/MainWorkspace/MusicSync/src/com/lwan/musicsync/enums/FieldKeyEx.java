@@ -25,6 +25,7 @@ public class FieldKeyEx {
 		map.put(BITRATE, header.getBitRate());
 		map.put(EXTENSION, StringUtil.getFileExtension(audio.getFile().getName()));
 		map.put(LENGTH, TimeUtil.secondsToString(header.getTrackLength()));
+		map.put(PRIMARY_DIRECTORY, audio.getFile().getAbsolutePath());	// for reference only
 //		map.put(ROOT_DIR, rootDir);
 //		map.put(ORIG_DIR, relativePath);
 	}
@@ -35,6 +36,7 @@ public class FieldKeyEx {
 		map.put(BITRATE, null);
 		map.put(EXTENSION, null);
 		map.put(LENGTH, null);
+		map.put(PRIMARY_DIRECTORY, null);	// for reference only
 	}
 
 	public static boolean isModifiable(Enum<?> e) {
@@ -89,6 +91,7 @@ public class FieldKeyEx {
 	public static final FileAdvancedInfo LENGTH = FileAdvancedInfo.LENGTH;
 //	public static final FileAdvancedInfo ROOT_DIR = FileAdvancedInfo.ROOT_DIR;
 //	public static final FileAdvancedInfo ORIG_DIR = FileAdvancedInfo.ORIG_DIR;
+	public static final FileAdvancedInfo PRIMARY_DIRECTORY = FileAdvancedInfo.PRIMARY_DIRECTORY;
 
 	// Modifiable FieldKey tag Fields
 	public static final FieldKey ALBUM = FieldKey.ALBUM;

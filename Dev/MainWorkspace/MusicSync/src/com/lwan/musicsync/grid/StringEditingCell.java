@@ -109,7 +109,7 @@ public class StringEditingCell extends BaseEditingCell<String> {
 		actualCancel = false;
 	}
 	
-	private void createTextField() {
+	protected void createTextField() {
 		textField = new TextField(getString());
 		textField.setStyle(Constants.getTextCellStyle());
 		textField.setMinWidth(this.getWidth() - this.getGraphicTextGap()*2);

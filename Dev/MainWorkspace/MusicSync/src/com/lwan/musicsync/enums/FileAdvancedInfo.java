@@ -10,10 +10,12 @@ public enum FileAdvancedInfo {
 	/* Public Info */
 	LENGTH,	// Length of track
 	BITRATE,
-	EXTENSION; 
+	EXTENSION,
 	
 	/* Private info */
-//	ROOT_DIR,	// The original absolute path to the root
+	PRIMARY_DIRECTORY;	// primary directory used for an AudioInfo
+	
+//	ROOT_DIR;	// The original absolute path to the root
 //	ORIG_DIR;	// The original relative path from root_dir
 //	
 //	/**

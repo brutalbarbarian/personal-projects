@@ -65,7 +65,7 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	protected AudioInfo getAudioInfo() {
+	public AudioInfo getAudioInfo() {
 		TableRow row = getTableRow();
 		if (row != null) {
 			return (AudioInfo) row.getItem();

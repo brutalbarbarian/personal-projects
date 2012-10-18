@@ -10,19 +10,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 public class AudioInfoRatingProperty extends IntegerPropertyBase implements AudioInfoProperty<Number>{
-	private AudioInfo parent;
+	private AudioInfo info;
 	private String name;
 	
 	public AudioInfoRatingProperty (AudioInfo info) {
-		parent = info;
+		this.info = info;
 		name = FieldKey.COVER_ART.name().toLowerCase();
-		String item = GenericsUtil.Coalice(info.tags().get(FieldKey.RATING), "").toString();
-		if (item.length() > 0) {
-			setValue(Integer.parseInt(item));	
-		} else {
-			setValue(null);
-		}
 		doSet = true;
+		ensurePropertyUpdated();
 	}
 	
 	public void set(int value) {
@@ -39,11 +34,11 @@ public class AudioInfoRatingProperty extends IntegerPropertyBase implements Audi
 			modifiedProperty().set(true);
 			doSet = false;
 			if (value != null) {
-				parent.tags().put(FieldKey.RATING, value);
+				info.tags().put(FieldKey.RATING, value);
 				super.setValue(value);
 			} else {
 				// clears value
-				parent.tags().put(FieldKey.RATING, null);
+				info.tags().put(FieldKey.RATING, null);
 				super.setValue(-1);
 			}
 			doSet = true;
@@ -52,7 +47,7 @@ public class AudioInfoRatingProperty extends IntegerPropertyBase implements Audi
 	
 	@Override
 	public Object getBean() {
-		return parent;
+		return info;
 	}
 
 	@Override
@@ -84,5 +79,15 @@ public class AudioInfoRatingProperty extends IntegerPropertyBase implements Audi
 			});
 		}
 		return nonRefProperty;
+	}
+
+	@Override
+	public void ensurePropertyUpdated() {
+		String item = GenericsUtil.Coalice(info.tags().get(FieldKey.RATING), "").toString();
+		if (item.length() > 0) {
+			setValue(Integer.parseInt(item));	
+		} else {
+			setValue(null);
+		}
 	}
 }

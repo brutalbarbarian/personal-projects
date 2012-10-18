@@ -26,7 +26,7 @@ public class AudioInfoArtworkProperty extends ObjectPropertyBase<Image> implemen
 	public AudioInfoArtworkProperty(AudioInfo audioInfo){
 		bean = audioInfo;
 		name = FieldKey.COVER_ART.name().toLowerCase();
-		setImage();
+		ensurePropertyUpdated();
 	}
 
 	@Override
@@ -135,5 +135,10 @@ public class AudioInfoArtworkProperty extends ObjectPropertyBase<Image> implemen
 			});
 		}
 		return nonRefProperty;
+	}
+
+	@Override
+	public void ensurePropertyUpdated() {
+		setImage();
 	}
 }

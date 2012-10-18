@@ -26,6 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
@@ -37,7 +38,9 @@ import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Stage;
 
 import com.lwan.musicsync.audioinfo.AudioInfo;
+import com.lwan.musicsync.enums.FieldKeyEx;
 import com.lwan.musicsync.grid.ArtworkEditingCell;
+import com.lwan.musicsync.grid.FileEditingCell;
 import com.lwan.musicsync.grid.RatingEditingCell;
 import com.lwan.musicsync.grid.StringEditingCell;
 import com.lwan.util.CollectionUtil;
@@ -142,7 +145,6 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 		
 		List<TableColumn<AudioInfo, ?>> cols = new Vector<>();
 		for (Enum<?> fk : Constants.getFilteredProperties()) {
-			// We don't want private columns in here
 			if (fk == FieldKey.RATING) {
 				TableColumn<AudioInfo, Integer> col = new TableColumn<>(EnumUtil.processEnumName(fk));
 				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Integer>(fk.name().toLowerCase()));
@@ -153,12 +155,19 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Image>(FieldKey.COVER_ART.name().toLowerCase()));
 				col.setCellFactory(ArtworkEditingCell.getArtworkEditingCellFactory(true));
 				cols.add(col);
+			} else if (fk == FieldKeyEx.PRIMARY_DIRECTORY) {
+				TableColumn<AudioInfo, String> col = new TableColumn<>(EnumUtil.processEnumName(fk));
+				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, String>(fk.name().toLowerCase()));
+				col.setCellFactory(FileEditingCell.getFileEditingCellFactory());
+				col.setOnEditCommit(new StringCommitHelper(fk));
+				cols.add(col);
 			} else {
 				TableColumn<AudioInfo, String> col = new TableColumn<>(EnumUtil.processEnumName(fk));
 				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, String>(fk.name().toLowerCase()));
 				col.setCellFactory(StringEditingCell.getStringEditingCellFactory(true));
+				col.setOnEditCommit(new StringCommitHelper(fk));
 				cols.add(col);
-			}
+			} 
 		}
 		
 		table.getColumns().setAll(cols);
@@ -205,6 +214,24 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 //		txtRoot.setText("C:\\Users\\Brutalbarbarian\\Music");
 		txtRoot.setText("C:\\TEST\\root1");
 		txtRoot2.setText("C:\\TEST\\root2");
+	}
+	
+	private class StringCommitHelper implements EventHandler<CellEditEvent<AudioInfo, String>> {
+		Enum<?> key;
+		
+		StringCommitHelper(Enum<?> e){
+			key = e;
+		}
+		
+		@Override
+		@SuppressWarnings("unchecked")
+		public void handle(CellEditEvent<AudioInfo, String> e) {
+			// Should also handle validation here??? or elsewhere?
+			AudioInfo info = e.getTableView().getSelectionModel().getSelectedItem();
+			if (info != null) {
+				info.properties.get(key).setValue(e.getNewValue());	
+			}
+		}
 	}
 
 	@Override
