@@ -4,6 +4,11 @@ import java.util.Collections;
 import java.util.HashSet;
 
 public class ClassUtil {
+	
+	public static boolean isSuperclassOf(Class<?> superClass, Class<?> subClass) {
+		return superClass.isAssignableFrom(subClass);
+	}
+	
 	/**
 	 * Find the closest common superclass of multiple classes
 	 * 
