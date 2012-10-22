@@ -2,13 +2,12 @@ package com.lwan.bo;
 
 import com.lwan.javafx.property.ValidatedProperty;
 import com.lwan.javafx.property.ValidationListener;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public class BOAttribute <T> extends BOObject {
+public class BOAttribute <T> extends BOBusinessObject {
 	/* Properties Declarations */
 	private Property<Boolean> allow_nulls;
 	private Property<T> default_value;
@@ -54,12 +53,12 @@ public class BOAttribute <T> extends BOObject {
 		return null_value;
 	}
 	
-	public BOAttribute(BOObject parent, String name) {
+	public BOAttribute(BOBusinessObject parent, String name) {
 		this(parent, name, true, null, null);
 	}
 	
 	
-	public BOAttribute(BOObject parent, String name, boolean allowNulls, T defaultValue, T nullValue) {
+	public BOAttribute(BOBusinessObject parent, String name, boolean allowNulls, T defaultValue, T nullValue) {
 		super(parent, name);
 		
 		AllowNulls().setValue(allowNulls);
@@ -159,6 +158,10 @@ public class BOAttribute <T> extends BOObject {
 	 */
 	protected void clearAttributes() {
 		setValue(DefaultValue().getValue());
+	}
+	
+	protected String getPropertyStrings() {
+		return "Value:" + getValue();
 	}
 	
 	/* Not relevant for attributes */ 

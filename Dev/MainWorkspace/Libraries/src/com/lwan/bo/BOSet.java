@@ -12,7 +12,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.Callback;
 
-public class BOSet<T extends BOObject> extends BOObject implements Iterable<T>{
+public class BOSet<T extends BOBusinessObject> extends BOBusinessObject implements Iterable<T>{
 	
 	// name of the BOattribute which is a direct descendant of the child BOobject
 	// if this is empty, calling 'findByID' will always return with null
@@ -51,7 +51,7 @@ public class BOSet<T extends BOObject> extends BOObject implements Iterable<T>{
 	 * @param name
 	 * @param childIdName
 	 */
-	public BOSet(BOObject owner, String name, String childIdName, Callback<BOSet<T>, T> instanceFactory) {
+	public BOSet(BOBusinessObject owner, String name, String childIdName, Callback<BOSet<T>, T> instanceFactory) {
 		super(owner, name);
 		
 		children = new Vector<T>();
@@ -63,7 +63,7 @@ public class BOSet<T extends BOObject> extends BOObject implements Iterable<T>{
 		String childAttr = ChildIDName().getValue();
 		if (!StringUtil.isNullOrBlank(childAttr)) {
 			for (T child : children) {
-				BOObject attr = child.getChildByName(childAttr);
+				BOBusinessObject attr = child.getChildByName(childAttr);
 				// If the attribute can be found, check the values are equal
 				if (attr != null && attr instanceof BOAttribute<?> && 
 						GenericsUtil.Equals(((BOAttribute<?>)attr).getValue(), id)) {
@@ -121,7 +121,7 @@ public class BOSet<T extends BOObject> extends BOObject implements Iterable<T>{
 		T child = findChildByID(id);
 		if (child == null) {
 			child = InstanceFactory().getValue().call(this);
-			BOObject idAttr = child.getChildByName(ChildIDName().getValue());
+			BOBusinessObject idAttr = child.getChildByName(ChildIDName().getValue());
 			if (idAttr != null) {
 				((BOAttribute<?>)idAttr).setAsObject(id);
 			}
@@ -198,6 +198,20 @@ public class BOSet<T extends BOObject> extends BOObject implements Iterable<T>{
 				child.Active().setValue(isActive);
 			}
 		}
+	}
+	
+	protected String toString(int spaces) {
+		StringBuilder sb = new StringBuilder();
+		// first line: Name:ClassName
+		sb.append(super.toString(spaces));
+		
+		sb.append("children\n");
+		
+		// call toString on all children with spaces += 4
+		for (BOBusinessObject child : children) {
+			sb.append(child.toString(spaces + 4));
+		}
+		return sb.toString();
 	}
 	
 	/**

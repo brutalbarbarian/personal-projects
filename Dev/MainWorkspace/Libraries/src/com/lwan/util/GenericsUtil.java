@@ -27,7 +27,7 @@ public class GenericsUtil {
 	}
 
 	/**
-	 * Convince method of choosing the first non-null value starting from the left
+	 * Convenience method of choosing the first non-null value starting from the left
 	 * 
 	 * @param a
 	 * @param b
@@ -41,5 +41,21 @@ public class GenericsUtil {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Convenience method for toString, which returns the passed in nullString if the value is null,
+	 * or the result of toString() if the object is not null.
+	 * 
+	 * @param o
+	 * @param nullString
+	 * @return
+	 */
+	public static String toString(Object o, String nullString) {
+		if (o == null) {
+			return nullString;
+		} else {
+			return o.toString();
+		}
 	}
 }

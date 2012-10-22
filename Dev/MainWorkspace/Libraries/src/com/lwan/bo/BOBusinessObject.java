@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.lwan.util.ClassUtil;
+import com.lwan.util.StringUtil;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
@@ -66,18 +67,19 @@ import javafx.beans.value.ObservableValue;
  * @author Brutalbarbarian
  *
  */
-public abstract class BOObject implements ModifiedEventListener{
+public abstract class BOBusinessObject implements ModifiedEventListener{
 	/* Property Declarations */
 	
-	private Property<BOObject> owner;
+	private Property<BOBusinessObject> owner;
 	private Property<Boolean> active;
 	private Property<String> name;
 	private Property<String> tag;
 	private Property<Boolean> allow_notifications;
+	private Property<Boolean> independent;
 	private Property<Set<State>> state;
 	
 	/* Property Accessor Methods */
-	public ReadOnlyProperty<BOObject> Owner() {
+	public ReadOnlyProperty<BOBusinessObject> Owner() {
 		return _owner();
 	}
 	public ReadOnlyProperty<String> Name() {
@@ -101,6 +103,20 @@ public abstract class BOObject implements ModifiedEventListener{
 		}
 		return tag;
 	}
+	/**
+	 * Independent represents if an object is independent from its parent.
+	 * An independent object will be saved prior to the saving of its parent
+	 * when save() of the parent is called.
+	 * 
+	 * @return
+	 */
+	public Property<Boolean> Independent() {
+		if (independent == null) {
+			independent = new SimpleObjectProperty<Boolean>(this, "Independent");
+		}
+		return independent;
+	}
+	
 	/** 
 	 * Use this flag to disable notifications if needed.
 	 * This will effectively disable fireModified for this object only. 
@@ -113,7 +129,7 @@ public abstract class BOObject implements ModifiedEventListener{
 	}
 	
 	/* Private Property Accessor Methods */
-	private Property<BOObject> _owner() {
+	private Property<BOBusinessObject> _owner() {
 		if (owner == null) {
 			owner = new SimpleObjectProperty<>(this, "Owner");
 		}
@@ -135,14 +151,14 @@ public abstract class BOObject implements ModifiedEventListener{
 
 	/* Private Fields  */
 	// Children of this object. This should never be exposed.
-	private HashMap<String, BOObject> children;
+	private HashMap<String, BOBusinessObject> children;
 	// List of listeners to any modification to this object.
 	// Note that the owner of this object will not be in this list, and thus will always be notified.
 	// i.e. cannot be removed.
 	private Vector<ModifiedEventListener> listeners;
 	
 	
-	public BOObject(BOObject owner, String name) {
+	public BOBusinessObject(BOBusinessObject owner, String name) {
 		children = new HashMap<>();
 		listeners = new Vector<>();
 		_name().setValue(name);
@@ -171,7 +187,7 @@ public abstract class BOObject implements ModifiedEventListener{
 	 * @param name
 	 * @return
 	 */
-	public BOObject getChildByName(String name) {
+	public BOBusinessObject getChildByName(String name) {
 		return children.get(name);
 	}
 	
@@ -182,7 +198,7 @@ public abstract class BOObject implements ModifiedEventListener{
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends BOObject> T getOwnerByClass(Class<T> parentClass) {
+	public <T extends BOBusinessObject> T getOwnerByClass(Class<T> parentClass) {
 		if (ClassUtil.isSuperclassOf(parentClass, getClass())) {
 			return (T)this;
 		} else if (Owner().getValue() != null) {
@@ -214,7 +230,7 @@ public abstract class BOObject implements ModifiedEventListener{
 			AllowNotifications().setValue(true);
 		}
 		// Set the active state of all children to match this
-		for (BOObject child : children.values()) {
+		for (BOBusinessObject child : children.values()) {
 			child.Active().setValue(isActive);
 		}
 	}
@@ -242,7 +258,7 @@ public abstract class BOObject implements ModifiedEventListener{
 			State().getValue().add(State.Modified);
 			handleModified(event);
 			
-			BOObject owner = Owner().getValue();
+			BOBusinessObject owner = Owner().getValue();
 			ModifiedEvent modEvent = new ModifiedEvent(event, this);
 			if (owner != null) {
 				Owner().getValue().fireModified(modEvent);
@@ -259,7 +275,7 @@ public abstract class BOObject implements ModifiedEventListener{
 	 */
 	protected void clear() {
 		// If settingActive is true, clear will be called for all children anyway. No need to loop.
-		for (BOObject child : children.values()) {
+		for (BOBusinessObject child : children.values()) {
 			child.clear();
 		}
 	}
@@ -270,8 +286,9 @@ public abstract class BOObject implements ModifiedEventListener{
 	 * 
 	 * @param object
 	 */
-	protected final void addAsChild(BOObject object) {
+	protected final <T extends BOBusinessObject> T addAsChild(T object) {
 		children.put(object.Name().getValue(), object);
+		return object;
 	}
 	
 	/**
@@ -304,22 +321,56 @@ public abstract class BOObject implements ModifiedEventListener{
 	public boolean save() {
 		// if modified... then do save
 		if (State().getValue().contains(State.Modified)) {
+			// Save all the independent children first
+			for (BOBusinessObject child : children.values()) {
+				// Attributes should be managed by the owner, and shouldn't need to manage themselves
+				if(!(child instanceof BOAttribute) && child.Independent().getValue()) {
+					child.save();
+				}
+			}
+			
 			// We want to call doSave if the value is active, otherwise doDelete should be called
 			if (Active().getValue()) {
 				doSave();
 			} else {
 				doDelete();
 			}
-			for (BOObject child: children.values()) {
+			
+			// Save all the dependent children after this object has been saved
+			for (BOBusinessObject child: children.values()) {
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
-				if (!(child instanceof BOAttribute)) {
+				if (!(child instanceof BOAttribute) && !child.Independent().getValue()) {
 					child.save();
 				}
 			}			
+			// Should be safe to assume the following state after successful saving
+			State().getValue().remove(State.Modified);
+			State().getValue().add(State.Dataset);
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	public String toString() {
+		return toString(0);
+	}
+	
+	protected String toString(int spaces) {
+		StringBuilder sb = new StringBuilder();
+		// first line: Name:ClassName
+		sb.append(StringUtil.getRepeatedString(" ", spaces)).append(Name().getValue()).append(':').append(getClass().getSimpleName()).
+				append(' ').append(getPropertyStrings()).append('\n');
+		
+		// call toString on all children with spaces += 4
+		for (BOBusinessObject child : children.values()) {
+			sb.append(child.toString(spaces + 4));
+		}
+		return sb.toString();
+	}
+	
+	protected String getPropertyStrings() {
+		return "Active:" + Active().getValue();
 	}
 	
 	/**
