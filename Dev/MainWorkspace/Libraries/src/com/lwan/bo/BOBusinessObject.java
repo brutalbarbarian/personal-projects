@@ -178,7 +178,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 		createAttributes();
 		// Ensures active state is false to begin with. This will also ensure all children are inactive as well.
 		Active().setValue(false);
-		clearAttributes();
+		clear();
 	}
 	
 	/**
@@ -224,14 +224,18 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 			if (populateAttributes()) {
 				State().getValue().add(State.Dataset);
 			} else {
-				// If its new, then modified is automatically triggered
+				// If its new, then set attributes to defaults and modified is automatically triggered
+				clearAttributes();
 				State().getValue().add(State.Modified);
 			}
 			AllowNotifications().setValue(true);
 		}
 		// Set the active state of all children to match this
 		for (BOBusinessObject child : children.values()) {
-			child.Active().setValue(isActive);
+			// Active state is meaningless to BOAttributes
+			if (!(child instanceof BOAttribute)) {
+				child.Active().setValue(isActive);
+			}
 		}
 	}
 	
@@ -273,7 +277,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	 * This is different from clearAttributes from that this should clear away all values as opposed to
 	 * setting them to default values.</br>
 	 */
-	protected void clear() {
+	public void clear() {
 		// If settingActive is true, clear will be called for all children anyway. No need to loop.
 		for (BOBusinessObject child : children.values()) {
 			child.clear();
@@ -320,7 +324,9 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	 */
 	public boolean save() {
 		// if modified... then do save
-		if (State().getValue().contains(State.Modified)) {
+		if (State().getValue().contains(State.Modified) || 
+				// or if loaded from a dataset but was set inactive afterwards
+				(State().getValue().contains(State.Dataset) && !Active().getValue())) {
 			// Save all the independent children first
 			for (BOBusinessObject child : children.values()) {
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
@@ -403,7 +409,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	/**
 	 * Clear all child attribute objects. This is effectively setting default values into all attributes.
 	 */
-	protected abstract void clearAttributes();
+	public abstract void clearAttributes();
 	
 	/**
 	 * Event thrown when something down the hierarchy is modified.

@@ -3,7 +3,7 @@ package com.lwan.musicsync.grid;
 import java.awt.Point;
 
 import com.lwan.musicsync.audioinfo.AudioInfoRatingProperty;
-import com.lwan.util.media.JAudioTaggerUtil;
+import com.lwan.musicsync.util.JAudioTaggerUtil;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;

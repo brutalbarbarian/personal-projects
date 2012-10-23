@@ -22,10 +22,10 @@ import com.lwan.musicsync.enums.FieldKeyEx;
 import com.lwan.musicsync.enums.FileBasicInfo;
 import com.lwan.musicsync.main.Constants;
 import com.lwan.musicsync.main.Start;
+import com.lwan.musicsync.util.JAudioTaggerUtil;
 import com.lwan.util.IOUtil;
 import com.lwan.util.StringUtil;
 import com.lwan.util.TimeUtil;
-import com.lwan.util.media.JAudioTaggerUtil;
 
 /**
  * Record class containing all information related to a audio file.

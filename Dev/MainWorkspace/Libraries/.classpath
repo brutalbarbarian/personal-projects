@@ -5,6 +5,5 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/JavaFX"/>
 	<classpathentry kind="lib" path="jl1.0.1.jar"/>
 	<classpathentry kind="lib" path="jid3lib-0.5.4.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JAudioTagger"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

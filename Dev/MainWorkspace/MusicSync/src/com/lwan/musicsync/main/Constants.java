@@ -8,8 +8,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 import org.jaudiotagger.tag.FieldKey;
 
 import com.lwan.musicsync.enums.FieldKeyEx;
+import com.lwan.musicsync.util.JAudioTaggerUtil;
 import com.lwan.util.CollectionUtil;
-import com.lwan.util.media.JAudioTaggerUtil;
 
 public class Constants {
 	private static Object getValueOf(Object property) {

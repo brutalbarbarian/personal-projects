@@ -51,6 +51,10 @@ public class ArtworkEditingCell extends BaseEditingCell<Image> {
 	public void startEdit() {
 		artworkEdit.showBasicEditScreen();
 	}
+	
+	protected void updateItem(Image item, boolean empty) {
+		itemProperty().set(item);
+	}
 
 	@Override
 	public boolean allowsCellEdit() {

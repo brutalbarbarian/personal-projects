@@ -15,17 +15,9 @@ public class AudioInfoFileProperty extends StringPropertyBase implements AudioIn
 	public AudioInfoFileProperty(AudioInfo info) {
 		this.info = info;
 		ensurePropertyUpdated();
-		
-		addListener(new ChangeListener<String>() {
-			public void changed(ObservableValue<? extends String> arg0,
-					String arg1, String arg2) {
-				System.out.println(arg1 + "," + arg2);
-			}
-		});
 	}
 	
 	public void set(String value) {
-		System.out.println("setting: " + value);
 		super.set(value);
 		info.changePrimary(value);
 	}

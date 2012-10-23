@@ -148,7 +148,7 @@ public class BOAttribute <T> extends BOBusinessObject {
 	 * Otherwise sets it the the default value
 	 * 
 	 */
-	protected void clear() {
+	public void clear() {
 		setValue(null);
 	}
 	
@@ -156,12 +156,21 @@ public class BOAttribute <T> extends BOBusinessObject {
 	 * Sets the attribute back to default, or null if no default is set.
 	 * 
 	 */
-	protected void clearAttributes() {
+	public void clearAttributes() {
 		setValue(DefaultValue().getValue());
+	}
+	
+	
+	protected void handleActive(Boolean isActive) {
+		// Do nothing... active state is meaningless to attributes
 	}
 	
 	protected String getPropertyStrings() {
 		return "Value:" + getValue();
+	}
+	
+	public void assign(BOAttribute<T> otherAttribute) {
+		setAsObject(otherAttribute.getValue());
 	}
 	
 	/* Not relevant for attributes */ 

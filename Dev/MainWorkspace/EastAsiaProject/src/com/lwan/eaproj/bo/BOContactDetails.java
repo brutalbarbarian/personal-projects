@@ -4,8 +4,10 @@ import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOBusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODatabaseObject;
+import com.lwan.eaproj.sp.PD_CDT;
 import com.lwan.eaproj.sp.PI_CDT;
 import com.lwan.eaproj.sp.PS_CDT;
+import com.lwan.eaproj.sp.PU_CDT;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOContactDetails extends BODatabaseObject {
@@ -20,6 +22,8 @@ public class BOContactDetails extends BODatabaseObject {
 		
 		SelectStoredProc().setValue(new PS_CDT());
 		InsertStoredProc().setValue(new PI_CDT());
+		UpdateStoredProc().setValue(new PU_CDT());
+		DeleteStoredProc().setValue(new PD_CDT());
 	}
 
 	@Override
@@ -38,7 +42,7 @@ public class BOContactDetails extends BODatabaseObject {
 	}
 
 	@Override
-	protected void clearAttributes() {}
+	public void clearAttributes() {}
 
 	@Override
 	public void handleModified(ModifiedEvent source) {}

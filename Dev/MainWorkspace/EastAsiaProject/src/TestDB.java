@@ -1,13 +1,7 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-
-import com.lwan.eaproj.bo.BOContactDetails;
-import com.lwan.eaproj.sp.PS_CDT;
+import com.lwan.eaproj.bo.BOCompany;
 import com.lwan.jdbc.GConnection;
-import com.lwan.jdbc.StoredProc;
 
 
 public class TestDB {
@@ -15,7 +9,7 @@ public class TestDB {
 		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 //		Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 		
-		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
 		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 //		Connection con = DriverManager.getConnection(url,"","");
 		
@@ -47,25 +41,44 @@ public class TestDB {
 //		
 //		prcClean.execute(con);
 		
-		BOContactDetails cd = new BOContactDetails(null);
+//		BOContactDetails cd = new BOContactDetails(null);
+//		cd.cdt_id.setValue(3);
+//		cd.ensureActive();
+		
+//		System.out.println(cd.toString());
+		
+//		cd.cdt_address_1.setValue("38 Some Different Place");
+//		cd.cdt_address_1.setValue("338 Riddell Road");
+//		cd.cdt_address_2.setValue("Glendowie");
+//		cd.cdt_city.setValue("Auckland");
+//		cd.cdt_country.setValue("New Zealand");
+//		cd.cdt_mobile.setValue("021 0220 0431");
 //		cd.cdt_id.setValue(1);
-		cd.ensureActive();
+//		cd.Active().setValue(false);
 		
-		System.out.println(cd.toString());
-		cd.cdt_address_1.setValue("338 Riddell Road");
-		cd.cdt_address_2.setValue("Glendowie");
-		cd.cdt_city.setValue("Auckland");
-		cd.cdt_country.setValue("New Zealand");
-		cd.cdt_mobile.setValue("021 0220 0431");
-//		cd.cdt_id.setValue(1);
+//		cd.save();
 		
-		cd.save();
+		BOCompany com = new BOCompany(null);
+//		com.com_id.setValue(1);
+		com.ensureActive();
+		System.out.println(com.toString());
 		
-		PS_CDT prc = new PS_CDT();
-		prc.execute(GConnection.getConnection());
-		ResultSet rs = prc.getResult();
-		printResultSet(rs);
-		rs.getStatement().close();
+		com.com_name.setValue("Test Company");
+		com.contactDetails.cdt_address_1.setValue("28 Beach Road");
+		com.contactDetails.cdt_address_2.setValue("Waterfront CBD");
+		com.contactDetails.cdt_city.setValue("Auckland");
+		com.contactDetails.cdt_mobile.setValue("123 4567");
+		com.contactDetails.cdt_site.setValue("www.company.com");
+		
+		System.out.println(com.toString());
+		
+		com.save();
+		
+//		StoredProc prc = new StoredProc("select * from CDT_contact_details");
+//		prc.execute(GConnection.getConnection());
+//		ResultSet rs = prc.getResult();
+//		printResultSet(rs);
+//		rs.getStatement().close();
 		
 //		con.close();
 		GConnection.uninitialise();

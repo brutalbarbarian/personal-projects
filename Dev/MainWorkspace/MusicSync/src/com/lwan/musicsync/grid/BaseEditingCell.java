@@ -151,6 +151,19 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 		selModel.clearSelection(row, col);
 	}
 	
+	protected void HandleEdit(ActionEvent e) {
+		TableViewSelectionModel<AudioInfo> sel = getTableView().getSelectionModel();
+		if (sel.getSelectedItems().size() <= 1) {
+			startEdit();
+		} else {
+			showEditingPopup(true);
+		}
+	}
+	
+	protected void HandleEditTrack(ActionEvent e) {
+		showEditingPopup(false);
+	}
+	
 	class ContextHandler implements EventHandler<ActionEvent>{
 		int context;
 		
@@ -168,22 +181,9 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 			}
 		}
 		
-		void HandleEdit(ActionEvent e) {
-			TableViewSelectionModel<AudioInfo> sel = getTableView().getSelectionModel();
-			if (sel.getSelectedItems().size() <= 1) {
-				startEdit();
-			} else {
-				showEditingPopup(true);
-			}
-		}
-		
-		void HandleEditTrack(ActionEvent e) {
-			showEditingPopup(false);
-		}
-		
 		
 		@SuppressWarnings("rawtypes")
-		void HandleClear(ActionEvent e) {
+		protected void HandleClear(ActionEvent e) {
 			TableViewSelectionModel<AudioInfo> selectionModel = getTableView().getSelectionModel();
 			ObservableList<TablePosition> selectedCells = selectionModel.getSelectedCells();
 			ObservableList<AudioInfo> selectedItems = selectionModel.getSelectedItems();

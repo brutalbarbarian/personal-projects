@@ -12,7 +12,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.Callback;
 
-public class BOSet<T extends BOBusinessObject> extends BOBusinessObject implements Iterable<T>{
+public abstract class BOSet<T extends BOBusinessObject> extends BOBusinessObject implements Iterable<T>{
 	
 	// name of the BOattribute which is a direct descendant of the child BOobject
 	// if this is empty, calling 'findByID' will always return with null
@@ -117,7 +117,7 @@ public class BOSet<T extends BOBusinessObject> extends BOBusinessObject implemen
 	 * 
 	 * @param id
 	 */
-	public void ensureActive(Object id) {
+	public void ensureChildActive(Object id) {
 		T child = findChildByID(id);
 		if (child == null) {
 			child = InstanceFactory().getValue().call(this);
@@ -244,9 +244,11 @@ public class BOSet<T extends BOBusinessObject> extends BOBusinessObject implemen
 
 	@Override
 	/**
-	 * Do nothing by default. Sets usually shouldn't have any attributes
+	 * This method should be used to populate the child datasets.
+	 * The timing of this will be such that the parent has already loaded,
+	 * and before the loading of any children.
 	 */
-	protected boolean populateAttributes() {return false;}
+	protected abstract boolean populateAttributes();
 
 	@Override
 	/**
@@ -255,10 +257,10 @@ public class BOSet<T extends BOBusinessObject> extends BOBusinessObject implemen
 	protected void createAttributes() {}
 
 	@Override
+	public
 	/**
 	 * Do nothing by default. Sets usually shouldn't have any attributes
-	 */
-	protected void clearAttributes() {}
+	 */ void clearAttributes() {}
 
 	@Override
 	/**

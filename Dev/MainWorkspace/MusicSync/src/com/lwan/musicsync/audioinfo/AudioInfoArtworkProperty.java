@@ -9,7 +9,7 @@ import org.jaudiotagger.tag.images.Artwork;
 
 import com.lwan.musicsync.javafx.CustomImageFX;
 import com.lwan.musicsync.main.Constants;
-import com.lwan.util.media.JAudioTaggerUtil;
+import com.lwan.musicsync.util.JAudioTaggerUtil;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectPropertyBase;

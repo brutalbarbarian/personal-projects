@@ -38,6 +38,10 @@ public class RatingEditingCell extends BaseEditingCell<Integer> implements  Call
 		}));
 	}
 	
+	protected void updateItem(Integer item, boolean empty) {
+		itemProperty().set(item);
+	}
+	
 	public void startEdit() {
 		// do nothing.
 	}

@@ -32,7 +32,7 @@ public class StoredProc {
 	 * 
 	 * @param _statements
 	 */
-	public StoredProc (String[] _statements) {
+	public StoredProc (String... _statements) {
 		statements = Arrays.asList(_statements);
 	}
 	
@@ -69,7 +69,11 @@ public class StoredProc {
 			for (int i = 0; i < statement.length; i++) {
 				if (paramFound) {
 					if (!(Character.isLetterOrDigit(statement[i]) || statement[i] == '_')) {
-						paramList.add(parameters.get(param.toString()));
+						Parameter par = parameters.get(param.toString());
+						if (par == null) {
+							throw new RuntimeException("Parameter '" + param.toString() + "' not found in paramList");
+						}
+						paramList.add(par);
 						param.setLength(0);	// reset back to 0
 						paramFound = false;	
 					} else {
@@ -102,22 +106,31 @@ public class StoredProc {
 	 * This means calling resultSet.getStatement().close();</br>
 	 * If nothing is closed, then all statements created from this stored proc is closed normally.
 	 * 
+	 * Can override this if need extra logic. Make sure to call result = null prior to calling
+	 * anything else. After that, call doExecute() on the statement lines as needed with extra logic
+	 * in between such as if/else statements.
+	 * 
 	 * @param con
 	 * @throws SQLException
 	 */
 	public void execute(Connection con) throws SQLException {
 		result = null;	// clear previous result set
-		
+
+		doExecute(con, 0, statements.size());
+	}
+	
+	protected void doExecute(Connection con, int startIndex, int endIndex) throws SQLException {
 		if (con == null || con.isClosed()) {
 			throw new SQLException("Cannot execute stored procedure without an active connection");
 		}
 		
-		for (int i = 0; i < statements.size(); i++) {
+		for (int i = startIndex; i < endIndex; i++) {
 			PreparedStatement statement = con.prepareStatement(statements.get(i));
 
 			// just ignore params if its null. Likely this stored proc has no parameters
 			if (paramMap != null) { 
 				List<Parameter> params = paramMap.get(i);
+				
 				for (int j = 1; j <= params.size(); j++) {
 					Parameter param = params.get(j - 1);
 					Object pValue = param.get();
@@ -128,7 +141,6 @@ public class StoredProc {
 					}
 				}
 			}
-			
 			statement.execute();
 			ResultSet res = statement.getResultSet();
 			

@@ -50,6 +50,8 @@ import com.sun.javafx.collections.ObservableListWrapper;
 
 public class Start extends Application implements EventHandler<ActionEvent> {
 	Map<String, AudioInfo> allMusic;	// title, audio info
+//	List<AudioInfo> allMusic;	// Sorted list of all music.. can't 
+	
 	Map<FieldKey, TableColumn<AudioInfo, String>> columns;
 	Stage mainWindow;
 	
@@ -149,16 +151,19 @@ public class Start extends Application implements EventHandler<ActionEvent> {
 				TableColumn<AudioInfo, Integer> col = new TableColumn<>(EnumUtil.processEnumName(fk));
 				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Integer>(fk.name().toLowerCase()));
 				col.setCellFactory(RatingEditingCell.getRatingEditingCellFactory(true));
+				col.setMinWidth(100);
 				cols.add(col);
 			} else if (fk == FieldKey.COVER_ART) {
 				TableColumn<AudioInfo, Image> col = new TableColumn<>(EnumUtil.processEnumName(FieldKey.COVER_ART));
 				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, Image>(FieldKey.COVER_ART.name().toLowerCase()));
 				col.setCellFactory(ArtworkEditingCell.getArtworkEditingCellFactory(true));
+				col.setMinWidth(100);
 				cols.add(col);
 			} else if (fk == FieldKeyEx.PRIMARY_DIRECTORY) {
 				TableColumn<AudioInfo, String> col = new TableColumn<>(EnumUtil.processEnumName(fk));
 				col.setCellValueFactory(new PropertyValueFactory<AudioInfo, String>(fk.name().toLowerCase()));
 				col.setCellFactory(FileEditingCell.getFileEditingCellFactory());
+				col.setMinWidth(150);
 				col.setOnEditCommit(new StringCommitHelper(fk));
 				cols.add(col);
 			} else {

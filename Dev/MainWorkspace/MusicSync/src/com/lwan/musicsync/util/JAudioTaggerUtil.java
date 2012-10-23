@@ -1,4 +1,4 @@
-package com.lwan.util.media;
+package com.lwan.musicsync.util;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
