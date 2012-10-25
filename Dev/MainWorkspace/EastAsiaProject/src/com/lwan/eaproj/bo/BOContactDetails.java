@@ -17,9 +17,9 @@ public class BOContactDetails extends BODatabaseObject {
 	
 	public BOContactDetails(BusinessObject owner) {
 		super(owner, "ContactDetails");
-		
-//		Independent().setValue(true);
-		
+	}
+	
+	protected void createStoredProcs() {
 		SelectStoredProc().setValue(new PS_CDT());
 		InsertStoredProc().setValue(new PI_CDT());
 		UpdateStoredProc().setValue(new PU_CDT());
@@ -43,16 +43,16 @@ public class BOContactDetails extends BODatabaseObject {
 
 	@Override
 	public void clearAttributes() {
-		cdt_address_1.setValue(null);
-		cdt_address_2.setValue(null);
-		cdt_address_3.setValue(null);
-		cdt_city.setValue(null);
-		cdt_country.setValue(null);
-		cdt_postcode.setValue(null);
-		cdt_phone.setValue(null);
-		cdt_mobile.setValue(null);
-		cdt_fax.setValue(null);
-		cdt_site.setValue(null);
+		cdt_address_1.clear();
+		cdt_address_2.clear();
+		cdt_address_3.clear();
+		cdt_city.clear();
+		cdt_country.clear();
+		cdt_postcode.clear();
+		cdt_phone.clear();
+		cdt_mobile.clear();
+		cdt_fax.clear();
+		cdt_site.clear();
 	}
 
 	@Override

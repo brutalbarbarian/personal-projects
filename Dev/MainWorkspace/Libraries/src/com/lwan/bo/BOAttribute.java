@@ -144,8 +144,8 @@ public class BOAttribute <T> extends BusinessObject {
 	}
 
 	/**
-	 * Sets the attribute back to null if allowsNull is true.
-	 * Otherwise sets it the the default value
+	 * Sets the attribute back to null.
+	 * Equivalent to calling setValue(null)
 	 * 
 	 */
 	public void clear() {

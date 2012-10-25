@@ -18,13 +18,14 @@ public class BOCompany extends BODatabaseObject {
 	
 	public BOCompany(BusinessObject owner) {
 		super(owner, "Company");
-		
+	}
+	
+	@Override
+	protected void createStoredProcs() {
 		SelectStoredProc().setValue(new PS_COM());
 		InsertStoredProc().setValue(new PI_COM());
 		UpdateStoredProc().setValue(new PU_COM());
 		DeleteStoredProc().setValue(new PD_COM());
-		
-		Independent().setValue(true);
 	}
 
 	@Override
@@ -49,7 +50,7 @@ public class BOCompany extends BODatabaseObject {
 
 	@Override
 	public void clearAttributes() {
-		com_name.setValue(null);
+		com_name.clear();
 		contactDetails.clearAttributes();
 	}
 

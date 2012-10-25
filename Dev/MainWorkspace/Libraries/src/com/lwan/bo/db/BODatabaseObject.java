@@ -60,7 +60,9 @@ public abstract class BODatabaseObject extends BusinessObject{
 	
 	public BODatabaseObject(BusinessObject owner, String name) {
 		super(owner, name);
+		createStoredProcs();
 	}
+	
 
 	@Override
 	protected void doSave() {
@@ -89,6 +91,14 @@ public abstract class BODatabaseObject extends BusinessObject{
 	 * 
 	 */
 	protected abstract void ensureIDExists();
+	
+	/**
+	 * Method called during initialisation.
+	 * The user should be setting the properties SelectStoredProc,
+	 * UpdateStoredProc, InsertStoredProc and DeleteStoredProc from this method.
+	 * 
+	 */
+	protected abstract void createStoredProcs();
 
 	@Override
 	public void doDelete() {
@@ -116,7 +126,7 @@ public abstract class BODatabaseObject extends BusinessObject{
 						Object value = rs.getObject(i);
 						
 						BOAttribute<?> attr = (BOAttribute<?>) getChildByName(colName);
-						// Just ignore any ones that don't map accross... not important.
+						// Just ignore any ones that don't map across... not important.
 						if (attr != null) {
 							attr.setAsObject(value);
 						}

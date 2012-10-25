@@ -1,9 +1,12 @@
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.lwan.bo.State;
 import com.lwan.eaproj.bo.BOCompany;
+import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.jdbc.GConnection;
+import com.lwan.jdbc.StoredProc;
 import com.lwan.util.CollectionUtil;
 
 
@@ -12,7 +15,8 @@ public class TestDB {
 		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 //		Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 		
-		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+//		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
 		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 //		Connection con = DriverManager.getConnection(url,"","");
 		
@@ -61,16 +65,16 @@ public class TestDB {
 		
 //		cd.save();
 		
-		BOCompany com = new BOCompany(null);
-		com.com_id.setValue(2);
-		com.ensureActive();
-		System.out.println(com.toString());
-		
-		com.Active().setValue(false);
+//		BOCompany com = new BOCompany(null);
+//		com.com_id.setValue(2);
+//		com.ensureActive();
+//		System.out.println(com.toString());
+//		
+//		com.Active().setValue(false);
 		
 //		com.cdt_id.setValue(5);
 //		com.com_name.setValue("New Name for Company");
-//		com.contactDetails.cdt_address_1.setValue("28 Beach Road");
+//		com.contactDwetails.cdt_address_1.setValue("28 Beach Road");
 //		com.contactDetails.cdt_address_2.setValue("Waterfront CBD");
 //		com.contactDetails.cdt_city.setValue("Auckland");
 //		com.contactDetails.cdt_mobile.setValue("123 4567");
@@ -79,9 +83,20 @@ public class TestDB {
 //		System.out.println(com.toString());
 		
 //		CollectionUtil.printV(com.State().getValue(), ",");
-		com.save();
+//		com.save();
 		
-//		StoredProc prc = new StoredProc("select * from CDT_contact_details");
+		BOEmployee emp = new BOEmployee(null);
+//		emp.emp_id.setValue(1);
+		emp.ensureActive();
+		emp.com_id.setValue(1);
+		emp.emp_name_first.setValue("first");
+		emp.emp_name_last.setValue("last");
+		
+		
+		
+		System.out.println(emp.toString());
+		
+//		StoredProc prc = new StoredProc("select * from EMP_employee");
 //		prc.execute(GConnection.getConnection());
 //		ResultSet rs = prc.getResult();
 //		printResultSet(rs);
@@ -103,7 +118,17 @@ public class TestDB {
 		
 		while(result.next()) {
 			for (int i = 1; i <= columns; i++) {
-				System.out.print(result.getObject(i));
+				Object o = result.getObject(i);
+				System.out.print(o.toString() + ":" + o.getClass().getName());
+				
+				// currency -> BigDecimal. timedate -> TimeStamp
+//				if (i == 6) {
+//					System.out.println(((BigDecimal)o).doubleValue());
+//					System.out.println(result.getMetaData().getColumnTypeName(i));
+////					Type.
+//				}
+////				java.sql.Timestamp.
+////				System.out.print(result.getObject(i).getClass());
 				if (i != columns) {
 					System.out.print(", ");
 				}
