@@ -12,7 +12,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.Callback;
 
-public abstract class BOSet<T extends BOBusinessObject> extends BOBusinessObject implements Iterable<T>{
+public abstract class BOSet<T extends BusinessObject> extends BusinessObject implements Iterable<T>{
 	
 	// name of the BOattribute which is a direct descendant of the child BOobject
 	// if this is empty, calling 'findByID' will always return with null
@@ -51,7 +51,7 @@ public abstract class BOSet<T extends BOBusinessObject> extends BOBusinessObject
 	 * @param name
 	 * @param childIdName
 	 */
-	public BOSet(BOBusinessObject owner, String name, String childIdName, Callback<BOSet<T>, T> instanceFactory) {
+	public BOSet(BusinessObject owner, String name, String childIdName, Callback<BOSet<T>, T> instanceFactory) {
 		super(owner, name);
 		
 		children = new Vector<T>();
@@ -63,7 +63,7 @@ public abstract class BOSet<T extends BOBusinessObject> extends BOBusinessObject
 		String childAttr = ChildIDName().getValue();
 		if (!StringUtil.isNullOrBlank(childAttr)) {
 			for (T child : children) {
-				BOBusinessObject attr = child.getChildByName(childAttr);
+				BusinessObject attr = child.getChildByName(childAttr);
 				// If the attribute can be found, check the values are equal
 				if (attr != null && attr instanceof BOAttribute<?> && 
 						GenericsUtil.Equals(((BOAttribute<?>)attr).getValue(), id)) {
@@ -121,7 +121,7 @@ public abstract class BOSet<T extends BOBusinessObject> extends BOBusinessObject
 		T child = findChildByID(id);
 		if (child == null) {
 			child = InstanceFactory().getValue().call(this);
-			BOBusinessObject idAttr = child.getChildByName(ChildIDName().getValue());
+			BusinessObject idAttr = child.getChildByName(ChildIDName().getValue());
 			if (idAttr != null) {
 				((BOAttribute<?>)idAttr).setAsObject(id);
 			}
@@ -208,7 +208,7 @@ public abstract class BOSet<T extends BOBusinessObject> extends BOBusinessObject
 		sb.append("children\n");
 		
 		// call toString on all children with spaces += 4
-		for (BOBusinessObject child : children) {
+		for (BusinessObject child : children) {
 			sb.append(child.toString(spaces + 4));
 		}
 		return sb.toString();

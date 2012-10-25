@@ -8,13 +8,13 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 
 import com.lwan.bo.BOAttribute;
-import com.lwan.bo.BOBusinessObject;
+import com.lwan.bo.BusinessObject;
 import com.lwan.bo.State;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
 
-public abstract class BODatabaseObject extends BOBusinessObject{
+public abstract class BODatabaseObject extends BusinessObject{
 	private Property<StoredProc> update_stored_proc;
 	private Property<StoredProc> insert_stored_proc;
 	private Property<StoredProc> delete_stored_proc;
@@ -58,7 +58,7 @@ public abstract class BODatabaseObject extends BOBusinessObject{
 		return delete_stored_proc;
 	}
 	
-	public BODatabaseObject(BOBusinessObject owner, String name) {
+	public BODatabaseObject(BusinessObject owner, String name) {
 		super(owner, name);
 	}
 

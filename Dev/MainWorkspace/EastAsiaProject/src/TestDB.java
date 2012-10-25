@@ -1,7 +1,10 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import com.lwan.bo.State;
 import com.lwan.eaproj.bo.BOCompany;
 import com.lwan.jdbc.GConnection;
+import com.lwan.util.CollectionUtil;
 
 
 public class TestDB {
@@ -59,19 +62,23 @@ public class TestDB {
 //		cd.save();
 		
 		BOCompany com = new BOCompany(null);
-//		com.com_id.setValue(1);
+		com.com_id.setValue(2);
 		com.ensureActive();
 		System.out.println(com.toString());
 		
-		com.com_name.setValue("Test Company");
-		com.contactDetails.cdt_address_1.setValue("28 Beach Road");
-		com.contactDetails.cdt_address_2.setValue("Waterfront CBD");
-		com.contactDetails.cdt_city.setValue("Auckland");
-		com.contactDetails.cdt_mobile.setValue("123 4567");
-		com.contactDetails.cdt_site.setValue("www.company.com");
+		com.Active().setValue(false);
 		
-		System.out.println(com.toString());
+//		com.cdt_id.setValue(5);
+//		com.com_name.setValue("New Name for Company");
+//		com.contactDetails.cdt_address_1.setValue("28 Beach Road");
+//		com.contactDetails.cdt_address_2.setValue("Waterfront CBD");
+//		com.contactDetails.cdt_city.setValue("Auckland");
+//		com.contactDetails.cdt_mobile.setValue("123 4567");
+//		com.contactDetails.cdt_site.setValue("www.company.com");
 		
+//		System.out.println(com.toString());
+		
+//		CollectionUtil.printV(com.State().getValue(), ",");
 		com.save();
 		
 //		StoredProc prc = new StoredProc("select * from CDT_contact_details");

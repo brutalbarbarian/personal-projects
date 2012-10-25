@@ -1,7 +1,7 @@
 package com.lwan.eaproj.bo;
 
 import com.lwan.bo.BOAttribute;
-import com.lwan.bo.BOBusinessObject;
+import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODatabaseObject;
 import com.lwan.eaproj.sp.PD_CDT;
@@ -15,10 +15,10 @@ public class BOContactDetails extends BODatabaseObject {
 	public BOAttribute<String> cdt_address_1, cdt_address_2, cdt_address_3, cdt_city, cdt_country,
 			cdt_postcode, cdt_phone, cdt_mobile, cdt_fax, cdt_site;
 	
-	public BOContactDetails(BOBusinessObject owner) {
+	public BOContactDetails(BusinessObject owner) {
 		super(owner, "ContactDetails");
 		
-		Independent().setValue(true);
+//		Independent().setValue(true);
 		
 		SelectStoredProc().setValue(new PS_CDT());
 		InsertStoredProc().setValue(new PI_CDT());
@@ -42,7 +42,18 @@ public class BOContactDetails extends BODatabaseObject {
 	}
 
 	@Override
-	public void clearAttributes() {}
+	public void clearAttributes() {
+		cdt_address_1.setValue(null);
+		cdt_address_2.setValue(null);
+		cdt_address_3.setValue(null);
+		cdt_city.setValue(null);
+		cdt_country.setValue(null);
+		cdt_postcode.setValue(null);
+		cdt_phone.setValue(null);
+		cdt_mobile.setValue(null);
+		cdt_fax.setValue(null);
+		cdt_site.setValue(null);
+	}
 
 	@Override
 	public void handleModified(ModifiedEvent source) {}

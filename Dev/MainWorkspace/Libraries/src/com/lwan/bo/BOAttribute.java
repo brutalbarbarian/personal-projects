@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public class BOAttribute <T> extends BOBusinessObject {
+public class BOAttribute <T> extends BusinessObject {
 	/* Properties Declarations */
 	private Property<Boolean> allow_nulls;
 	private Property<T> default_value;
@@ -53,12 +53,12 @@ public class BOAttribute <T> extends BOBusinessObject {
 		return null_value;
 	}
 	
-	public BOAttribute(BOBusinessObject parent, String name) {
+	public BOAttribute(BusinessObject parent, String name) {
 		this(parent, name, true, null, null);
 	}
 	
 	
-	public BOAttribute(BOBusinessObject parent, String name, boolean allowNulls, T defaultValue, T nullValue) {
+	public BOAttribute(BusinessObject parent, String name, boolean allowNulls, T defaultValue, T nullValue) {
 		super(parent, name);
 		
 		AllowNulls().setValue(allowNulls);

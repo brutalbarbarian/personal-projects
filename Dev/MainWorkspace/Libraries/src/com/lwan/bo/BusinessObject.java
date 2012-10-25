@@ -67,10 +67,10 @@ import javafx.beans.value.ObservableValue;
  * @author Brutalbarbarian
  *
  */
-public abstract class BOBusinessObject implements ModifiedEventListener{
+public abstract class BusinessObject implements ModifiedEventListener{
 	/* Property Declarations */
 	
-	private Property<BOBusinessObject> owner;
+	private Property<BusinessObject> owner;
 	private Property<Boolean> active;
 	private Property<String> name;
 	private Property<String> tag;
@@ -79,15 +79,17 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	private Property<Set<State>> state;
 	
 	/* Property Accessor Methods */
-	public ReadOnlyProperty<BOBusinessObject> Owner() {
+	public ReadOnlyProperty<BusinessObject> Owner() {
 		return _owner();
 	}
 	public ReadOnlyProperty<String> Name() {
 		return _name();
 	}
+	
 	public ReadOnlyProperty<Set<State>> State(){
 		return _state();
 	}
+	
 	/** 
 	 * Active represents if this objects is in use. 
 	 */
@@ -97,6 +99,14 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 		}
 		return active;
 	}
+	
+	/**
+	 * Any miscellaneous tags attached to this object.
+	 * This has no actual effect on the BusinessObject itself.
+	 * 
+	 * 
+	 * @return
+	 */
 	public Property<String> Tag() {
 		if (tag == null) {
 			tag = new SimpleObjectProperty<>(this, "Tag");
@@ -104,9 +114,26 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 		return tag;
 	}
 	/**
+	 * <p>
 	 * Independent represents if an object is independent from its parent.
 	 * An independent object will be saved prior to the saving of its parent
-	 * when save() of the parent is called.
+	 * when save() of the parent is called, where as dependent children will
+	 * have its save() called after the parent has saved.
+	 * </p>
+	 * <p>
+	 * When deleting an inactive object however, the order will be reversed. Dependent children
+	 * will be deleted prior to deleting parent, while independent children
+	 * will be deleted after the parent.
+	 * </p>
+	 * <p>
+	 * This should never be set by an object, but rather by the parent of an object,
+	 * as this property describes a child's relationship with its parent.
+	 * </p>
+	 * <p>
+	 * Note: This property has no effect on attributes.
+	 * </p>
+	 * 
+	 * By default this is set to false.
 	 * 
 	 * @return
 	 */
@@ -129,7 +156,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	}
 	
 	/* Private Property Accessor Methods */
-	private Property<BOBusinessObject> _owner() {
+	private Property<BusinessObject> _owner() {
 		if (owner == null) {
 			owner = new SimpleObjectProperty<>(this, "Owner");
 		}
@@ -151,14 +178,14 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 
 	/* Private Fields  */
 	// Children of this object. This should never be exposed.
-	private HashMap<String, BOBusinessObject> children;
+	private HashMap<String, BusinessObject> children;
 	// List of listeners to any modification to this object.
 	// Note that the owner of this object will not be in this list, and thus will always be notified.
 	// i.e. cannot be removed.
 	private Vector<ModifiedEventListener> listeners;
 	
 	
-	public BOBusinessObject(BOBusinessObject owner, String name) {
+	public BusinessObject(BusinessObject owner, String name) {
 		children = new HashMap<>();
 		listeners = new Vector<>();
 		_name().setValue(name);
@@ -187,7 +214,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	 * @param name
 	 * @return
 	 */
-	public BOBusinessObject getChildByName(String name) {
+	public BusinessObject getChildByName(String name) {
 		return children.get(name);
 	}
 	
@@ -198,7 +225,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends BOBusinessObject> T getOwnerByClass(Class<T> parentClass) {
+	public <T extends BusinessObject> T getOwnerByClass(Class<T> parentClass) {
 		if (ClassUtil.isSuperclassOf(parentClass, getClass())) {
 			return (T)this;
 		} else if (Owner().getValue() != null) {
@@ -231,7 +258,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 			AllowNotifications().setValue(true);
 		}
 		// Set the active state of all children to match this
-		for (BOBusinessObject child : children.values()) {
+		for (BusinessObject child : children.values()) {
 			// Active state is meaningless to BOAttributes
 			if (!(child instanceof BOAttribute)) {
 				child.Active().setValue(isActive);
@@ -262,7 +289,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 			State().getValue().add(State.Modified);
 			handleModified(event);
 			
-			BOBusinessObject owner = Owner().getValue();
+			BusinessObject owner = Owner().getValue();
 			ModifiedEvent modEvent = new ModifiedEvent(event, this);
 			if (owner != null) {
 				Owner().getValue().fireModified(modEvent);
@@ -276,10 +303,12 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	/**
 	 * This is different from clearAttributes from that this should clear away all values as opposed to
 	 * setting them to default values.</br>
+	 * </br>
+	 * This will automatically be called on all descendents of this object.
 	 */
 	public void clear() {
 		// If settingActive is true, clear will be called for all children anyway. No need to loop.
-		for (BOBusinessObject child : children.values()) {
+		for (BusinessObject child : children.values()) {
 			child.clear();
 		}
 	}
@@ -290,7 +319,7 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	 * 
 	 * @param object
 	 */
-	protected final <T extends BOBusinessObject> T addAsChild(T object) {
+	protected final <T extends BusinessObject> T addAsChild(T object) {
 		children.put(object.Name().getValue(), object);
 		return object;
 	}
@@ -328,9 +357,11 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 				// or if loaded from a dataset but was set inactive afterwards
 				(State().getValue().contains(State.Dataset) && !Active().getValue())) {
 			// Save all the independent children first
-			for (BOBusinessObject child : children.values()) {
+			for (BusinessObject child : children.values()) {
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
-				if(!(child instanceof BOAttribute) && child.Independent().getValue()) {
+				if(!(child instanceof BOAttribute) &&
+						// either independent and active, or dependent and inactive
+						child.Independent().getValue() == isActive()) {
 					child.save();
 				}
 			}
@@ -343,25 +374,61 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 			}
 			
 			// Save all the dependent children after this object has been saved
-			for (BOBusinessObject child: children.values()) {
+			for (BusinessObject child: children.values()) {
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
-				if (!(child instanceof BOAttribute) && !child.Independent().getValue()) {
+				if (!(child instanceof BOAttribute) &&
+						// either independent and inactive, or dependent and active
+						child.Independent().getValue() != isActive()) {
 					child.save();
 				}
 			}			
 			// Should be safe to assume the following state after successful saving
 			State().getValue().remove(State.Modified);
-			State().getValue().add(State.Dataset);
+			if (isActive()) {
+				State().getValue().add(State.Dataset);
+			} else {
+				State().getValue().remove(State.Dataset);
+			}
 			return true;
 		} else {
 			return false;
 		}
 	}
 	
+	/**
+	 * Get the tree representing the business object data structure tree with
+	 * the current object as the root of the tree.
+	 * 
+	 */
 	public String toString() {
 		return toString(0);
 	}
 	
+	/**
+	 * Shortcut for calling Active().getValue()
+	 * 
+	 * @return
+	 */
+	public boolean isActive() {
+		return Active().getValue();
+	}
+	
+	/**
+	 * Shortcut for calling Independent().getValue()
+	 * 
+	 * @return
+	 */
+	public boolean isIndependent() {
+		return Independent().getValue();
+	}
+	
+	/**
+	 * Recursive function for traversing the tree, building the tree in
+	 * String form.
+	 * 
+	 * @param spaces
+	 * @return
+	 */
 	protected String toString(int spaces) {
 		StringBuilder sb = new StringBuilder();
 		// first line: Name:ClassName
@@ -369,12 +436,18 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 				append(' ').append(getPropertyStrings()).append('\n');
 		
 		// call toString on all children with spaces += 4
-		for (BOBusinessObject child : children.values()) {
+		for (BusinessObject child : children.values()) {
 			sb.append(child.toString(spaces + 4));
 		}
 		return sb.toString();
 	}
 	
+	/**
+	 * Used by toString(int) to append any useful information about
+	 * the non-direct BO-children of this object such as properties.
+	 * 
+	 * @return
+	 */
 	protected String getPropertyStrings() {
 		return "Active:" + Active().getValue();
 	}
@@ -407,7 +480,9 @@ public abstract class BOBusinessObject implements ModifiedEventListener{
 	protected abstract void createAttributes();
 	
 	/**
-	 * Clear all child attribute objects. This is effectively setting default values into all attributes.
+	 * Clear all child attribute objects to a neutral state.</br>
+	 * This will not be automatically called on any children(unlike clear(), thus
+	 * the parent must be responsible for all values being set.
 	 */
 	public abstract void clearAttributes();
 	

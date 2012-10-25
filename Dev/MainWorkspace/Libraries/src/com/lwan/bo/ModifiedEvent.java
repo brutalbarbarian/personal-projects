@@ -9,19 +9,19 @@ import com.lwan.util.GenericsUtil;
  *
  */
 public class ModifiedEvent {
-	private BOBusinessObject source;
+	private BusinessObject source;
 	private String tags;
-	private BOBusinessObject directChild;
+	private BusinessObject directChild;
 	
-	public ModifiedEvent(BOBusinessObject source) {
+	public ModifiedEvent(BusinessObject source) {
 		this(source, null);
 	}
 	
-	public ModifiedEvent(BOBusinessObject source, String tags) {
+	public ModifiedEvent(BusinessObject source, String tags) {
 		this(source, source, tags);
 	}
 	
-	private ModifiedEvent(BOBusinessObject source, BOBusinessObject caller, String tags) {
+	private ModifiedEvent(BusinessObject source, BusinessObject caller, String tags) {
 		this.source = source;
 		directChild = source;
 		this.tags = tags;
@@ -33,7 +33,7 @@ public class ModifiedEvent {
 	 * @param sourceEvent
 	 * @param caller
 	 */
-	protected ModifiedEvent(ModifiedEvent sourceEvent, BOBusinessObject caller) {
+	protected ModifiedEvent(ModifiedEvent sourceEvent, BusinessObject caller) {
 		this(sourceEvent.source, caller, sourceEvent.tags);
 	}
 
@@ -42,7 +42,7 @@ public class ModifiedEvent {
 	 * 
 	 * @return
 	 */
-	public BOBusinessObject getSource() {
+	public BusinessObject getSource() {
 		return source;
 	}
 	
@@ -52,7 +52,7 @@ public class ModifiedEvent {
 	 * 
 	 * @return
 	 */
-	public BOBusinessObject getDirectChild() {
+	public BusinessObject getDirectChild() {
 		return directChild;
 	}
 	
