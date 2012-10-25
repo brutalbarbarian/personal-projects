@@ -4,6 +4,13 @@ import java.sql.Types;
 
 import com.lwan.jdbc.StoredProc;
 
+/**
+ * Stored proc for fetching the next id used for the passed
+ * in primary key name. 
+ * 
+ * @author Brutalbarbarian
+ *
+ */
 public class PA_PKC_new_id extends StoredProc{
 	private static final String[] PARAMS = {"@pkc_name"};
 	private static final int[] PARAM_TYPES = {Types.CHAR};

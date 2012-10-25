@@ -25,7 +25,7 @@ public class StoredProc {
 	HashMap<String, Parameter> parameters;
 	List<List<Parameter>> paramMap;
 	List<String> statements;
-	ResultSet result;
+	private ResultSet result;
 	
 	/**
 	 * Simpler constructor for a stored proc which assumes there are no parameters
@@ -119,7 +119,11 @@ public class StoredProc {
 		doExecute(con, 0, statements.size());
 	}
 	
-	protected void doExecute(Connection con, int startIndex, int endIndex) throws SQLException {
+	protected final void doExecute(Connection con, int line) throws SQLException {
+		doExecute(con, line, line+1);
+	}
+	
+	protected final void doExecute(Connection con, int startIndex, int endIndex) throws SQLException {
 		if (con == null || con.isClosed()) {
 			throw new SQLException("Cannot execute stored procedure without an active connection");
 		}

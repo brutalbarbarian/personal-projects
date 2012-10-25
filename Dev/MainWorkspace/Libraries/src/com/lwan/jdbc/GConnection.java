@@ -6,7 +6,9 @@ import java.sql.SQLException;
 
 /**
  * Global connection object.
- * Initialise must be called prior to use.
+ * initialise() must be called prior to use.
+ * 
+ * This is for use with a single connection application model.
  * 
  * @author Brutalbarbarian
  *

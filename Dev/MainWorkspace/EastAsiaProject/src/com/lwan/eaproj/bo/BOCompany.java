@@ -1,11 +1,13 @@
 package com.lwan.eaproj.bo;
 
 import com.lwan.bo.BOAttribute;
-import com.lwan.bo.BOBusinessObject;
+import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODatabaseObject;
+import com.lwan.eaproj.sp.PD_COM;
 import com.lwan.eaproj.sp.PI_COM;
 import com.lwan.eaproj.sp.PS_COM;
+import com.lwan.eaproj.sp.PU_COM;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOCompany extends BODatabaseObject {
@@ -14,12 +16,13 @@ public class BOCompany extends BODatabaseObject {
 	public BOContactDetails contactDetails;
 	
 	
-	public BOCompany(BOBusinessObject owner) {
+	public BOCompany(BusinessObject owner) {
 		super(owner, "Company");
 		
 		SelectStoredProc().setValue(new PS_COM());
 		InsertStoredProc().setValue(new PI_COM());
-		// TODO
+		UpdateStoredProc().setValue(new PU_COM());
+		DeleteStoredProc().setValue(new PD_COM());
 		
 		Independent().setValue(true);
 	}
@@ -31,6 +34,7 @@ public class BOCompany extends BODatabaseObject {
 		com_name = addAsChild(new BOAttribute<String>(this, "com_name"));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
+		contactDetails.Independent().setValue(true);
 	}
 	
 	protected boolean populateAttributes() {
@@ -45,10 +49,8 @@ public class BOCompany extends BODatabaseObject {
 
 	@Override
 	public void clearAttributes() {
-		com_id.clear();
-		cdt_id.clear();
-		contactDetails.clear();	// ensures the child is cleared too.
-		com_name.setAsObject("");	// Empty string for name
+		com_name.setValue(null);
+		contactDetails.clearAttributes();
 	}
 
 	@Override

@@ -55,7 +55,7 @@ public class CollectionUtil {
 		Iterator <?> it = list.iterator(); 
 		while (it.hasNext()) {
 			Object item = it.next();
-			System.out.append(item.toString());
+			System.out.append(GenericsUtil.toString(item, "null"));
 			if (it.hasNext()) {
 				System.out.append(sep);
 			}
