@@ -1,4 +1,5 @@
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -15,8 +16,8 @@ public class TestDB {
 		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 //		Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 		
-		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
-//		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+//		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
 		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 //		Connection con = DriverManager.getConnection(url,"","");
 		
@@ -86,15 +87,23 @@ public class TestDB {
 //		com.save();
 		
 		BOEmployee emp = new BOEmployee(null);
-//		emp.emp_id.setValue(1);
+		emp.emp_id.setValue(1);
 		emp.ensureActive();
-		emp.com_id.setValue(1);
-		emp.emp_name_first.setValue("first");
-		emp.emp_name_last.setValue("last");
 		
-		
+//		emp.Active().setValue(false);
+//		emp.com_id.setValue(1);
+//		emp.emp_name_first.setValue("newFirstName");
+//		emp.emp_name_last.setValue("last");
+//		emp.emp_is_active.setValue(true);
+//		emp.emp_employment_start.setValue(Date.valueOf("2000-12-24"));
+//		emp.emp_payment_monthly.setValue(2000.0);
+//		emp.contactDetails.cdt_address_1.setValue("address1");
+//		emp.contactDetails.cdt_address_2.setValue("address2");
+//		emp.contactDetails.cdt_address_3.setValue("address3");
 		
 		System.out.println(emp.toString());
+		
+		emp.save();
 		
 //		StoredProc prc = new StoredProc("select * from EMP_employee");
 //		prc.execute(GConnection.getConnection());
@@ -119,7 +128,7 @@ public class TestDB {
 		while(result.next()) {
 			for (int i = 1; i <= columns; i++) {
 				Object o = result.getObject(i);
-				System.out.print(o.toString() + ":" + o.getClass().getName());
+				System.out.print(o.toString() + ":" + o.getClass().getName() + ":" + result.getMetaData().getColumnTypeName(i));
 				
 				// currency -> BigDecimal. timedate -> TimeStamp
 //				if (i == 6) {

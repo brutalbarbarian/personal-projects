@@ -113,11 +113,27 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	
 	/**
 	 * Ensures a child object with the value within it's attribute by name declared in ChildIDName
-	 * is equal to 'id' exists and is set to active.  
+	 * is equal to 'id' exists and is set to active.
+	 * 
+	 * Calling this with null as parameter is effectively the same as creating a new child
+	 * instance (thats not from the dataset)
 	 * 
 	 * @param id
 	 */
 	public void ensureChildActive(Object id) {
+		T child = populateChild(id);
+		child.ensureActive();
+	}
+	
+	/**
+	 * This should only be called from populateAttributes and
+	 * nowhere else.
+	 * Creates an inactive child with the id value set to the passed
+	 * in id, but only if there isn't already a child with that same id.
+	 * 
+	 * @param id
+	 */
+	protected T populateChild(Object id) {
 		T child = findChildByID(id);
 		if (child == null) {
 			child = InstanceFactory().getValue().call(this);
@@ -127,7 +143,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 			children.add(child);
 		}
-		child.ensureActive();
+		return child;
 	}
 
 	@Override

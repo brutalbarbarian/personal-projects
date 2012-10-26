@@ -3,7 +3,6 @@ package com.lwan.eaproj.util;
 import java.security.InvalidParameterException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import com.lwan.eaproj.sp.PA_PKC_new_id;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.StoredProc;

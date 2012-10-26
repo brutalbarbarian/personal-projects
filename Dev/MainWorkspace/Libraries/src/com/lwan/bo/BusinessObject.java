@@ -468,7 +468,8 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	
 	/**
 	 * This is used to populate all child attributes and objects.
-	 * It is up to the implementation of the object to decide to populate with default values or to load values from some source. 
+	 * It is up to the implementation of the object to decide to populate with default values or to load values from some source.
+	 * If this function returns false, clearAttributes() will be called on this object. 
 	 * @return 
 	 * Whether or not this object is populated from a dataset. This is used to determine the state.
 	 */

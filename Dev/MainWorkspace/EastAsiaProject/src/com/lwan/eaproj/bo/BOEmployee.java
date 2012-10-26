@@ -6,8 +6,10 @@ import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODatabaseObject;
+import com.lwan.eaproj.sp.PD_EMP;
 import com.lwan.eaproj.sp.PI_EMP;
 import com.lwan.eaproj.sp.PS_EMP;
+import com.lwan.eaproj.sp.PU_EMP;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOEmployee extends BODatabaseObject {
@@ -17,7 +19,7 @@ public class BOEmployee extends BODatabaseObject {
 	public BOAttribute<Date> emp_employment_start;
 	public BOAttribute<Boolean> emp_is_active;
 	
-	BOContactDetails contactDetails;
+	public BOContactDetails contactDetails;
 	
 	// set of payment history...TODO
 	
@@ -31,7 +33,8 @@ public class BOEmployee extends BODatabaseObject {
 	protected void createStoredProcs() {
 		SelectStoredProc().setValue(new PS_EMP());
 		InsertStoredProc().setValue(new PI_EMP());
-		// TODO
+		UpdateStoredProc().setValue(new PU_EMP());
+		DeleteStoredProc().setValue(new PD_EMP());
 	}
 
 	@Override
