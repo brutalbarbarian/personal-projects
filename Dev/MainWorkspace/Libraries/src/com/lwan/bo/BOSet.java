@@ -10,21 +10,16 @@ import com.lwan.util.StringUtil;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.util.Callback;
 
 public abstract class BOSet<T extends BusinessObject> extends BusinessObject implements Iterable<T>{
 	
 	// name of the BOattribute which is a direct descendant of the child BOobject
 	// if this is empty, calling 'findByID' will always return with null
 	private Property<String> child_id_name;
-	private Property<Callback<BOSet<T>, T>> instance_factory;
 	
 	/* public property accessors */
 	public ReadOnlyProperty<String> ChildIDName() {
 		return _child_id_name();
-	}
-	public ReadOnlyProperty<Callback<BOSet<T>, T>> InstanceFactory () {
-		return _instance_factory();
 	}
 	
 	/* private property accessors */
@@ -33,12 +28,6 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			child_id_name = new SimpleObjectProperty<String>(this, "ChildIDName");
 		}
 		return child_id_name;
-	}
-	private Property<Callback<BOSet<T>, T>> _instance_factory () {
-		if (instance_factory == null) {
-			instance_factory = new SimpleObjectProperty<Callback<BOSet<T>,T>>(this, "InstanceFactory");
-		}
-		return instance_factory;
 	}
 	
 	// private fields
@@ -51,12 +40,11 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * @param name
 	 * @param childIdName
 	 */
-	public BOSet(BusinessObject owner, String name, String childIdName, Callback<BOSet<T>, T> instanceFactory) {
+	public BOSet(BusinessObject owner, String name, String childIdName) {
 		super(owner, name);
 		
 		children = new Vector<T>();
 		_child_id_name().setValue(childIdName);
-		_instance_factory().setValue(instanceFactory);
 	}
 
 	public T findChildByID(Object id) {
@@ -136,7 +124,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	protected T populateChild(Object id) {
 		T child = findChildByID(id);
 		if (child == null) {
-			child = InstanceFactory().getValue().call(this);
+			child = createChildInstance();
 			BusinessObject idAttr = child.getChildByName(ChildIDName().getValue());
 			if (idAttr != null) {
 				((BOAttribute<?>)idAttr).setAsObject(id);
@@ -194,7 +182,8 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * 
 	 * @param isActive
 	 */
-	public void handleActive(boolean isActive) {
+	@Override
+	protected void handleActive(Boolean isActive) {
 		// delete all inactive children if isActive is true
 		// not sure if this is the best practice... but don't really see much better way of handling this
 		if (isActive && children != null) {
@@ -221,7 +210,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		// first line: Name:ClassName
 		sb.append(super.toString(spaces));
 		
-		sb.append("children\n");
+		sb.append(StringUtil.getRepeatedString(" ", spaces) + "children\n");
 		
 		// call toString on all children with spaces += 4
 		for (BusinessObject child : children) {
@@ -245,6 +234,13 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			return false;
 		}
 	}
+	
+	/**
+	 * Must be implemented to create a new instance of a child. Will be called upon populateChild();
+	 * 
+	 * @return
+	 */
+	protected abstract T createChildInstance();
 	
 	@Override
 	/**

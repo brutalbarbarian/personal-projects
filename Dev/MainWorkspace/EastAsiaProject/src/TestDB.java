@@ -16,8 +16,8 @@ public class TestDB {
 		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 //		Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 		
-//		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
-		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+//		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
 		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 //		Connection con = DriverManager.getConnection(url,"","");
 		
@@ -66,9 +66,15 @@ public class TestDB {
 		
 //		cd.save();
 		
-//		BOCompany com = new BOCompany(null);
-//		com.com_id.setValue(2);
-//		com.ensureActive();
+		BOCompany com = new BOCompany(null);
+		com.com_id.setValue(1);
+		com.ensureActive();
+		com.Active().setValue(false);
+		
+//		com.employees.ensureChildActive(0);// create a child
+//		com.employees.getActive(0).emp_name_first.setValue("secondEmpFirst");
+		
+		com.save();
 //		System.out.println(com.toString());
 //		
 //		com.Active().setValue(false);
@@ -86,9 +92,9 @@ public class TestDB {
 //		CollectionUtil.printV(com.State().getValue(), ",");
 //		com.save();
 		
-		BOEmployee emp = new BOEmployee(null);
-		emp.emp_id.setValue(1);
-		emp.ensureActive();
+//		BOEmployee emp = new BOEmployee(null);
+//		emp.emp_id.setValue(1);
+//		emp.ensureActive();
 		
 //		emp.Active().setValue(false);
 //		emp.com_id.setValue(1);
@@ -101,9 +107,9 @@ public class TestDB {
 //		emp.contactDetails.cdt_address_2.setValue("address2");
 //		emp.contactDetails.cdt_address_3.setValue("address3");
 		
-		System.out.println(emp.toString());
+//		System.out.println(emp.toString());
 		
-		emp.save();
+//		emp.save();
 		
 //		StoredProc prc = new StoredProc("select * from EMP_employee");
 //		prc.execute(GConnection.getConnection());

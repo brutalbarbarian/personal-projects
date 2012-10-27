@@ -3,6 +3,7 @@ package com.lwan.bo.db;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.HashSet;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -77,7 +78,8 @@ public abstract class BODatabaseObject extends BusinessObject{
 			ensureIDExists();
 			executeStoredProc(sp);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RuntimeException("Failed to save object: " + getClass().getName() + 
+					" while attempting to call stored procedure: " + sp.getClass().getName(), e);
 		}
 	}
 	
@@ -143,7 +145,36 @@ public abstract class BODatabaseObject extends BusinessObject{
 	}
 	
 	/**
-	 * Execute a stored proc, assuming all parameters for
+	 * Called prior to executing the select stored proc within
+	 * executeStoredProc(). By default this will attempt to match
+	 * parameters to attribute values in this object.
+	 * 
+	 * If a param cannot be found, an exception will be thrown.
+	 * 
+	 * The stored proc should correspond directly to either update, 
+	 * insert, delete or select stored procs.
+	 * Override this if you desire different/improved functionality.
+	 * 
+	 * @param storedProc
+	 * @throws SQLException
+	 */ 
+	protected void populateParameters(StoredProc sp) throws SQLException {
+		for (Parameter param : sp.getAllParameters()) {
+			// shave off the '@'
+			String attriName = param.name().substring(1);
+			BOAttribute<?> attr = (BOAttribute<?>) getChildByName(attriName);
+			if (attr != null) {	
+				param.set(attr.getValue());
+			} else {
+				// if attr is null... something serious has gone wrong... bad stored proc or bad boobject.
+				throw new SQLException("Attribute for param '" + param.name() + "' not found.");
+			}
+		}		
+	}
+	
+	/**
+	 * Execute a stored proc.
+	 * Will call populateParameters which by default assumes all parameters for
 	 * the passed in stored proc are map directly too attributes within
 	 * this BOobject.
 	 * 
@@ -153,17 +184,7 @@ public abstract class BODatabaseObject extends BusinessObject{
 	protected void executeStoredProc(StoredProc sp) throws SQLException {
 		if (sp != null) {
 			sp.clearParameters();
-			for (Parameter param : sp.getAllParameters()) {
-				// shave off the '@'
-				String attriName = param.name().substring(1);
-				BOAttribute<?> attr = (BOAttribute<?>) getChildByName(attriName);
-				if (attr != null) {	
-					param.set(attr.getValue());
-				} else {
-					// if attr is null... something serious has gone wrong... bad stored proc or bad boobject.
-					throw new SQLException("Attribute for param '" + param.name() + "' not found.");
-				}
-			}
+			populateParameters(sp);
 			sp.execute(GConnection.getConnection());
 		}
 	}

@@ -13,8 +13,9 @@ import com.lwan.eaproj.util.DbUtil;
 public class BOCompany extends BODatabaseObject {
 	public BOAttribute<Integer> com_id, cdt_id;
 	public BOAttribute<String> com_name;
-	public BOContactDetails contactDetails;
 	
+	public BOContactDetails contactDetails;
+	public BOEmployeeSet employees;
 	
 	public BOCompany(BusinessObject owner) {
 		super(owner, "Company");
@@ -36,6 +37,8 @@ public class BOCompany extends BODatabaseObject {
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
 		contactDetails.Independent().setValue(true);
+		
+		employees = addAsChild(new BOEmployeeSet(this));
 	}
 	
 	protected boolean populateAttributes() {

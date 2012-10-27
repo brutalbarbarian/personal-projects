@@ -5,8 +5,6 @@ import java.sql.SQLException;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.util.Callback;
-
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
@@ -25,10 +23,18 @@ public abstract class BODatabaseSet<T extends BODatabaseObject> extends BOSet<T>
 	}
 	
 
-	public BODatabaseSet(BusinessObject owner, String name, String childIdName,
-			Callback<BOSet<T>, T> instanceFactory) {
-		super(owner, name, childIdName, instanceFactory);
+	public BODatabaseSet(BusinessObject owner, String name, String childIdName) {
+		super(owner, name, childIdName);
+		createStoredProcs();
 	}
+	
+	/**
+	 * Method called during initialisation.
+	 * The user should be setting the properties SelectStoredProc,
+	 * UpdateStoredProc, InsertStoredProc and DeleteStoredProc from this method.
+	 * 
+	 */
+	protected abstract void createStoredProcs();
 
 	@Override
 	protected boolean populateAttributes() {
@@ -68,9 +74,10 @@ public abstract class BODatabaseSet<T extends BODatabaseObject> extends BOSet<T>
 	 * or if not found, will attempt to match them to objects in the direct
 	 * owner of this object.
 	 * 
-	 * If a param cannot be patched, an exception will be thrown.
+	 * If a param cannot be found, an exception will be thrown.
 	 * 
 	 * Note this will only ever be called with the selectStoredProc.
+	 * Override this if you desire different/improved functionality.
 	 * 
 	 * @param storedProc
 	 * @throws SQLException 

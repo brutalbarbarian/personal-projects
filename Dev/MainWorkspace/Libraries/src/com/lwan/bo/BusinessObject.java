@@ -139,7 +139,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	public Property<Boolean> Independent() {
 		if (independent == null) {
-			independent = new SimpleObjectProperty<Boolean>(this, "Independent");
+			independent = new SimpleObjectProperty<Boolean>(this, "Independent", false);
 		}
 		return independent;
 	}
@@ -150,7 +150,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	public Property<Boolean> AllowNotifications() {
 		if (allow_notifications == null) {
-			allow_notifications = new SimpleObjectProperty<>(this, "AllowNotifications");
+			allow_notifications = new SimpleObjectProperty<>(this, "AllowNotifications", true);
 		}
 		return allow_notifications;
 	}

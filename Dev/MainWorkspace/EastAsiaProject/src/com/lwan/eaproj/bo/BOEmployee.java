@@ -43,8 +43,7 @@ public class BOEmployee extends BODatabaseObject {
 			emp_id.setValue(DbUtil.getNextID("emp_id"));
 		}
 		cdt_id.assign(contactDetails.cdt_id);
-		// TODO assign company
-//		com_id.assign(getOwnerByClass(BOCompany.class).com_id);
+		com_id.assign(getOwnerByClass(BOCompany.class).com_id);
 	}
 
 	@Override
