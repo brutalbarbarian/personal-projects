@@ -6,6 +6,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.util.Callback;
 
 public class BOAttribute <T> extends BusinessObject {
 	/* Properties Declarations */
@@ -32,6 +33,17 @@ public class BOAttribute <T> extends BusinessObject {
 		return value;
 	}
 	
+	protected String doVerifyState() {
+		// if allow null state is satisfied.
+		// Shouldn't need to check if the value itself is valid, as it should have 
+		// already been validated when the value was set
+		if ((isNull() || AllowNulls().getValue())) {
+			return null;
+		} else {
+			return "Attribute '" + Name().getValue() + "' is invalid";
+		}
+	}
+	
 	public Property<Boolean> AllowNulls() {
 		if (allow_nulls == null) {
 			allow_nulls = new SimpleObjectProperty<>(this, "AllowNulls");
@@ -53,6 +65,66 @@ public class BOAttribute <T> extends BusinessObject {
 		return null_value;
 	}
 	
+	/**
+	 * Effectively 0 if the value is null, or cast as integer if the value
+	 * is of type integer. If the value is not null and is not integer,
+	 * a NumberFormatException is thrown.
+	 * 
+	 * @return
+	 */
+	public int asInteger() {
+		T val = getValue();
+		if (val == null) {
+			return 0;
+		} else if (val instanceof Integer) {
+			return (Integer)val;
+		} else {
+			throw new NumberFormatException("Cannot convert object of type " + val.getClass().getName() + 
+					" into an integer."); 
+		}
+	}
+	
+	public long asLong() {
+		T val = getValue();
+		if (val == null) {
+			return 0L;
+		} else if (val instanceof Long || val instanceof Integer) {
+			return (Long)val;
+		} else {
+			throw new IllegalArgumentException("Cannot convert object of type " + val.getClass().getName() +
+					" into a Long");
+		}
+	}
+	
+	public boolean asBoolean() {
+		T val = getValue();
+		if (val == null) {
+			return false;
+		} else if (val instanceof Boolean) {
+			return true;
+		} else {
+			throw new IllegalArgumentException("Cannot convert object of type " + val.getClass().getName() +
+					" into a boolean");
+		}
+	}
+	
+	/**
+	 * Effectively an empty string if the value is null, or the toString()
+	 * of the value otherwise. This should only be used on String type
+	 * attributes as the toString is unlikely a true reflection of
+	 * the stored value.
+	 * 
+	 * @return
+	 */
+	public String asString() {
+		T val = getValue();
+		if (val == null) {
+			return "";
+		} else {
+			return val.toString();
+		}
+	}
+	
 	public BOAttribute(BusinessObject parent, String name) {
 		this(parent, name, true, null, null);
 	}
@@ -71,13 +143,18 @@ public class BOAttribute <T> extends BusinessObject {
 				doChanged(oldValue, newValue);
 			}
 		});
-		Value().addListener(new ValidationListener<T>() {
-			@Override
-			public boolean validate(ObservableValue<T> value, T oldValue,
-					T newValue) {
-				return doValidate(newValue, newValue);
-			}
-		});
+	}
+	
+	public void addValidationListener(ValidationListener<T> listener) {
+		Value().addListener(listener);
+	}
+	
+	public void addChangeListener(ChangeListener<T> listener) {
+		Value().addListener(listener);
+	}
+	
+	public void setBeforeChangeListener(Callback<T, T> callback) {
+		Value().setBeforeSetValue(callback);
 	}
 	
 	
@@ -89,17 +166,6 @@ public class BOAttribute <T> extends BusinessObject {
 	 */
 	public void doChanged(T oldValue, T newValue) {
 		fireModified(new ModifiedEvent(this));
-	}
-	
-	/**
-	 * Will be called upon a request to change the value.
-	 * 
-	 * @param oldValue
-	 * @param newValue
-	 * @return
-	 */
-	public boolean doValidate(T oldValue, T newValue) {
-		return true;
 	}	
 	
 	/**
@@ -175,7 +241,7 @@ public class BOAttribute <T> extends BusinessObject {
 	
 	/* Not relevant for attributes */ 
 	protected void doSave() {}
-	public void doDelete() {}
+	protected void doDelete() {}
 	protected boolean populateAttributes() {return false;}
 	protected void createAttributes() {}
 	public void handleModified(ModifiedEvent source) {}

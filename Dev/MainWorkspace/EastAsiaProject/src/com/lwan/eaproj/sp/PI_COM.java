@@ -11,7 +11,7 @@ public class PI_COM extends StoredProc{
 	
 	private static String[] STATEMENTS = {
 		"insert into COM_company " +
-		"(com_id, cdt_id, com_name) , " +
+		"(com_id, cdt_id, com_name)  " +
 		"values (@com_id, @cdt_id, @com_name)"
 	};
 	

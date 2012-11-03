@@ -4,15 +4,25 @@ import java.util.List;
 import java.util.Vector;
 
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.util.Callback;
 
 public class ValidatedProperty <T> extends SimpleObjectProperty<T> {
 	List<ValidationListener<T>> validationListeners;
+	Callback<T, T> beforeSetValue;
 	
 	
 	public ValidatedProperty (Object parent, String name) {
 		super(parent, name);
 		
 		validationListeners = new Vector<>();
+	}
+	
+	public void setBeforeSetValue(Callback<T, T> callback) {
+		beforeSetValue = callback;
+	}
+	
+	public Callback<T, T> getBeforeSetValue() {
+		return beforeSetValue;
 	}
 
 	public void addListener(ValidationListener<T> listener) {
@@ -25,6 +35,10 @@ public class ValidatedProperty <T> extends SimpleObjectProperty<T> {
 	
 	public void set(T value) {
 		if (validate(get(), value)) {
+			// Allow validation first??? or validation after...
+			if (beforeSetValue != null) {
+				value = beforeSetValue.call(value);
+			}
 			super.set(value);
 		}
 	}

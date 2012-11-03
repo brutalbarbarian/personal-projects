@@ -1,18 +1,18 @@
 package com.lwan.eaproj.bo;
 
-import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
-import com.lwan.bo.db.BODatabaseObject;
+import com.lwan.bo.db.BODbAttribute;
+import com.lwan.bo.db.BODbObject;
 import com.lwan.eaproj.sp.PD_COM;
 import com.lwan.eaproj.sp.PI_COM;
 import com.lwan.eaproj.sp.PS_COM;
 import com.lwan.eaproj.sp.PU_COM;
 import com.lwan.eaproj.util.DbUtil;
 
-public class BOCompany extends BODatabaseObject {
-	public BOAttribute<Integer> com_id, cdt_id;
-	public BOAttribute<String> com_name;
+public class BOCompany extends BODbObject {
+	public BODbAttribute<Integer> companyID, contactDetailsID;
+	public BODbAttribute<String> companyName;
 	
 	public BOContactDetails contactDetails;
 	public BOEmployeeSet employees;
@@ -31,9 +31,9 @@ public class BOCompany extends BODatabaseObject {
 
 	@Override
 	protected void createAttributes() {
-		com_id = addAsChild(new BOAttribute<Integer>(this, "com_id", false, null, 0));
-		cdt_id = addAsChild(new BOAttribute<Integer>(this, "cdt_id", false, null, 0));
-		com_name = addAsChild(new BOAttribute<String>(this, "com_name"));
+		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false, null, 0));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, null, 0));
+		companyName = addAsChild(new BODbAttribute<String>(this, "CompanyName", "com_name"));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
 		contactDetails.Independent().setValue(true);
@@ -44,16 +44,16 @@ public class BOCompany extends BODatabaseObject {
 	protected boolean populateAttributes() {
 		boolean result = super.populateAttributes();
 		if (result) {
-			contactDetails.cdt_id.assign(cdt_id);
+			contactDetails.contactDetailsID.assign(contactDetailsID);
 		} else {
-			contactDetails.cdt_id.clear();
+			contactDetails.contactDetailsID.clear();
 		}
 		return result;
 	}
 
 	@Override
 	public void clearAttributes() {
-		com_name.clear();
+		companyName.clear();
 		contactDetails.clearAttributes();
 	}
 
@@ -62,10 +62,10 @@ public class BOCompany extends BODatabaseObject {
 
 	@Override
 	protected void ensureIDExists() {
-		if (com_id.isNull() || com_id.getValue() == 0) {
-			com_id.setValue(DbUtil.getNextID("com_id"));
+		if (companyID.asInteger() == 0) {
+			companyID.setValue(DbUtil.getNextID("com_id"));
 		}
-		cdt_id.assign(contactDetails.cdt_id);
+		contactDetailsID.assign(contactDetails.contactDetailsID);
 	}
 
 }

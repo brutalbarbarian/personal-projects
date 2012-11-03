@@ -77,6 +77,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	private Property<Boolean> allow_notifications;
 	private Property<Boolean> independent;
 	private Property<Set<State>> state;
+	private Property<Boolean> is_populating;
 	
 	/* Property Accessor Methods */
 	public ReadOnlyProperty<BusinessObject> Owner() {
@@ -89,13 +90,16 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	public ReadOnlyProperty<Set<State>> State(){
 		return _state();
 	}
+	public ReadOnlyProperty<Boolean> IsPopulating() {
+		return _is_populating();
+	}
 	
 	/** 
 	 * Active represents if this objects is in use. 
 	 */
 	public Property<Boolean> Active() {
 		if (active == null) {
-			active = new SimpleObjectProperty<>(this, "Active");
+			active = new SimpleObjectProperty<>(this, "Active", false);
 		}
 		return active;
 	}
@@ -109,7 +113,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	public Property<String> Tag() {
 		if (tag == null) {
-			tag = new SimpleObjectProperty<>(this, "Tag");
+			tag = new SimpleObjectProperty<>(this, "Tag", "");
 		}
 		return tag;
 	}
@@ -158,19 +162,25 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	/* Private Property Accessor Methods */
 	private Property<BusinessObject> _owner() {
 		if (owner == null) {
-			owner = new SimpleObjectProperty<>(this, "Owner");
+			owner = new SimpleObjectProperty<>(this, "Owner", null);
 		}
 		return owner;
 	}
 	private Property<String> _name() {
 		if(name == null) {
-			name = new SimpleObjectProperty<>(this, "Name");
+			name = new SimpleObjectProperty<>(this, "Name", "");
 		}
 		return name;
 	}	
+	private Property<Boolean> _is_populating() {
+		if (is_populating == null) {
+			is_populating = new SimpleObjectProperty<>(this, "IsPopulating", false);
+		}
+		return is_populating;
+	}
 	private Property<Set<State>> _state() {
 		if (state == null) {
-			state = new SimpleObjectProperty<>(this, "State");
+			state = new SimpleObjectProperty<>(this, "State", null);
 			state.setValue(new HashSet<State>());
 		}
 		return state;
@@ -201,7 +211,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		initialise();
 	}
 	
-	private final void initialise() {
+	protected void initialise() {
 		createAttributes();
 		// Ensures active state is false to begin with. This will also ensure all children are inactive as well.
 		Active().setValue(false);
@@ -247,6 +257,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		if (isActive) {
 			// Any modifications occurring while populating from dataset should be ignored
 			AllowNotifications().setValue(false);
+			_is_populating().setValue(true);
 			State().getValue().clear();	// Reset all states upon setting active.
 			if (populateAttributes()) {
 				State().getValue().add(State.Dataset);
@@ -255,6 +266,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 				clearAttributes();
 				State().getValue().add(State.Modified);
 			}
+			_is_populating().setValue(false);
 			AllowNotifications().setValue(true);
 		}
 		// Set the active state of all children to match this
@@ -319,7 +331,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 * @param object
 	 */
-	protected final <T extends BusinessObject> T addAsChild(T object) {
+	protected <T extends BusinessObject> T addAsChild(T object) {
 		children.put(object.Name().getValue(), object);
 		return object;
 	}
@@ -343,7 +355,67 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	
 	/**
-	 * Call to save this BOObject.
+	 * Call this to save this business object, which in turn will 
+	 * also recursively save all its children.
+	 * 
+	 * This object will attempt to verify prior to saving. This includes
+	 * making sure that no 'non-null' attributes contain no value.
+	 * 
+	 * Will throw an exception if any issues occur.
+	 */
+	public void trySave() throws BOException {
+		if (verifyState()) {
+			save();
+		}
+	}
+	
+	/**
+	 * Return null or empty string if no issues were found.
+	 * Override this function in order to implement any verification
+	 * of state prior to saving.
+	 * 
+	 * The returned string is the message that'll be thrown.
+	 * 
+	 * @return
+	 */
+	protected String doVerifyState() {
+		return null;
+	}
+	
+	/**
+	 * Recursive call for verifying that all attributes desecending from this object,
+	 * and all children from this object are valid for saving.
+	 * 
+	 * This should always return true, as it will throw a BOException if
+	 * any issues occur.
+	 * 
+	 * Note this recurses in the same order as save()
+	 * 
+	 * @return
+	 */
+	protected boolean verifyState() throws BOException {
+		// No need to validate inactive objects
+		if (isActive()) {
+			for (BusinessObject child : children.values()) {
+				if (child.Independent().getValue()) {
+					child.verifyState();
+				}
+			}
+			String err = doVerifyState();
+			if (!StringUtil.isNullOrBlank(err)) {
+				throw new BOException("Failed to verfy child with message '" + err + "'", this);
+			}
+			for(BusinessObject child : children.values()) {
+				if (!child.Independent().getValue()) {
+					child.verifyState();
+				}
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Recursive call for saving business objects.
 	 * This will only do anything if this object is modified. The returned value will signify if anything was actually saved.
 	 * 
 	 * The actual action upon calling this depends on if this object is active or not. Will call doSave if
@@ -351,7 +423,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 * Will then call save() on all non-attribute children.
 	 */
-	public boolean save() {
+	protected boolean save() {
 		// if modified... then do save
 		if (State().getValue().contains(State.Modified) || 
 				// or if loaded from a dataset but was set inactive afterwards
@@ -464,7 +536,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * Override this in order to delete this object
 	 *  This will be called by save() if the object is inactive
 	 */
-	public abstract void doDelete();
+	protected abstract void doDelete();
 	
 	/**
 	 * This is used to populate all child attributes and objects.

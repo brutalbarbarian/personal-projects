@@ -47,6 +47,53 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		_child_id_name().setValue(childIdName);
 	}
 
+	/**
+	 * Find a child of this set, where the child contains an attribute with the specified name,
+	 * and the attribute has the same value as the passed in value.
+	 * Will return the 'childNum' child found which satisfies the above.
+	 * i.e. childNum = 1 will return the first child which satisfies the above.
+	 * Will return null if cannot find the above properties.
+	 * Will throw IllegalArgumentException if the child of this set doesn't contain the specified
+	 * attribute.
+	 * 
+	 * @param attrName
+	 * @param value
+	 * @return
+	 */
+	public T findChildByAttribute(String attrName, Object value, int childNum) {
+		int found = 0;
+		for (T child : children) {
+			Object attr = child.getChildByName(attrName);
+			if (attr == null) {
+				throw new IllegalArgumentException("Cannot find child by name '" + attrName + "'");
+			} else if (!(attr instanceof BOAttribute)) {
+				throw new IllegalArgumentException(attr.getClass().getName() + " is not a BOAttribute");
+			} else {
+				BOAttribute<?> attribute = (BOAttribute<?>)attr;
+				if (GenericsUtil.Equals(value, attribute.getValue())) {
+					found++;
+					if (found == childNum) {
+						return child;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Find the first child, where that child's attribute by name 'attrName'
+	 * is equal to the value passed in.
+	 * Same as calling findChildByAttribute(attrName, value, 1)
+	 * 
+	 * @param attrName
+	 * @param value
+	 * @return
+	 */
+	public T findChildByAttribute(String attrName, Object value) {
+		return findChildByAttribute(attrName, value, 1);
+	}
+	
 	public T findChildByID(Object id) {
 		String childAttr = ChildIDName().getValue();
 		if (!StringUtil.isNullOrBlank(childAttr)) {
@@ -64,6 +111,15 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		return null;
 	}
 	
+	/**
+	 * Same as calling ensureChildActive(null)
+	 * 
+	 * @return
+	 */
+	public T createNewChild() {
+		return ensureChildActive(null);
+	}
+	
 	public int getActiveCount() {
 		int count = 0;
 		for (T child : children) {
@@ -72,6 +128,14 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 		}
 		return count;
+	}
+	
+	protected boolean verifyState() throws BOException {
+		super.verifyState();
+		for(T child : children) {
+			child.verifyState();
+		}
+		return true;
 	}
 	
 	public T getActive(int index) {
@@ -108,9 +172,10 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * 
 	 * @param id
 	 */
-	public void ensureChildActive(Object id) {
+	public T ensureChildActive(Object id) {
 		T child = populateChild(id);
 		child.ensureActive();
+		return child;
 	}
 	
 	/**
@@ -122,12 +187,19 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * @param id
 	 */
 	protected T populateChild(Object id) {
-		T child = findChildByID(id);
+		T child;
+		if (id == null || id.equals(0)) {
+			child = null;
+		} else {
+			child = findChildByID(id);
+		}
 		if (child == null) {
 			child = createChildInstance();
 			BusinessObject idAttr = child.getChildByName(ChildIDName().getValue());
 			if (idAttr != null) {
 				((BOAttribute<?>)idAttr).setAsObject(id);
+			} else {
+				throw new RuntimeException("Cannot find child id property by name '" + ChildIDName().getValue() + "'");
 			}
 			children.add(child);
 		}
@@ -223,15 +295,36 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * If will normally save, then this will also call save() on all
 	 * the children as well.
 	 * 
+	 * This will also remove all inactive children after saving.
+	 * 
 	 */
 	public boolean save() {
 		if (super.save()) {
 			for (T child : children) {
 				child.save();
 			}
+			// remove all inactive children here.
+			Iterator<T> it = children.iterator();
+			while (it.hasNext()) {
+				T child = it.next();
+				if (!child.isActive()) {
+					it.remove();
+				}
+			}
+			
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	public void clear() {
+		super.clear();
+		// This will effectively remove all children.
+		if (children != null) {
+			for (T child : children) {
+				child.Active().setValue(false);
+			}
 		}
 	}
 	
@@ -249,10 +342,10 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	protected void doSave() {}
 
 	@Override
+	protected
 	/**
 	 * Do nothing by default. Sets usually should only be a container for a one to many relationship
-	 */
-	public void doDelete() {}
+	 */ void doDelete() {}
 
 	@Override
 	/**

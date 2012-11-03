@@ -1,14 +1,10 @@
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.lwan.bo.State;
-import com.lwan.eaproj.bo.BOCompany;
-import com.lwan.eaproj.bo.BOEmployee;
+import com.lwan.bo.BOException;
+import com.lwan.eaproj.bo.*;
 import com.lwan.jdbc.GConnection;
-import com.lwan.jdbc.StoredProc;
-import com.lwan.util.CollectionUtil;
 
 
 public class TestDB {
@@ -16,8 +12,8 @@ public class TestDB {
 		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 //		Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 		
-		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
-//		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+//		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
 		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 //		Connection con = DriverManager.getConnection(url,"","");
 		
@@ -66,15 +62,15 @@ public class TestDB {
 		
 //		cd.save();
 		
-		BOCompany com = new BOCompany(null);
-		com.com_id.setValue(1);
-		com.ensureActive();
-		com.Active().setValue(false);
+//		BOCompany com = new BOCompany(null);
+//		com.com_id.setValue(1);
+//		com.ensureActive();
+//		com.Active().setValue(false);
 		
 //		com.employees.ensureChildActive(0);// create a child
 //		com.employees.getActive(0).emp_name_first.setValue("secondEmpFirst");
 		
-		com.save();
+//		com.save();
 //		System.out.println(com.toString());
 //		
 //		com.Active().setValue(false);
@@ -111,11 +107,100 @@ public class TestDB {
 		
 //		emp.save();
 		
+//		BOCompany com = new BOCompany(null);
+//		com.companyID.setValue(10);
+//		com.ensureActive();
+//		BOEmployeePayment pay = com.employees.getActive(0).employeePayments.createNewChild();
+//		pay.datePaid.setValue(Date.valueOf("2012-08-21"));
+//		pay.notes.setValue("Overpriced");
+//		pay.paidAmount.setValue(99.95);
+//		pay.
+//		com.companyName.setValue("EastAsia");
+//		com.contactDetails.address1.setValue("32 Some Place");
+//		com.contactDetails.city.setValue("Auckland");
+//		com.contactDetails.site.setValue("www.ea.com");
+//		
+//		BOEmployee emp = com.employees.createNewChild();
+//		emp.nameFirst.setValue("Bob");
+//		emp.nameLast.setValue("Doe");
+//		emp.contactDetails.address1.setValue("Bob's Din");
+//		
+//		emp = com.employees.createNewChild();
+//		emp.nameFirst.setValue("Jane");
+//		emp.nameLast.setValue("Doe");
+//		emp.contactDetails.address1.setValue("Jane's Place");
+//		
+//		System.out.println(com.toString());
+		
+//		try {
+//			com.trySave();
+//		} catch (BOException e) {
+//			e.printStackTrace();
+//		}
+		
+//		BOEmployeePayment eph = new BOEmployeePayment(null);
+//		eph.employeePaymentID.setValue(2);
+//		eph.ensureActive();
+//		eph.Active().setValue(false);
+		
+//		eph.employeeID.setValue(18);
+//		eph.notes.setValue("Less Overpriced");
+//		eph.paidAmount.setValue(1999.95);
+//		eph.datePaid.setValue(Date.valueOf("2012-04-21"));
+//		try {
+//			eph.trySave();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 //		StoredProc prc = new StoredProc("select * from EMP_employee");
 //		prc.execute(GConnection.getConnection());
 //		ResultSet rs = prc.getResult();
 //		printResultSet(rs);
 //		rs.getStatement().close();
+		
+//		BOUser user = new BOUser(null);
+//		user.userID.setValue(9);
+//		user.ensureActive();
+//		user.userName.setValue("sa");
+//		user.password.setValue("password");
+//		user.description.setValue("insecure password");
+		
+//		System.out.println(user.checkPassword("passwor"));
+		
+//		System.out.println(user.toString());
+		
+//		try {
+//			user.trySave();
+//		} catch (BOException e) {
+//			e.printStackTrace();
+//		}
+		
+//		BOCompany com = new BOCompany(null);
+//		com.ensureActive();
+//		com.contactDetails.address1.setValue("21 Somewhere Road");
+//		com.contactDetails.city.setValue("Happyvile");
+//		com.companyName.setValue("Cool place");
+//		
+//		BOEmployee emp = com.employees.createNewChild();
+//		emp.nameFirst.setValue("Sarah");
+//		emp.contactDetails.city.setValue("Sad place");
+//		emp.employmentStart.setValue(Date.valueOf("2012-11-03"));
+//		emp.isActive.setValue(true);
+//		emp.payMonthly.setValue(100.50);
+//		emp.taxCode.setValue("M");
+		
+//		BOCompany com = new BOCompany(null);
+//		com.companyID.setValue(11);
+//		com.ensureActive();
+//		
+//		System.out.println(com.toString());
+		
+//		try {
+//			com.trySave();
+//		} catch (BOException e) {
+//			e.printStackTrace();
+//		}
+		
 		
 //		con.close();
 		GConnection.uninitialise();

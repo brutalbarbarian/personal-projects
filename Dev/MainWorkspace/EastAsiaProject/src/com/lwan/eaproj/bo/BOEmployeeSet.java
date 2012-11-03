@@ -1,13 +1,13 @@
 package com.lwan.eaproj.bo;
 
 import com.lwan.bo.BusinessObject;
-import com.lwan.bo.db.BODatabaseSet;
+import com.lwan.bo.db.BODbSet;
 import com.lwan.eaproj.sp.PS_EMP_for_company;
 
-public class BOEmployeeSet extends BODatabaseSet<BOEmployee>{
+public class BOEmployeeSet extends BODbSet<BOEmployee>{
 
 	public BOEmployeeSet(BusinessObject owner)  {
-		super(owner, "EmployeeSet", "emp_id");
+		super(owner, "EmployeeSet", "EmployeeID", "emp_id");
 	}
 	
 	

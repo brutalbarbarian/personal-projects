@@ -3,23 +3,24 @@ package com.lwan.bo.db;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.HashMap;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 
-import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.State;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
 
-public abstract class BODatabaseObject extends BusinessObject{
+public abstract class BODbObject extends BusinessObject{
 	private Property<StoredProc> update_stored_proc;
 	private Property<StoredProc> insert_stored_proc;
 	private Property<StoredProc> delete_stored_proc;
 	private Property<StoredProc> select_stored_proc;
+	
+	private HashMap<String, BODbAttribute<?>> fields; 
 	
 	public Property<StoredProc> SelectStoredProc () {
 		if (select_stored_proc == null) {
@@ -59,11 +60,41 @@ public abstract class BODatabaseObject extends BusinessObject{
 		return delete_stored_proc;
 	}
 	
-	public BODatabaseObject(BusinessObject owner, String name) {
+	public BODbObject(BusinessObject owner, String name) {
 		super(owner, name);
 		createStoredProcs();
 	}
 	
+	protected void initialise () {
+		fields = new HashMap<>();
+		super.initialise();
+	}
+	
+	protected <T extends BusinessObject> T addAsChild(T object) {
+		super.addAsChild(object);
+		if (object instanceof BODbAttribute) {
+			BODbAttribute<?> attr = (BODbAttribute<?>)object;
+			fields.put(attr.FieldName().getValue(), attr);
+		}
+		return object;
+	}
+	
+	/**
+	 * Get the BODbAttribute with the same field name as the value passed in
+	 * 
+	 * @param fieldName
+	 * @return
+	 */
+	public BODbAttribute<?> getAttributeByFieldName(String fieldName)   {
+		return fields.get(fieldName);
+	}
+	
+	protected String doVerifyState() {
+		// need to allow the object to assign id's first 
+		// prior to checking verification.
+		ensureIDExists();
+		return null;
+	}
 
 	@Override
 	protected void doSave() {
@@ -75,7 +106,7 @@ public abstract class BODatabaseObject extends BusinessObject{
 		}
 		
 		try {
-			ensureIDExists();
+//			ensureIDExists();	// called in verifyState() now.
 			executeStoredProc(sp);
 		} catch (SQLException e) {
 			throw new RuntimeException("Failed to save object: " + getClass().getName() + 
@@ -103,7 +134,7 @@ public abstract class BODatabaseObject extends BusinessObject{
 	protected abstract void createStoredProcs();
 
 	@Override
-	public void doDelete() {
+	protected void doDelete() {
 		try{
 			executeStoredProc(DeleteStoredProc().getValue());
 		} catch (SQLException e) {
@@ -127,7 +158,7 @@ public abstract class BODatabaseObject extends BusinessObject{
 						String colName = meta.getColumnName(i);
 						Object value = rs.getObject(i);
 						
-						BOAttribute<?> attr = (BOAttribute<?>) getChildByName(colName);
+						BODbAttribute<?> attr = getAttributeByFieldName(colName);
 						// Just ignore any ones that don't map across... not important.
 						if (attr != null) {
 							attr.setAsObject(value);
@@ -162,7 +193,7 @@ public abstract class BODatabaseObject extends BusinessObject{
 		for (Parameter param : sp.getAllParameters()) {
 			// shave off the '@'
 			String attriName = param.name().substring(1);
-			BOAttribute<?> attr = (BOAttribute<?>) getChildByName(attriName);
+			BODbAttribute<?> attr = getAttributeByFieldName(attriName);
 			if (attr != null) {	
 				param.set(attr.getValue());
 			} else {
@@ -188,5 +219,4 @@ public abstract class BODatabaseObject extends BusinessObject{
 			sp.execute(GConnection.getConnection());
 		}
 	}
-
 }
