@@ -1,0 +1,2 @@
+jfx.build.stagingdir = ${workspace}/JFXTrial/build
+jfx.build.apptitle = JFXTrial

@@ -1,0 +1,19 @@
+package com.lwan.jdbc;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class GConnection {
+	private static Connection conn; 
+	
+	public static void initialise(String driverClassName, String connectionString, String username, String password) throws ClassNotFoundException {
+		Class.forName(driverClassName);
+		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
+		Connection con = DriverManager.getConnection(url,"","");
+	}
+	
+	public static Connection getConnection() {
+		return conn;
+	}
+}

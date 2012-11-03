@@ -1,0 +1,68 @@
+package com.lwan.bo;
+
+import javafx.beans.value.ChangeListener;
+
+public class BOAttribute <T> extends BOObject {
+	public BOAttribute(BOObject parent, String name) {
+		super(parent, name);
+	}
+
+	/**
+	 * Add a listener.
+	 * 
+	 * 
+	 */
+	public void addListener(ChangeListener<? super T> arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public T getValue() {
+		
+		return null;
+	}
+	
+
+	public void setValue(T val) {
+		
+	}
+
+	@Override
+	protected void doSave() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void doDelete() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean populateAttributes() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected void createAttributes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void clearAttributes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleModified(ModifiedEvent source) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
+}

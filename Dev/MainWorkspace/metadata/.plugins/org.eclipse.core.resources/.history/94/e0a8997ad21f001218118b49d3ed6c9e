@@ -1,0 +1,22 @@
+package com.lwan.eaproj.bo;
+
+import javafx.util.Callback;
+
+import com.lwan.bo.BOSet;
+import com.lwan.bo.BusinessObject;
+import com.lwan.bo.db.BODatabaseSet;
+
+public class BOEmployeeSet extends BODatabaseSet<BOEmployee>{
+
+	public BOEmployeeSet(BusinessObject owner, String name, String childIdName,
+			Callback<BOSet<BOEmployee>, BOEmployee> instanceFactory)  {
+		super(owner, "EmployeeSet", "emp_id");
+	}
+
+	@Override
+	protected BOEmployee createChildInstance() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

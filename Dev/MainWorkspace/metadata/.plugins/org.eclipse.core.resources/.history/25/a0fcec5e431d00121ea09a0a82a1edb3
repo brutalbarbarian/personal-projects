@@ -1,0 +1,8 @@
+
+import javafx.scene.Scene
+
+component MainScene {
+	Scene {
+		//TODO Add Nodes
+	}
+}

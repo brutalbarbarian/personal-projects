@@ -1,0 +1,22 @@
+package com.lwan.jdbc;
+
+public class Parameter {
+	private Object value;
+	private String name;
+	
+	protected Parameter(String name) {
+		this.name = name;
+	}
+	
+	public void set(Object val) {
+		value = val;
+	}
+	
+	public Object get() {
+		return value;
+	}
+	
+	public String name() {
+		return name;
+	}
+}

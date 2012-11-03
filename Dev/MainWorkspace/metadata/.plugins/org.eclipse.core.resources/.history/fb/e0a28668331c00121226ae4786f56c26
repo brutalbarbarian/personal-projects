@@ -1,0 +1,7 @@
+package com.lwan.eaproj.sp;
+
+import StoredProc;
+
+public class PI_CDT extends StoredProc {
+
+}

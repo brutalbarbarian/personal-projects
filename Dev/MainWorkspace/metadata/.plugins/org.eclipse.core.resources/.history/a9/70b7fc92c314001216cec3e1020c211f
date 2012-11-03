@@ -1,0 +1,60 @@
+package com.lwan.bo;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
+public class BOAttribute <T> extends BOObject implements ChangeListener<T> {
+	// allow nulls
+	// null value
+	// 
+	
+	public BOAttribute(BOObject parent, String name) {
+		super(parent, name);
+	}
+
+	public T getValue() {
+		
+		return null;
+	}
+	
+
+	public void setValue(T val) {
+		
+	}
+
+	
+	
+	
+	
+	/* Not relevant for attributes */ 
+	protected void doSave() {}
+	public void doDelete() {}
+	protected boolean populateAttributes() {return true;}
+
+	@Override
+	protected void createAttributes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void clearAttributes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleModified(ModifiedEvent source) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void changed(ObservableValue<? extends T> observable, T oldValue,
+			T newValue) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
+}

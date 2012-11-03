@@ -1,0 +1,5 @@
+package com.lwan.proj.eaproj.bo;
+
+public class BOContactDetails {
+
+}

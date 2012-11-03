@@ -1,0 +1,17 @@
+package com.lwan.eaproj.util;
+
+import com.lwan.eaproj.sp.PA_PKC_new_id;
+import com.lwan.jdbc.StoredProc;
+
+public class DbUtil {
+	
+	private static StoredProc idProc;
+	public static int getNextID(String fieldName) {
+		if (idProc == null) {
+			idProc = new PA_PKC_new_id();
+		}
+		
+		return 0;
+		
+	}
+}

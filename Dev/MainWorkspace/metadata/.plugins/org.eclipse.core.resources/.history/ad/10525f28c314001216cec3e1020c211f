@@ -1,0 +1,79 @@
+package com.lwan.bo;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Binding;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
+
+public class BOAttribute <T> extends BOObject {
+	public BOAttribute(BOObject parent, String name) {
+		super(parent, name);
+	}
+
+	/**
+	 * Add a listener.
+	 * 
+	 * 
+	 */
+	public void addListener(ChangeListener<? super T> arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public T getValue() {
+		
+		return null;
+	}
+	
+
+	public void setValue(T val) {
+		
+	}
+	
+	/**
+	 * Clears the value
+	 */
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void createAttributes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void clearAttributes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleModified(ModifiedEvent source) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean populateAttributes() {
+		return false;
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void doSave() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void doDelete() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

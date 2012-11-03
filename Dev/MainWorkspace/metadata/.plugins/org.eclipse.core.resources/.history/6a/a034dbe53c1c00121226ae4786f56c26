@@ -1,0 +1,10 @@
+package com.lwan.eaproj.util;
+
+public class DbUtil {
+	public static int getNextID(String fieldName) {
+		
+		
+		return 0;
+		
+	}
+}

@@ -1,0 +1,14 @@
+package com.lwan.eaproj.sp;
+
+import com.lwan.jdbc.StoredProc;
+
+public class PI_EMP extends StoredProc{
+	private static final String[] PARAMS = {"@emp_id", "@emp_name_first", "@emp_name_last", "@emp_payment_monthly",
+		"@emp_tax_code", "@emp_employment_start", "@emp_is_active", "@com_id", "@cdt_id"};
+	private static final int[] PARAM_TYPES = {};
+	private static final String[] STATEMENTS = {};
+	
+	public PI_EMP () {
+		super(PARAMS, PARAM_TYPES, STATEMENTS);
+	}
+}

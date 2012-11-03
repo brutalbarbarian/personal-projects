@@ -1,0 +1,17 @@
+package com.lwan.eaproj.bo;
+
+import com.lwan.bo.BusinessObject;
+import com.lwan.bo.db.BODatabaseSet;
+
+public class BOEmployeeSet extends BODatabaseSet<BOEmployee>{
+
+	public BOEmployeeSet(BusinessObject owner)  {
+		super(owner, "EmployeeSet", "emp_id");
+	}
+
+	@Override
+	protected BOEmployee createChildInstance() {
+		return new BOEmployee(this);
+	}
+
+}

@@ -1,0 +1,45 @@
+package com.lwan.eaproj.bo;
+
+import com.lwan.bo.BOAttribute;
+import com.lwan.bo.BOObject;
+import com.lwan.bo.ModifiedEvent;
+import com.lwan.bo.db.DBBOObject;
+import com.lwan.eaproj.sp.PI_CDT;
+import com.lwan.eaproj.sp.PS_CDT;
+
+public class BOContactDetails extends DBBOObject {
+	public BOAttribute<Integer> ctd_id;
+	public BOAttribute<String> ctd_address_1, ctd_address_2, ctd_address_3, ctd_city, ctd_country,
+			ctd_postcode, ctd_phone, ctd_mobile, cdt_fax, cdt_site);
+	
+	public BOContactDetails(BOObject owner) {
+		super(owner, "ContactDetails");
+		
+		Independent().setValue(true);
+		
+		SelectStoredProc().setValue(new PS_CDT());
+		InsertStoredProc().setValue(new PI_CDT());
+	}
+
+	@Override
+	protected void createAttributes() {
+		ctd_id = addAsChild(new BOAttribute<Integer>(this, "cdt_id", false, 0, 0));
+		addAsChild(new BOAttribute<String>(this, "cdt_address_1"));
+		addAsChild(new BOAttribute<String>(this, "cdt_address_2"));
+		addAsChild(new BOAttribute<String>(this, "cdt_address_3"));
+		addAsChild(new BOAttribute<String>(this, "cdt_city"));
+		addAsChild(new BOAttribute<String>(this, "cdt_country"));
+		addAsChild(new BOAttribute<String>(this, "cdt_postcode"));
+		addAsChild(new BOAttribute<String>(this, "cdt_phone"));
+		addAsChild(new BOAttribute<String>(this, "cdt_mobile"));
+		addAsChild(new BOAttribute<String>(this, "cdt_fax"));
+		addAsChild(new BOAttribute<String>(this, "cdt_site"));
+	}
+
+	@Override
+	protected void clearAttributes() {}
+
+	@Override
+	public void handleModified(ModifiedEvent source) {}
+
+}

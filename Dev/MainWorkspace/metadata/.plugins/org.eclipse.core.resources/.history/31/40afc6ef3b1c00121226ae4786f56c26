@@ -1,0 +1,5 @@
+package com.lwan.eaproj.util;
+
+public class DbUtil {
+
+}

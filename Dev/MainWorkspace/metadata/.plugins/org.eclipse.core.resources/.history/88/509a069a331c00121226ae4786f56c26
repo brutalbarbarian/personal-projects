@@ -1,0 +1,12 @@
+package com.lwan.eaproj.sp;
+
+import com.lwan.jdbc.StoredProc;
+
+public class PI_CDT extends StoredProc {
+
+	public PI_CDT(String[] params, int[] paramTypes, String[] _statements) {
+		super(params, paramTypes, _statements);
+		// TODO Auto-generated constructor stub
+	}
+
+}

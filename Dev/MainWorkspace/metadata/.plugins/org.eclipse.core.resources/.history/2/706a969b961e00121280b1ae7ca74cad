@@ -1,0 +1,72 @@
+package com.lwan.eaproj.bo;
+
+import java.util.Date;
+
+import com.lwan.bo.BOAttribute;
+import com.lwan.bo.BusinessObject;
+import com.lwan.bo.ModifiedEvent;
+import com.lwan.bo.db.BODatabaseObject;
+
+public class BOEmployee extends BODatabaseObject {
+	BOAttribute<Integer> emp_id, com_id, cdt_id;
+	BOAttribute<String> emp_name_first, emp_name_last, emp_tax_code;
+	BOAttribute<Double> emp_payment_monthly;
+	BOAttribute<Date> emp_employment_start;
+	BOAttribute<Boolean> emp_is_active;
+	
+	BOContactDetails contactDetails;
+	
+	// set of payment history...TODO
+	
+	public BOEmployee(BusinessObject owner, String name) {
+		super(owner, name);
+		
+		
+	}
+	
+	@Override
+	protected void createStoredProcs() {
+		
+	}
+
+	@Override
+	protected void ensureIDExists() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void createAttributes() {
+		emp_id = addAsChild(new BOAttribute<Integer>(this, "emp_id", false, null, 0));
+		com_id = addAsChild(new BOAttribute<Integer>(this, "com_id", false, null, 0));
+		cdt_id = addAsChild(new BOAttribute<Integer>(this, "cdt_id", false, null, 0));
+		
+		emp_name_first = addAsChild(new BOAttribute<String>(this, "emp_name_first"));
+		emp_name_last = addAsChild(new BOAttribute<String>(this, "emp_name_last"));
+		
+		emp_payment_monthly = addAsChild(new BOAttribute<Double>(this, "emp_payment_monthly"));
+		emp_tax_code = addAsChild(new BOAttribute<String>(this, "emp_tax_code"));
+		
+		emp_employment_start = addAsChild(new BOAttribute<Date>(this, "emp_employment_start"));
+		emp_is_active = addAsChild(new BOAttribute<Boolean>(this, "emp_is_active", false, false, false));
+		
+		contactDetails = addAsChild(new BOContactDetails(this));
+		contactDetails.Independent().setValue(true);
+	}
+
+	@Override
+	public void clearAttributes() {
+		emp_name_first.clear();
+		emp_name_last.clear();
+		emp_payment_monthly.clear();
+		emp_tax_code.clear();
+		emp_employment_start.clear();
+		
+		emp_is_active.setValue(false);
+		
+		contactDetails.clear();
+	}
+
+	@Override
+	public void handleModified(ModifiedEvent source) {}
+}

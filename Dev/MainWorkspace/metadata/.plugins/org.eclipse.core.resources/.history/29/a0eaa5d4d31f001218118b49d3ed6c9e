@@ -1,0 +1,7 @@
+package com.lwan.eaproj.sp;
+
+import com.lwan.jdbc.StoredProc;
+
+public class PS_EMP_for_company extends StoredProc{
+	
+}
