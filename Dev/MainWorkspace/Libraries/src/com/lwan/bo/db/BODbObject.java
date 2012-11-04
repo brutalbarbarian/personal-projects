@@ -115,10 +115,10 @@ public abstract class BODbObject extends BusinessObject{
 	}
 	
 	/**
-	 * Method called on doSave() which will allows the user to
-	 * check if the id exists (and is valid) prior to calling executeStoredProc.
+	 * Method called on doVerifyState() which will allows the user to
+	 * check if the id exists (and is valid) prior to calling save.
 	 * 
-	 * As this is called after all independent children has saved, this can also be
+	 * As this is called after all independent children has been checked, this can also be
 	 * used to ensure all links are correct to those children. i.e. ensure the foreign key
 	 * id fields has the same id as the independent children.
 	 * 
