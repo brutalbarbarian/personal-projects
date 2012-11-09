@@ -31,10 +31,10 @@ public class BOEmployee extends BODbObject {
 	
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_EMP());
-		InsertStoredProc().setValue(new PI_EMP());
-		UpdateStoredProc().setValue(new PU_EMP());
-		DeleteStoredProc().setValue(new PD_EMP());
+		setSP(new PS_EMP(), BOEmployee.class, SP_SELECT);
+		setSP(new PI_EMP(), BOEmployee.class, SP_INSERT);
+		setSP(new PU_EMP(), BOEmployee.class, SP_UPDATE);
+		setSP(new PD_EMP(), BOEmployee.class, SP_DELETE);
 	}
 
 	@Override
@@ -43,14 +43,14 @@ public class BOEmployee extends BODbObject {
 			employeeID.setValue(DbUtil.getNextID("emp_id"));
 		}
 		contactDetailsID.assign(contactDetails.contactDetailsID);
-		companyID.assign(getOwnerByClass(BOCompany.class).companyID);
+		companyID.assign(findOwnerByClass(BOCompany.class).companyID);
 	}
 
 	@Override
 	protected void createAttributes() {
-		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false, null, 0));
-		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false, null, 0));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, null, 0));
+		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false));
+		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id"));
 		
 		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "emp_name_first"));
 		nameLast = addAsChild(new BODbAttribute<String>(this, "NameLast", "emp_name_last"));
@@ -59,7 +59,7 @@ public class BOEmployee extends BODbObject {
 		taxCode = addAsChild(new BODbAttribute<String>(this, "TaxCode", "emp_tax_code"));
 		
 		employmentStart = addAsChild(new BODbAttribute<Date>(this, "EmploymentStart", "emp_employment_start"));
-		isActive = addAsChild(new BODbAttribute<Boolean>(this, "IsActive", "emp_is_active", false, false, false));
+		isActive = addAsChild(new BODbAttribute<Boolean>(this, "IsActive", "emp_is_active", false));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
 		contactDetails.Independent().setValue(true);

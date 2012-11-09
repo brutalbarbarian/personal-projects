@@ -13,6 +13,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.util.Callback;
 
 /**
  * <h1>****GUIDE TO BOObjects ****</h1>
@@ -83,8 +84,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	public ReadOnlyProperty<BusinessObject> Owner() {
 		return _owner();
 	}
-	public ReadOnlyProperty<String> Name() {
-		return _name();
+	public Property<String> Name() {
+		if(name == null) {
+			name = new SimpleObjectProperty<>(this, "Name", "");
+		}
+		return name;
 	}
 	
 	public ReadOnlyProperty<Set<State>> State(){
@@ -148,6 +152,24 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		return independent;
 	}
 	
+	/**
+	 * Check if this business object is a BOAttribute
+	 * 
+	 * @return
+	 */
+	public boolean isAttribute() {
+		return false;
+	}
+	
+	/**
+	 * Check if this business object s a BOSet
+	 * 
+	 * @return
+	 */
+	public boolean isSet() {
+		return false;
+	}
+	
 	/** 
 	 * Use this flag to disable notifications if needed.
 	 * This will effectively disable fireModified for this object only. 
@@ -166,12 +188,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		}
 		return owner;
 	}
-	private Property<String> _name() {
-		if(name == null) {
-			name = new SimpleObjectProperty<>(this, "Name", "");
-		}
-		return name;
-	}	
+	
 	private Property<Boolean> _is_populating() {
 		if (is_populating == null) {
 			is_populating = new SimpleObjectProperty<>(this, "IsPopulating", false);
@@ -198,7 +215,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	public BusinessObject(BusinessObject owner, String name) {
 		children = new HashMap<>();
 		listeners = new Vector<>();
-		_name().setValue(name);
+		Name().setValue(name);
 		_owner().setValue(owner);
 		AllowNotifications().setValue(true);
 		Active().addListener(new ChangeListener<Boolean>() {
@@ -224,8 +241,59 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param name
 	 * @return
 	 */
-	public BusinessObject getChildByName(String name) {
-		return children.get(name);
+	public BusinessObject findChildByName(String name) {
+		BusinessObject child = children.get(name);
+		if (child == null) return null;
+		return child.getReferencedObject();
+	}
+	
+	/**
+	 * Returns the object referenced by this Business object.
+	 * Normally this will return this object, except with BOLinks,
+	 * where the referenced object is weakly linked via getReferenceObject. 
+	 * 
+	 * @return
+	 */
+	protected BusinessObject getReferencedObject () {
+		return this;
+	}
+
+	/**
+	 * Effectively the same as called equivilentTo(other, null).
+	 */
+	public boolean equals(Object other) {
+		if (other instanceof BusinessObject) {
+			return equivalentTo((BusinessObject)other, null);
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Will call equivilentTo on all direct children of this object. This will effectively
+	 * cascade down the tree, checking every object. Objects should override this if the
+	 * object does any special checks.
+	 * 
+	 * IgnoreFields will be called on every object in the hierarchy. If ignoredFields is null
+	 * or returns true, then equivalentTo will not be called on that object.
+	 * 
+	 * @param other
+	 * @param ignoreFields
+	 * @return
+	 */
+	public boolean equivalentTo (BusinessObject other, Callback<BusinessObject, Boolean> ignoreFields) {
+		if (getClass() != other.getClass() || children.size() != other.children.size()) {
+			return false;
+		} 
+		for (BusinessObject child : children.values()) {
+			// Not going to bother comparing if callback returns true
+			if (ignoreFields != null && ignoreFields.call(child)) continue;	
+			String name = child.Name().getValue();
+			BusinessObject otherChild = other.findChildByName(name);
+			if(otherChild == null || !child.equivalentTo(otherChild, ignoreFields)) return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -235,11 +303,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends BusinessObject> T getOwnerByClass(Class<T> parentClass) {
+	public <T extends BusinessObject> T findOwnerByClass(Class<T> parentClass) {
 		if (ClassUtil.isSuperclassOf(parentClass, getClass())) {
 			return (T)this;
 		} else if (Owner().getValue() != null) {
-			return Owner().getValue().getOwnerByClass(parentClass);
+			return Owner().getValue().findOwnerByClass(parentClass);
 		} else {
 			return null;
 		}
@@ -272,7 +340,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		// Set the active state of all children to match this
 		for (BusinessObject child : children.values()) {
 			// Active state is meaningless to BOAttributes
-			if (!(child instanceof BOAttribute)) {
+			if (!(child.isAttribute())) {
 				child.Active().setValue(isActive);
 			}
 		}
@@ -431,7 +499,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 			// Save all the independent children first
 			for (BusinessObject child : children.values()) {
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
-				if(!(child instanceof BOAttribute) &&
+				if(!(child.isAttribute()) &&
 						// either independent and active, or dependent and inactive
 						child.Independent().getValue() == isActive()) {
 					child.save();
@@ -448,7 +516,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 			// Save all the dependent children after this object has been saved
 			for (BusinessObject child: children.values()) {
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
-				if (!(child instanceof BOAttribute) &&
+				if (!(child.isAttribute()) &&
 						// either independent and inactive, or dependent and active
 						child.Independent().getValue() != isActive()) {
 					child.save();
@@ -486,12 +554,30 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	
 	/**
+	 * Shortcut for calling Active().setValue()
+	 * 
+	 * @param active
+	 */
+	public void setActive(boolean active) {
+		Active().setValue(active);
+	}
+	
+	/**
 	 * Shortcut for calling Independent().getValue()
 	 * 
 	 * @return
 	 */
 	public boolean isIndependent() {
 		return Independent().getValue();
+	}
+	
+	/**
+	 * Shortcut for calling Independent().setValue()
+	 * 
+	 * @param independent
+	 */
+	public void setIndependent(boolean independent) {
+		Independent().setValue(independent);
 	}
 	
 	/**

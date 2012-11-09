@@ -16,7 +16,7 @@ public class BOEmployeePaymentSet extends BODbSet<BOEmployeePayment> {
 	}
 
 	@Override
-	protected BOEmployeePayment createChildInstance() {
+	protected BOEmployeePayment createChildInstance(Object id) {
 		return new BOEmployeePayment(this);
 	}
 

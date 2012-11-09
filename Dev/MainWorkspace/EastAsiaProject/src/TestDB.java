@@ -3,7 +3,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.lwan.bo.BOException;
+import com.lwan.bo.BOSet;
 import com.lwan.eaproj.bo.*;
+import com.lwan.eaproj.util.BOConstants;
 import com.lwan.jdbc.GConnection;
 
 
@@ -176,6 +178,7 @@ public class TestDB {
 //		}
 		
 //		BOCompany com = new BOCompany(null);
+		
 //		com.ensureActive();
 //		com.contactDetails.address1.setValue("21 Somewhere Road");
 //		com.contactDetails.city.setValue("Happyvile");
@@ -191,18 +194,70 @@ public class TestDB {
 		
 //		BOCompany com = new BOCompany(null);
 //		com.companyID.setValue(11);
+//		com.employees.LoadMode().setValue(BOSet.LOADMODE_PASSIVE);
 //		com.ensureActive();
 //		
+//		com.employees.getActive(0).nameFirst.setValue("Different Name");
+//		BOEmployee emp = com.employees.createNewChild();
+//		emp.nameFirst.setValue("New Kid");
+//		emp.contactDetails.address1.setValue("Some Place");
+//		
 //		System.out.println(com.toString());
-		
+//		
 //		try {
 //			com.trySave();
 //		} catch (BOException e) {
 //			e.printStackTrace();
 //		}
 		
+//		BOSchool sch = new BOSchool(null);
+//		sch.schoolID.setValue(7);
+//		sch.ensureActive();
+//		sch.Active().setValue(false);
+		
+//		sch.schoolName.setValue("primary school");
+//		sch.contactDetails.address1.setValue("32 some st");
+//		sch.contactDetails.city.setValue("our city");
+//		
+//		System.out.println(sch.toString());
+		
+//		try {
+//			sch.trySave();
+//		} catch (BOException e) {
+//			e.printStackTrace();
+//		}
 		
 //		con.close();
+		
+		BOCustomer cus = new BOStudent(null);
+		cus.customerID.setValue(4);
+		cus.ensureActive();
+		
+////		cus.Active().setValue(false);
+//		
+//		cus.nameFirst.setValue("student name");
+//		cus.nameLast.setValue("last name");
+//		cus.reference.setValue("studying");
+//		cus.contactDetails.address1.setValue("CUS Address 1");
+//		cus.customerType.setValue(BOConstants.CTY_STUDENT);
+//		
+//		BOStudent stu = cus.students.createNewChild();
+//		stu.schoolID.setValue(8);
+//		stu.startDate.setValue(Date.valueOf("2012-08-11"));
+//		stu.notes.setValue("Redoing same courses as previous year");
+//		
+//		System.out.println(cus.toString());
+//		
+//		try {
+//			cus.trySave();
+//		} catch (BOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+		
+		System.out.println(cus.toString());
+		
 		GConnection.uninitialise();
 	}
 	

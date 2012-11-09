@@ -23,16 +23,16 @@ public class BOCompany extends BODbObject {
 	
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_COM());
-		InsertStoredProc().setValue(new PI_COM());
-		UpdateStoredProc().setValue(new PU_COM());
-		DeleteStoredProc().setValue(new PD_COM());
+		setSP(new PS_COM(), BOCompany.class, SP_SELECT);
+		setSP(new PI_COM(), BOCompany.class, SP_INSERT);
+		setSP(new PU_COM(), BOCompany.class, SP_UPDATE);
+		setSP(new PD_COM(), BOCompany.class, SP_DELETE);
 	}
 
 	@Override
 	protected void createAttributes() {
-		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false, null, 0));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, null, 0));
+		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false));
 		companyName = addAsChild(new BODbAttribute<String>(this, "CompanyName", "com_name"));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));

@@ -28,21 +28,21 @@ public class BOEmployeePayment extends BODbObject{
 		if (employeePaymentID.asInteger() == 0) {
 			employeePaymentID.setValue(DbUtil.getNextID("eph_id"));
 		}
-		employeeID.assign(getOwnerByClass(BOEmployee.class).employeeID);
+		employeeID.assign(findOwnerByClass(BOEmployee.class).employeeID);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_EPH());
-		InsertStoredProc().setValue(new PI_EPH());
-		UpdateStoredProc().setValue(new PU_EPH());
-		DeleteStoredProc().setValue(new PD_EPH());
+		setSP(new PS_EPH(), BOEmployeePayment.class, SP_SELECT);
+		setSP(new PI_EPH(), BOEmployeePayment.class, SP_INSERT);
+		setSP(new PU_EPH(), BOEmployeePayment.class, SP_UPDATE);
+		setSP(new PD_EPH(), BOEmployeePayment.class, SP_DELETE);
 	}
 
 	@Override
 	protected void createAttributes() {
-		employeePaymentID = addAsChild(new BODbAttribute<Integer>(this, "EmployeePaymentID", "eph_id", false, null, 0));
-		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false, null, 0));
+		employeePaymentID = addAsChild(new BODbAttribute<Integer>(this, "EmployeePaymentID", "eph_id", false));
+		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false));
 		
 		datePaid = addAsChild(new BODbAttribute<Date>(this, "DatePaid", "eph_date_paid"));
 		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "eph_notes"));

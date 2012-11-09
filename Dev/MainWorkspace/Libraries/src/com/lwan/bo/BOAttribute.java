@@ -2,7 +2,10 @@ package com.lwan.bo;
 
 import com.lwan.javafx.property.ValidatedProperty;
 import com.lwan.javafx.property.ValidationListener;
+import com.lwan.util.GenericsUtil;
+
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -11,13 +14,10 @@ import javafx.util.Callback;
 public class BOAttribute <T> extends BusinessObject {
 	/* Properties Declarations */
 	private Property<Boolean> allow_nulls;
-	private Property<T> default_value;
-
-	// value is the valid contained by the attribute
-	private ValidatedProperty<T> value;
+	private Property<Boolean> user_set;
+	private Property<Object> user_set_source;
 	
-	// This is the value that should be returned when get() is called and the value is null
-	private Property<T> null_value;
+	private ValidatedProperty<T> value;
 	
 	
 	/* Property accessors */
@@ -33,6 +33,38 @@ public class BOAttribute <T> extends BusinessObject {
 		return value;
 	}
 	
+	public ReadOnlyProperty<Object> UserSetSource() {
+		return _user_set_source();
+	}
+	
+	/**
+	 * Will be set to true if userSetValue() is called as opposed to
+	 * setValue() or Value().set(). All interface objects which is bound to
+	 * this attribute should trigger this to be true. 
+	 * This property allows code to be tailored to user changes as opposed to changes
+	 * made as result of internal calculations. 
+	 * 
+	 * @return
+	 */
+	public ReadOnlyProperty<Boolean> UserSet() {
+		return _user_set();
+	}
+	
+	/* Private properties */
+	private Property<Boolean> _user_set() {
+		if (user_set == null) {
+			user_set = new SimpleObjectProperty<Boolean>(this, "UserSet", false);
+		}
+		return user_set;
+	}
+	
+	private Property<Object> _user_set_source() {
+		if (user_set_source == null) {
+			user_set_source = new SimpleObjectProperty<Object>(this, "UserSetSource", null);
+		}
+		return user_set_source;
+	}
+	
 	protected String doVerifyState() {
 		// if allow null state is satisfied.
 		// Shouldn't need to check if the value itself is valid, as it should have 
@@ -44,25 +76,17 @@ public class BOAttribute <T> extends BusinessObject {
 		}
 	}
 	
+	/**
+	 * Represents when verifying if a datastructure is valid for saving, if this
+	 * attribute is allowed to be null. 
+	 * 
+	 * @return
+	 */
 	public Property<Boolean> AllowNulls() {
 		if (allow_nulls == null) {
 			allow_nulls = new SimpleObjectProperty<>(this, "AllowNulls");
 		}
 		return allow_nulls;
-	}
-	
-	public Property<T> DefaultValue() {
-		if (default_value == null) {
-			default_value = new SimpleObjectProperty<>(this, "DefaultValue");
-		}
-		return default_value;
-	}
-	
-	public Property<T> NullValue() {
-		if (null_value == null) {
-			null_value = new SimpleObjectProperty<>(this, "NullValue");
-		}
-		return null_value;
 	}
 	
 	/**
@@ -125,17 +149,19 @@ public class BOAttribute <T> extends BusinessObject {
 		}
 	}
 	
+	public boolean isAttribute() {
+		return true;
+	}
+	
 	public BOAttribute(BusinessObject parent, String name) {
-		this(parent, name, true, null, null);
+		this(parent, name, true);
 	}
 	
 	
-	public BOAttribute(BusinessObject parent, String name, boolean allowNulls, T defaultValue, T nullValue) {
+	public BOAttribute(BusinessObject parent, String name, boolean allowNulls) {
 		super(parent, name);
 		
 		AllowNulls().setValue(allowNulls);
-		DefaultValue().setValue(defaultValue);
-		NullValue().setValue(nullValue);
 		
 		Value().addListener(new ChangeListener<T>(){
 			public void changed(ObservableValue<? extends T> observable,
@@ -190,6 +216,44 @@ public class BOAttribute <T> extends BusinessObject {
 	}
 	
 	/**
+	 * All interface objects setting the value of this attribute representing a user's
+	 * change should call this function, passing some representation of itself in
+	 * as the source. This allows listeners listening to modifications to this attribute
+	 * to tailor code specific for user changes from certain sources.
+	 * 
+	 * 
+	 * @param val
+	 */
+	public void userSetValue(T val, Object source) {
+		_user_set().setValue(true);
+		_user_set_source().setValue(source);
+		setValue(val);
+		_user_set_source().setValue(null);
+		_user_set().setValue(false);
+	}
+	
+	/**
+	 * Shortcut for calling UserSet().getValue()
+	 * 
+	 * @return
+	 */
+	public boolean isUserSet() {
+		return UserSet().getValue();
+	}
+	
+	/**
+	 * Checks that the values contained within both BOAttributes are the same.
+	 * 
+	 */
+	public boolean equivalentTo (BusinessObject other, Callback<BusinessObject, Boolean> ignoreFields) {
+		if (super.equivalentTo(other, ignoreFields)) {
+			return GenericsUtil.Equals(getValue(), ((BOAttribute<?>)other).getValue());
+		} else {
+			return false;
+		}
+	}
+	
+	/**
 	 * Less safe way but allowing universal setting without
 	 * knowing type of T beforehand
 	 * 
@@ -219,11 +283,11 @@ public class BOAttribute <T> extends BusinessObject {
 	}
 	
 	/**
-	 * Sets the attribute back to default, or null if no default is set.
+	 * Same as calling clear
 	 * 
 	 */
 	public void clearAttributes() {
-		setValue(DefaultValue().getValue());
+		clear();
 	}
 	
 	

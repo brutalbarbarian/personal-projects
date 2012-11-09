@@ -5,9 +5,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.State;
 import com.lwan.jdbc.GConnection;
@@ -15,49 +12,92 @@ import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
 
 public abstract class BODbObject extends BusinessObject{
-	private Property<StoredProc> update_stored_proc;
-	private Property<StoredProc> insert_stored_proc;
-	private Property<StoredProc> delete_stored_proc;
-	private Property<StoredProc> select_stored_proc;
+	public static final int SP_SELECT = 0;
+	public static final int SP_INSERT = 1;
+	public static final int SP_UPDATE = 2;
+	public static final int SP_DELETE = 3;
 	
-	private HashMap<String, BODbAttribute<?>> fields; 
-	
-	public Property<StoredProc> SelectStoredProc () {
-		if (select_stored_proc == null) {
-			select_stored_proc = new SimpleObjectProperty<> ();
+	//	How should inheritance work in terms of BusinessObjects?
+	//	Table B inherits of Table A.
+	//	Thus think of it as object A and B, where B inherits from A
+	//
+	//	When loading... the base stored proc should be called first, followed by its direct descendant, and so on.
+	//	When Saving, should save the base, followed by its direct descendant, and so on.
+	//	When deleting, should delete the lowest member of the hierarchy, up towards the base.
+	//
+	//	Overall... this means multiple stored procs need to be run... how would that work?
+	//	Current design... only the bottom most level of stored proc will be run...i.e. only the leaf will be able to run its stored proc, as the same property is shared between all levels of the hierachy
+	//
+	//	a solution would be to make that property not shared... only way to do that would be to
+	//	use method extensions as opposed to properties...
+	//
+	//	Requirements
+	//	Each level of a hierarchy should have its own set of stored procs.
+	class StoredProcSet {
+		StoredProc update, insert, delete, select;
+		
+		StoredProc get(int type) {
+			switch (type) {
+			case SP_SELECT : return select;
+			case SP_INSERT : return insert;
+			case SP_UPDATE : return update;
+			case SP_DELETE : return delete;
+			default : return null;
+			}
 		}
-		return select_stored_proc;
+		
+		void set(int type, StoredProc sp) {
+			switch (type) {
+			case SP_SELECT : select = sp; break;
+			case SP_INSERT : insert = sp; break;
+			case SP_UPDATE : update = sp; break;
+			case SP_DELETE : delete = sp; break;
+			}
+		}
 	}
 	
-	public Property<StoredProc> UpdateStoredProc () {
-		if (update_stored_proc == null) {
-			update_stored_proc = new SimpleObjectProperty<>();
+	private HashMap<String, StoredProcSet> storedProcs;
+	
+	private HashMap<String, StoredProcSet> storedProcs () {
+		if (storedProcs == null) {
+			storedProcs = new HashMap<String, StoredProcSet>();
 		}
-		return update_stored_proc;
+		return storedProcs;
+	}
+	
+	private HashMap<String, BODbAttribute<?>> fields;
+	
+	/**
+	 * Set the stored proc of this business object.
+	 * type is either SP_SELECT, SP_INSERT, SP_UPDATE, or SP_DELETE
+	 * It is important to pass in the current class by
+	 * 'ClassName.class' as opposed to the getClass() method, as getClass()
+	 * will always return the lowest member in the object hierachy.
+	 * 
+	 * @param sp
+	 * @param type
+	 */
+	protected void setSP(StoredProc sp, Class<? extends BODbObject> key, int type) {
+		String className = key.getName();
+		StoredProcSet sps = storedProcs().get(className);
+		if (sps == null) {
+			sps = new StoredProcSet();
+			storedProcs().put(className, sps);
+		}
+		sps.set(type, sp);
 	}
 	
 	/**
-	 * This stored proc will be called when doSave is called while w
+	 * Get the stored proc of specified type, keyed to the class passed in
 	 * 
+	 * @param type
 	 * @return
 	 */
-	public Property<StoredProc> InsertStoredProc () {
-		if (insert_stored_proc == null) {
-			insert_stored_proc = new SimpleObjectProperty<>();
-		}
-		return insert_stored_proc;
-	}
-	
-	/**
-	 * This stored proc will be called when doDelete is called
-	 * 
-	 * @return
-	 */
-	public Property<StoredProc> DeleteStoredProc () {
-		if (delete_stored_proc == null) {
-			delete_stored_proc = new SimpleObjectProperty<>();
-		}
-		return delete_stored_proc;
+	protected StoredProc getSP (int type, Class<?> key) {
+		String className = key.getName();
+		StoredProcSet sps = storedProcs().get(className);
+		if (sps == null) return null;
+		return sps.get(type);
 	}
 	
 	public BODbObject(BusinessObject owner, String name) {
@@ -85,7 +125,7 @@ public abstract class BODbObject extends BusinessObject{
 	 * @param fieldName
 	 * @return
 	 */
-	public BODbAttribute<?> getAttributeByFieldName(String fieldName)   {
+	public BODbAttribute<?> findAttributeByFieldName(String fieldName)   {
 		return fields.get(fieldName);
 	}
 	
@@ -95,22 +135,39 @@ public abstract class BODbObject extends BusinessObject{
 		ensureIDExists();
 		return null;
 	}
+	
+	private void executeStoredProc(int type) throws SQLException {
+		Class<?> c = getClass();
+		StoredProc sp = null;
+		try {
+			while (c != BODbObject.class) {
+				sp = getSP(type, c);
+				executeStoredProc(sp);
+				
+				c = c.getSuperclass();
+			}
+			
+			sp = null;
+		} catch (SQLException e) {
+			// If this was thrown, impossible for sp to be null
+			throw new SQLException(sp.getClass().getName(), e);
+		}
+	}
 
 	@Override
 	protected void doSave() {
-		StoredProc sp;
+		int type;
 		if (State().getValue().contains(State.Dataset)) {
-			sp = UpdateStoredProc().getValue();
+			type = SP_UPDATE;
 		} else {
-			sp = InsertStoredProc().getValue();
+			type = SP_INSERT;
 		}
 		
 		try {
-//			ensureIDExists();	// called in verifyState() now.
-			executeStoredProc(sp);
+			executeStoredProc(type);
 		} catch (SQLException e) {
 			throw new RuntimeException("Failed to save object: " + getClass().getName() + 
-					" while attempting to call stored procedure: " + sp.getClass().getName(), e);
+					" while attempting to call stored procedure: " + e.getMessage(), e);
 		}
 	}
 	
@@ -136,7 +193,7 @@ public abstract class BODbObject extends BusinessObject{
 	@Override
 	protected void doDelete() {
 		try{
-			executeStoredProc(DeleteStoredProc().getValue());
+			executeStoredProc(SP_DELETE);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -144,35 +201,44 @@ public abstract class BODbObject extends BusinessObject{
 	
 	@Override
 	protected boolean populateAttributes() {
-		StoredProc sp = SelectStoredProc().getValue();
-		if (sp != null) {
-			try {
-				executeStoredProc(sp);
-				ResultSet rs = sp.getResult();
-				if (!rs.next()) {
-					return false;
-				} else {
-					ResultSetMetaData meta = rs.getMetaData();
-					int count = meta.getColumnCount();
-					for (int i = 1; i <= count; i++) {
-						String colName = meta.getColumnName(i);
-						Object value = rs.getObject(i);
-						
-						BODbAttribute<?> attr = getAttributeByFieldName(colName);
-						// Just ignore any ones that don't map across... not important.
-						if (attr != null) {
-							attr.setAsObject(value);
+		Class<?> c = getClass();
+		boolean result = false;
+		while (c != BODbObject.class) {
+			StoredProc sp = getSP(SP_SELECT, c);
+			c = c.getSuperclass();
+			if (sp != null) {
+				try {
+					executeStoredProc(sp);
+					ResultSet rs = sp.getResult();
+					if (!rs.next()) {
+						// something went wrong clearly...
+						// can't have a stored proc returning nothing... can we?
+						// or ignore???
+						return false;
+					} else {
+						ResultSetMetaData meta = rs.getMetaData();
+						int count = meta.getColumnCount();
+						for (int i = 1; i <= count; i++) {
+							String colName = meta.getColumnName(i);
+							Object value = rs.getObject(i);
+							
+							BODbAttribute<?> attr = findAttributeByFieldName(colName);
+							// Just ignore any ones that don't map across... not important.
+							if (attr != null) {
+								attr.setAsObject(value);
+							}
 						}
+						
+						result = true;
 					}
-					
-					return true;
+				} catch (SQLException e) {
+					e.printStackTrace();
 				}
-			} catch (SQLException e) {
-				e.printStackTrace();
 			}
-			
 		}
-		return false;
+		
+		
+		return result;
 	}
 	
 	/**
@@ -193,7 +259,7 @@ public abstract class BODbObject extends BusinessObject{
 		for (Parameter param : sp.getAllParameters()) {
 			// shave off the '@'
 			String attriName = param.name().substring(1);
-			BODbAttribute<?> attr = getAttributeByFieldName(attriName);
+			BODbAttribute<?> attr = findAttributeByFieldName(attriName);
 			if (attr != null) {	
 				param.set(attr.getValue());
 			} else {

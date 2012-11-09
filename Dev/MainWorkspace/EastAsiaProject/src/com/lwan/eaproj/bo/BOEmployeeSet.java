@@ -12,7 +12,7 @@ public class BOEmployeeSet extends BODbSet<BOEmployee>{
 	
 	
 	@Override
-	protected BOEmployee createChildInstance() {
+	protected BOEmployee createChildInstance(Object id) {
 		return new BOEmployee(this);
 	}
 

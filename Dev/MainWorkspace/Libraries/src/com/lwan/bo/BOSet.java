@@ -10,13 +10,53 @@ import com.lwan.util.StringUtil;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.util.Callback;
 
 public abstract class BOSet<T extends BusinessObject> extends BusinessObject implements Iterable<T>{
+	public static final int LOADMODE_ACTIVE = 0;	// Implemented from BOSet
+	public static final int LOADMODE_PASSIVE = 1;	// Implemented from BOSet
+	// Will need to be implemented inside implementation of this in populate attribute
+	public static final int LOADMODE_CACHE = 2;		
+	
+	Property<Integer> load_mode;
 	
 	// name of the BOattribute which is a direct descendant of the child BOobject
 	// if this is empty, calling 'findByID' will always return with null
 	private Property<String> child_id_name;
 	
+	
+	/**
+	 * <p>
+	 * Property related to how this set is used.
+	 * Can be set to one of three values.
+	 * </p>
+	 * <h1>LOADMODE_ACTIVE</h1>
+	 * <p>Upon populate attributes, will fetch a list of all children, then for each
+	 * child, will ensure an instance of that child exists, and will then set each of
+	 * those children active, thus populating them</p>
+	 * <h1>LOADMODE_PASSIVE</h1>
+	 * <p>Upon populate attributes, will fetch a list of all children, then for each
+	 * child, will ensure an instance of that child exists. The child will be considered active,
+	 * but won't actually be populated until a call is made which would result in that child
+	 * being returned.</p>
+	 * <h1>LOADMODE_CACHE</h1>
+	 * <p>Populate Attributes will do nothing. Rather, when a child is requested (by id),
+	 * the set will attempt to find that child. If that child exists, will proceed to
+	 * load and populate that child prior to returning it, or otherwise will return null.</p>
+	 * <p>
+	 * By default, all sets should have this set to LOADMODE_ACTIVE. It is recommended to 
+	 * change this depending on the requirements of the set, in order to minimize work
+	 * required upon populating.</p>
+	 * TODO change default to LOADMODE_PASSIVE maybe?  
+	 * 
+	 * @return
+	 */
+	public Property<Integer> LoadMode() {
+		if (load_mode == null) {
+			load_mode = new SimpleObjectProperty<Integer>(this, "LoadMode", LOADMODE_ACTIVE);
+		}
+		return load_mode;
+	}
 	/* public property accessors */
 	public ReadOnlyProperty<String> ChildIDName() {
 		return _child_id_name();
@@ -31,7 +71,17 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	}
 	
 	// private fields
-	private List<T> children;
+	private List<Entry> children;
+	
+	private class Entry {
+		T child;
+		boolean loaded;
+		
+		Entry (T child) {
+			this.child = child;
+			loaded = false;
+		}
+	}
 	
 	/**
 	 * Construct a set of BOObjects.
@@ -43,7 +93,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	public BOSet(BusinessObject owner, String name, String childIdName) {
 		super(owner, name);
 		
-		children = new Vector<T>();
+		children = new Vector<Entry>();
 		_child_id_name().setValue(childIdName);
 	}
 
@@ -62,8 +112,8 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 */
 	public T findChildByAttribute(String attrName, Object value, int childNum) {
 		int found = 0;
-		for (T child : children) {
-			Object attr = child.getChildByName(attrName);
+		for (T child : childIterable()) {
+			Object attr = child.findChildByName(attrName);
 			if (attr == null) {
 				throw new IllegalArgumentException("Cannot find child by name '" + attrName + "'");
 			} else if (!(attr instanceof BOAttribute)) {
@@ -81,6 +131,10 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		return null;
 	}
 	
+	public boolean isSet() {
+		return true;
+	}
+	
 	/**
 	 * Find the first child, where that child's attribute by name 'attrName'
 	 * is equal to the value passed in.
@@ -95,17 +149,33 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	}
 	
 	public T findChildByID(Object id) {
+		return findChildByID(id, true);
+	}
+	
+	protected T findChildByID (Object id, boolean ensureActive) {
 		String childAttr = ChildIDName().getValue();
 		if (!StringUtil.isNullOrBlank(childAttr)) {
-			for (T child : children) {
-				BusinessObject attr = child.getChildByName(childAttr);
+			for (Entry e : children) {
+				T child = e.child;
+				BusinessObject attr = child.findChildByName(childAttr);
 				// If the attribute can be found, check the values are equal
-				if (attr != null && attr instanceof BOAttribute<?> && 
+				if (attr != null && attr.isAttribute() && 
 						GenericsUtil.Equals(((BOAttribute<?>)attr).getValue(), id)) {
 					// If they are equal... just return it. Assume there's only
 					// one child with the same 'id'
+					
+					// ensure the child is loaded if it isn't populating.
+					if (!e.loaded && ensureActive) {	
+						child.ensureActive();
+						e.loaded = true;
+					}
 					return child;
 				}
+			}
+			// Dosen't exist in current set... but in cache mode so might still exist in
+			// the actual dataset...
+			if (LoadMode().getValue() == LOADMODE_CACHE && childExists(id)) {
+				return populateChild(id, ensureActive);
 			}
 		}
 		return null;
@@ -122,8 +192,9 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	
 	public int getActiveCount() {
 		int count = 0;
-		for (T child : children) {
-			if (child.Active().getValue()) {
+		for (Entry e : children) {
+			// Assume not loaded means its technically active
+			if (!e.loaded || e.child.Active().getValue()) {
 				count++;
 			}
 		}
@@ -132,15 +203,18 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	
 	protected boolean verifyState() throws BOException {
 		super.verifyState();
-		for(T child : children) {
-			child.verifyState();
+		// no need to verify the state of unloaded children
+		for(Entry e : children) {
+			if (e.loaded) {
+				e.child.verifyState();
+			}
 		}
 		return true;
 	}
 	
 	public T getActive(int index) {
 		int active = -1;
-		for (T child : children) {
+		for (T child : childIterable()) {
 			if (child.Active().getValue()) {
 				active++;
 			}
@@ -151,16 +225,62 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		return null;	// likely index out of bounds of reached here
 	}
 	
-	public int getCount() {
+	protected int getCount() {
 		return children.size();
 	}
 	
-	public T get(int index) {
+	protected T get(int index) {
 		if (index < 0 || index >= children.size()) {
 			return null;
 		} else {
-			return children.get(index);
+			Entry e = children.get(index);
+			if (!e.loaded) {
+				// Activate the child
+				e.child.ensureActive();
+				e.loaded = true;
+			}
+			return e.child;
 		}
+	}
+	
+	protected Iterable<T> childIterable() {
+		return new Iterable<T>(){
+			public Iterator<T> iterator() {
+				return new Iterator<T>(){
+					int i = 0;
+					@Override
+					public boolean hasNext() {
+						return i < getCount();
+					}
+					@Override
+					public T next() {
+						return get(i++);
+					}
+					@Override
+					public void remove() {
+						// not supported
+						throw new UnsupportedOperationException("Remove not supported");
+					}					
+				};
+			}
+			
+		};
+	}
+	
+	public boolean equivalentTo (BusinessObject other, 
+			Callback<BusinessObject, Boolean> ignoreFields) {
+		boolean result = super.equivalentTo(other, ignoreFields);
+		if (result) {
+			BOSet<?> otherSet = (BOSet<?>)other;
+			if (getActiveCount() != otherSet.getActiveCount()) return false;
+			for (T child : this) {
+				if (ignoreFields.call(child)) continue;	// seems a little silly...
+				BOAttribute<?> attr = (BOAttribute<?>)child.findChildByName(ChildIDName().getName());
+				BusinessObject otherChild = otherSet.findChildByID(attr.getValue());
+				if (otherChild == null || !child.equivalentTo(otherChild, ignoreFields)) return false;
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -173,9 +293,12 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * @param id
 	 */
 	public T ensureChildActive(Object id) {
-		T child = populateChild(id);
-		child.ensureActive();
+		T child = populateChild(id, true);
 		return child;
+	}
+	
+	protected T populateChild(Object id) {
+		return populateChild(id, false);
 	}
 	
 	/**
@@ -186,22 +309,28 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * 
 	 * @param id
 	 */
-	protected T populateChild(Object id) {
+	protected T populateChild(Object id, boolean ensureActive) {
 		T child;
 		if (id == null || id.equals(0)) {
 			child = null;
 		} else {
-			child = findChildByID(id);
+			child = findChildByID(id, ensureActive);
 		}
 		if (child == null) {
-			child = createChildInstance();
-			BusinessObject idAttr = child.getChildByName(ChildIDName().getValue());
+			child = createChildInstance(id);
+			BusinessObject idAttr = child.findChildByName(ChildIDName().getValue());
 			if (idAttr != null) {
 				((BOAttribute<?>)idAttr).setAsObject(id);
 			} else {
 				throw new RuntimeException("Cannot find child id property by name '" + ChildIDName().getValue() + "'");
 			}
-			children.add(child);
+			Entry e = new Entry(child);
+			children.add(e);
+			
+			if (ensureActive) {
+				child.ensureActive();
+				e.loaded = true;
+			}
 		}
 		return child;
 	}
@@ -223,7 +352,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		private ActiveIterator() {
 			activePassed = 0;
 			activeCount = getActiveCount();
-			iterator = children.iterator();
+			iterator = childIterable().iterator();
 		}
 		
 		public boolean hasNext() {
@@ -259,10 +388,11 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		// delete all inactive children if isActive is true
 		// not sure if this is the best practice... but don't really see much better way of handling this
 		if (isActive && children != null) {
-			Iterator<T> it = children.iterator();
+			Iterator<Entry> it = children.iterator();//childIterable().iterator();
 			while (it.hasNext()) {
-				T child = it.next();
-				if (!child.Active().getValue()) {
+				Entry e = it.next();
+				// If child isn't loaded, we can assume its supposed to be active
+				if (e.loaded && !e.child.isActive()) {
 					it.remove();
 				}
 			}
@@ -271,8 +401,24 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		super.handleActive(isActive);
 		// Set the active state of all children to match this
 		if (children != null) {
-			for (T child : children) {
-				child.Active().setValue(isActive);
+			for (Entry e : children) {
+				// Only actively load upon setActive() if loadmode is active
+				if (isActive) {
+					if (LoadMode().getValue() == LOADMODE_ACTIVE) {
+						e.child.ensureActive();
+						e.loaded = true;
+					}
+				} else {
+					if (!e.loaded) {
+						// Need to fully load that child prior
+						// to setting it to inactive
+						// This way any child of that child will
+						// also be set to inactive
+						e.child.ensureActive();
+						e.loaded = true;
+					}
+					e.child.Active().setValue(false);
+				}
 			}
 		}
 	}
@@ -285,7 +431,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		sb.append(StringUtil.getRepeatedString(" ", spaces) + "children\n");
 		
 		// call toString on all children with spaces += 4
-		for (BusinessObject child : children) {
+		for (BusinessObject child : childIterable()) {
 			sb.append(child.toString(spaces + 4));
 		}
 		return sb.toString();
@@ -300,14 +446,16 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 */
 	public boolean save() {
 		if (super.save()) {
-			for (T child : children) {
-				child.save();
+			for (Entry e : children) {
+				if (e.loaded) {
+					e.child.save();
+				}
 			}
 			// remove all inactive children here.
-			Iterator<T> it = children.iterator();
+			Iterator<Entry> it = children.iterator();
 			while (it.hasNext()) {
-				T child = it.next();
-				if (!child.isActive()) {
+				Entry e = it.next();
+				if (e.loaded && !e.child.isActive()) {
 					it.remove();
 				}
 			}
@@ -322,18 +470,29 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		super.clear();
 		// This will effectively remove all children.
 		if (children != null) {
-			for (T child : children) {
-				child.Active().setValue(false);
+			for (Entry e : children) {
+				if (!e.loaded) {
+					e.child.ensureActive();
+				}
+				e.child.Active().setValue(false);
 			}
 		}
 	}
+	
+	/**
+	 * Called under cache mode when findChildByID() is called.
+	 * 
+	 * @param id
+	 * @return
+	 */
+	protected abstract boolean childExists(Object id);
 	
 	/**
 	 * Must be implemented to create a new instance of a child. Will be called upon populateChild();
 	 * 
 	 * @return
 	 */
-	protected abstract T createChildInstance();
+	protected abstract T createChildInstance(Object id);
 	
 	@Override
 	/**
@@ -342,10 +501,10 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	protected void doSave() {}
 
 	@Override
-	protected
 	/**
 	 * Do nothing by default. Sets usually should only be a container for a one to many relationship
-	 */ void doDelete() {}
+	 */ 
+	protected void doDelete() {}
 
 	@Override
 	/**
@@ -361,11 +520,11 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 */
 	protected void createAttributes() {}
 
-	@Override
-	public
+	@Override	
 	/**
 	 * Do nothing by default. Sets usually shouldn't have any attributes
-	 */ void clearAttributes() {}
+	 */ 
+	public void clearAttributes() {}
 
 	@Override
 	/**

@@ -20,15 +20,15 @@ public class BOContactDetails extends BODbObject {
 	}
 	
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_CDT());
-		InsertStoredProc().setValue(new PI_CDT());
-		UpdateStoredProc().setValue(new PU_CDT());
-		DeleteStoredProc().setValue(new PD_CDT());
+		setSP(new PS_CDT(), BOContactDetails.class, SP_SELECT);
+		setSP(new PI_CDT(), BOContactDetails.class, SP_INSERT);
+		setSP(new PU_CDT(), BOContactDetails.class, SP_UPDATE);
+		setSP(new PD_CDT(), BOContactDetails.class, SP_DELETE);
 	}
 
 	@Override
 	protected void createAttributes() {
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, 0, 0));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false));
 		address1 = addAsChild(new BODbAttribute<String>(this, "Address1", "cdt_address_1"));
 		address2 = addAsChild(new BODbAttribute<String>(this, "Address2", "cdt_address_2"));
 		address3 = addAsChild(new BODbAttribute<String>(this, "Address3", "cdt_address_3"));

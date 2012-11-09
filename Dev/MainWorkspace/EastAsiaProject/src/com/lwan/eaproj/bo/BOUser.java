@@ -44,16 +44,16 @@ public class BOUser extends BODbObject{
 
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_USR());
-		InsertStoredProc().setValue(new PI_USR());
-		UpdateStoredProc().setValue(new PU_USR());
-		DeleteStoredProc().setValue(new PD_USR());
+		setSP(new PS_USR(), BOUser.class, SP_SELECT);
+		setSP(new PI_USR(), BOUser.class, SP_INSERT);
+		setSP(new PU_USR(), BOUser.class, SP_UPDATE);
+		setSP(new PD_USR(), BOUser.class, SP_DELETE);
 	}
 
 	@Override
 	protected void createAttributes() {
-		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", false, null, 0));
-		userName = addAsChild(new BODbAttribute<String>(this, "UserName", "usr_name", false, null, null));
+		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", false));
+		userName = addAsChild(new BODbAttribute<String>(this, "UserName", "usr_name", false));
 		userName.addValidationListener(new Validation.StringValidator(
 				// Stop usage of white space for the username
 				Validation.STR_NO_LIMIT, Validation.STR_NO_LIMIT, true, true, false, false, true, null));

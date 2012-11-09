@@ -22,12 +22,12 @@ public class BODbAttribute <T> extends BOAttribute<T> {
 	}
 
 	public BODbAttribute(BusinessObject parent, String name, String field) {
-		this(parent, name, field, true, null, null);
+		this(parent, name, field, true);
 	}
 	
 	public BODbAttribute(BusinessObject parent, String name, String field,
-			boolean allowNulls, T defaultValue, T nullValue) {
-		super(parent, name, allowNulls, defaultValue, nullValue);
+			boolean allowNulls) {
+		super(parent, name, allowNulls);
 		
 		_field_name().setValue(field);
 	}

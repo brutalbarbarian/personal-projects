@@ -14,7 +14,15 @@ import com.lwan.jdbc.StoredProc;
 
 public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 	Property<StoredProc> select_stored_proc;
+	Property<StoredProc> exists_stored_proc;
 	Property<String> child_id_field_name;
+	
+	public Property<StoredProc> ExistsStoredProc() {
+		if (exists_stored_proc == null) {
+			exists_stored_proc = new SimpleObjectProperty<StoredProc>(this, "ExistsStoredProc");
+		}
+		return exists_stored_proc;
+	}
 	
 	public Property<StoredProc> SelectStoredProc() {
 		if (select_stored_proc == null) {
@@ -51,30 +59,35 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 
 	@Override
 	protected boolean populateAttributes() {
-		// if the SelectStoredProc requires any parameters...
-		// go looking in the direct parent's attributes
-		StoredProc sp = SelectStoredProc().getValue();
-		if (sp != null) {
-			try {
-				populateParameters(sp);
-				sp.execute(GConnection.getConnection());
-				
-				ResultSet rs = sp.getResult();
-				if (rs == null) {
-					throw new SQLException("No resultset found found from populate Attributes");
-				}
-				// look for column with same name as childID property?
-				int col = rs.findColumn(ChildIDFieldName().getValue());
-				while (rs.next()) {
-					// The child will be set active straight after this anyway.
-					populateChild(rs.getObject(col));
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}			
-			return true;
+		if (LoadMode().getValue() != LOADMODE_CACHE) {
+			// if the SelectStoredProc requires any parameters...
+			// go looking in the direct parent's attributes
+			StoredProc sp = SelectStoredProc().getValue();
+			if (sp != null) {
+				try {
+					populateParameters(sp);
+					sp.execute(GConnection.getConnection());
+					
+					ResultSet rs = sp.getResult();
+					if (rs == null) {
+						throw new SQLException("No resultset found found from populate Attributes");
+					}
+					// look for column with same name as childID property?
+					int col = rs.findColumn(ChildIDFieldName().getValue());
+					while (rs.next()) {
+						// The child will be set active straight after this anyway.
+						populateChild(rs.getObject(col));
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}			
+				return true;
+			} else {
+				return false;
+			}
 		} else {
-			return false;
+			// Never load anything if loadmode is cache
+			return true;
 		}
 	}
 	
@@ -92,7 +105,7 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 			return null;
 		}
 		T child = get(0);	// dosen't matter if inactive, just need to get attribute reference.
-		BODbAttribute<?> attr = child.getAttributeByFieldName(fieldName);
+		BODbAttribute<?> attr = child.findAttributeByFieldName(fieldName);
 		if (attr == null) {
 			throw new IllegalArgumentException("Cannot find attribute of child with fieldname '" + fieldName + "'");
 		}
@@ -134,12 +147,51 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 				// this only an issue if parameters are required...
 				throw new SQLException("No owner found for class " + getClass().getName());
 			} else {
-				attr = owner.getAttributeByFieldName(name);
+				attr = owner.findAttributeByFieldName(name);
 			}
 			if (attr == null) {
 				throw new SQLException("Attribute for param '" + param.name() + "' not found.");
 			}
 			param.set(attr.getValue());
+		}
+	}
+	
+	protected boolean childExists(Object id) {
+		StoredProc sp = ExistsStoredProc().getValue();
+		BODbObject owner = (BODbObject)Owner().getValue();
+		BODbAttribute<?> attr = null;
+		if (sp != null) {
+			for (Parameter p : sp.getAllParameters()) {
+				String paramName = p.name().substring(1);
+				if (paramName == ChildIDFieldName().getValue()) {
+					p.set(id);
+				} else if (owner != null && 
+						(attr = owner.findAttributeByFieldName("paramName")) != null) {
+					// go look in parent
+					p.set(attr.getValue());
+				} else {
+					throw new RuntimeException("Cannot find param field " + paramName + " for " +
+							"storedproc " + sp.getClass().getName());
+				}
+			}
+			try {
+				sp.execute(GConnection.getConnection());
+				ResultSet rs = null;
+				try { 
+					rs = sp.getResult();
+					return rs.next();
+				} finally {
+					if (rs != null) {
+						rs.getStatement().close();
+					}
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+			
+			
+		} else {
+			return false;	// No way of checking.. assume false
 		}
 	}
 }
