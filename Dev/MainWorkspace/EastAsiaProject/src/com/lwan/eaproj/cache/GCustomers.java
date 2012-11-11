@@ -30,11 +30,14 @@ public class GCustomers extends BODbSet<BOCustomer> {
 	public GCustomers() {
 		super(null, "CustomerCache", "CustomerID", "cus_id");
 		LoadMode().setValue(LOADMODE_CACHE);
+		
 	}
 
 	@Override
 	protected void createStoredProcs() {
+		// inefficent???
 		childType = new PS_CUS();
+		ExistsStoredProc().setValue(new PS_CUS());
 	}
 
 	@Override

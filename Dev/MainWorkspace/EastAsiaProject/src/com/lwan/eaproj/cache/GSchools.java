@@ -2,6 +2,7 @@ package com.lwan.eaproj.cache;
 
 import com.lwan.bo.db.BODbSet;
 import com.lwan.eaproj.bo.BOSchool;
+import com.lwan.eaproj.sp.PS_SCH;
 
 public class GSchools extends BODbSet<BOSchool> {
 	private static GSchools cachedSet;
@@ -15,11 +16,12 @@ public class GSchools extends BODbSet<BOSchool> {
 	private GSchools() {
 		super(null, "SchoolCache", "SchoolName", "sch_id");
 		LoadMode().setValue(LOADMODE_CACHE);
+		
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		// Does it matter for caches?... never going to load anything anyway
+		ExistsStoredProc().setValue(new PS_SCH());
 	}
 
 	@Override
