@@ -41,8 +41,8 @@ public class BOEmployeePayment extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		employeePaymentID = addAsChild(new BODbAttribute<Integer>(this, "EmployeePaymentID", "eph_id", false));
-		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false));
+		employeePaymentID = addAsChild(new BODbAttribute<Integer>(this, "EmployeePaymentID", "eph_id", false, false));
+		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false, false));
 		
 		datePaid = addAsChild(new BODbAttribute<Date>(this, "DatePaid", "eph_date_paid"));
 		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "eph_notes"));

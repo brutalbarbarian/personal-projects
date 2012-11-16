@@ -21,7 +21,7 @@ public class GCustomers extends BODbSet<BOCustomer> {
 		return cache;
 	}
 	
-	public static BOCustomer findCustomerID(int id) {
+	public static BOCustomer findCustomerByID(int id) {
 		return get().findChildByID(id);
 	}
 	
@@ -50,7 +50,10 @@ public class GCustomers extends BODbSet<BOCustomer> {
 		try {
 			childType.execute(GConnection.getConnection());
 			res = childType.getResult();
-			int type = res.getInt("cty_id");
+			int type = -1;
+			if (res.next()) {
+				type = res.getInt("cty_id");
+			}
 			switch (type) {
 			case BOConstants.CTY_DEFAULT : return new BOCustomer(this);
 			case BOConstants.CTY_STUDENT : return new BOStudent(this);

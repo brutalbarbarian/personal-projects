@@ -2,8 +2,6 @@ package com.lwan.eaproj.bo;
 
 import java.util.Date;
 
-import javafx.util.Callback;
-
 import com.lwan.bo.BOLink;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
@@ -36,21 +34,15 @@ public class BOStudentRecord extends BODbObject {
 	}
 	
 	protected void createAttributes() {
-		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", false));
-		studentID = addAsChild(new BODbAttribute<Integer>(this, "StudentID", "stu_id", false));
-		schoolID = addAsChild(new BODbAttribute<Integer>(this, "SchoolID", "sch_id", false));
+		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", false, false));
+		studentID = addAsChild(new BODbAttribute<Integer>(this, "StudentID", "stu_id", false, false));
+		schoolID = addAsChild(new BODbAttribute<Integer>(this, "SchoolID", "sch_id", false, true));
 		
 		startDate = addAsChild(new BODbAttribute<Date>(this, "StartDate", "stu_start_date"));
 		endDate = addAsChild(new BODbAttribute<Date>(this, "EndDate", "stu_end_date"));
 		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "stu_notes"));
 		
-		school = addAsChild(new BOLink<BOSchool>(this, "School", 
-				new Callback<BOLink<BOSchool>, BOSchool>(){
-					public BOSchool call(BOLink<BOSchool> arg0) {
-						return GSchools.findSchoolByID(schoolID.getValue());
-					}
-				}
-		));
+		school = addAsChild(new BOLink<BOSchool>(this, "School"));
 	}
 	
 	protected void createStoredProcs() {
@@ -58,6 +50,15 @@ public class BOStudentRecord extends BODbObject {
 		setSP(new PI_STU(), BOStudentRecord.class, SP_INSERT);
 		setSP(new PU_STU(), BOStudentRecord.class, SP_UPDATE);
 		setSP(new PD_STU(), BOStudentRecord.class, SP_DELETE);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected <T extends BusinessObject> T getLinkedChild(BOLink<T> link) {
+		if (link == school) {
+			return (T) GSchools.findSchoolByID(schoolID.getValue());
+		} else {
+			return super.getLinkedChild(link);
+		}
 	}
 	
 	public void clearAttributes() {

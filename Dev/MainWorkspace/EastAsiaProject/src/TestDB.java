@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOSet;
 import com.lwan.eaproj.bo.*;
+import com.lwan.eaproj.cache.GCompany;
+import com.lwan.eaproj.cache.GCustomers;
+import com.lwan.eaproj.cache.GUsers;
 import com.lwan.eaproj.util.BOConstants;
 import com.lwan.jdbc.GConnection;
 
@@ -229,9 +232,14 @@ public class TestDB {
 		
 //		con.close();
 		
-		BOCustomer cus = new BOStudent(null);
-		cus.customerID.setValue(4);
-		cus.ensureActive();
+//		BOCustomer cus = new BOStudent(null);
+//		cus.customerID.setValue(4);
+//		cus.ensureActive();
+		
+//		BOCustomer cus = GCustomers.findCustomerID(4);
+//		System.out.println(cus.toString());
+		
+//		System.out.println(GUsers.validateLogin("sa", "password"));
 		
 ////		cus.Active().setValue(false);
 //		
@@ -256,8 +264,52 @@ public class TestDB {
 //		}
 //		
 		
-		System.out.println(cus.toString());
+//		System.out.println(cus.toString());
 		
+//		BOProduct prd = new BOProduct(null);
+////		prd.productID.Value().set(1);
+//		prd.ensureActive();
+//		prd.name.setValue("Test Product");
+//		prd.productCategoryID.setValue(1);	// misc
+//		prd.description.setValue("Some description");
+//		prd.defaultPrice.setValue(999.99);
+////		prd.setActive(false);
+//		try {
+//			prd.trySave();
+//		} catch (BOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		
+//		System.out.println(new Date(System.currentTimeMillis()));
+		
+//		System.out.println(prd.toString());
+		
+		if (GUsers.setActiveUser("sa", "password")) {
+			System.out.println("Login success");
+			
+			BOInvoice inv = new BOInvoice(null);
+			inv.ensureActive();
+			inv.companyID.setValue(10);
+			inv.customerID.setValue(4);
+			inv.dateRequired.setValue(Date.valueOf("2012-04-12"));
+			
+			System.out.println(inv.toString());
+			
+			try {
+				inv.trySave();
+			} catch (BOException e) {
+				e.printStackTrace();
+			}
+			
+		} else {
+			System.out.println("Login failed");
+		}
+		
+		
+		
+		GUsers.clearActiveUser();
 		GConnection.uninitialise();
 	}
 	
@@ -275,15 +327,6 @@ public class TestDB {
 			for (int i = 1; i <= columns; i++) {
 				Object o = result.getObject(i);
 				System.out.print(o.toString() + ":" + o.getClass().getName() + ":" + result.getMetaData().getColumnTypeName(i));
-				
-				// currency -> BigDecimal. timedate -> TimeStamp
-//				if (i == 6) {
-//					System.out.println(((BigDecimal)o).doubleValue());
-//					System.out.println(result.getMetaData().getColumnTypeName(i));
-////					Type.
-//				}
-////				java.sql.Timestamp.
-////				System.out.print(result.getObject(i).getClass());
 				if (i != columns) {
 					System.out.print(", ");
 				}

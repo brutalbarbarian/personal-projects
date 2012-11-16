@@ -2,6 +2,7 @@ package com.lwan.eaproj.cache;
 
 import com.lwan.bo.db.BODbSet;
 import com.lwan.eaproj.bo.BOCompany;
+import com.lwan.eaproj.sp.PS_COM;
 
 public class GCompany extends BODbSet<BOCompany>{
 	private static GCompany cache;
@@ -12,21 +13,24 @@ public class GCompany extends BODbSet<BOCompany>{
 		}
 		return cache;
 	}
+	
+	public static BOCompany findCompanyByID(int id) {
+		return get().findChildByID(id);
+	}
 
 	private GCompany() {
 		super(null, "CompanyCache", "CompanyID", "com_id");
 		
-		
+		LoadMode().setValue(LOADMODE_CACHE);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-//		Exists
+		ExistsStoredProc().setValue(new PS_COM());
 	}
 
 	@Override
 	protected BOCompany createChildInstance(Object id) {
 		return new BOCompany(this);
 	}
-
 }

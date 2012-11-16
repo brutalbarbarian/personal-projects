@@ -43,8 +43,8 @@ public class BOCustomer extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", false));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false));
+		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", false, false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, false));
 		
 		customerType = addAsChild(new BODbAttribute<Integer>(this, "CustomerType", "cty_id"));
 		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "cus_name_first"));

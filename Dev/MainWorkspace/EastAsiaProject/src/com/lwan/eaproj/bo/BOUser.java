@@ -52,8 +52,8 @@ public class BOUser extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", false));
-		userName = addAsChild(new BODbAttribute<String>(this, "UserName", "usr_name", false));
+		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", false, false));
+		userName = addAsChild(new BODbAttribute<String>(this, "UserName", "usr_name", false, true));
 		userName.addValidationListener(new Validation.StringValidator(
 				// Stop usage of white space for the username
 				Validation.STR_NO_LIMIT, Validation.STR_NO_LIMIT, true, true, false, false, true, null));

@@ -270,6 +270,18 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	
 	/**
+	 * Will be called by BOLinks when the links attempt to get the linked
+	 * item. This should be controlled by the parent.
+	 * 
+	 * @param link
+	 * @return
+	 */
+	protected <T extends BusinessObject> T getLinkedChild(BOLink<T> link) {
+		// By default just return null... 
+		return null;
+	}
+	
+	/**
 	 * Will call equivilentTo on all direct children of this object. This will effectively
 	 * cascade down the tree, checking every object. Objects should override this if the
 	 * object does any special checks.

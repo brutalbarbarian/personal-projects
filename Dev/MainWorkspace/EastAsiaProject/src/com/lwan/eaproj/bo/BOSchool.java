@@ -38,8 +38,8 @@ public class BOSchool extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		schoolID = addAsChild(new BODbAttribute<Integer>(this, "SchoolID", "sch_id", false));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false));
+		schoolID = addAsChild(new BODbAttribute<Integer>(this, "SchoolID", "sch_id", false, false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, false));
 		schoolName = addAsChild(new BODbAttribute<String>(this, "SchoolName", "sch_name"));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));

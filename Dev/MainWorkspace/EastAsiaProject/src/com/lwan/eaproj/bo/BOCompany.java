@@ -31,8 +31,8 @@ public class BOCompany extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false));
+		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false, false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, false));
 		companyName = addAsChild(new BODbAttribute<String>(this, "CompanyName", "com_name"));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));

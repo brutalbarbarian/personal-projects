@@ -17,6 +17,9 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 	Property<StoredProc> exists_stored_proc;
 	Property<String> child_id_field_name;
 	
+	// Exists and select stored procs are mutually exclusive.
+	// Select is used upon populateAttributes with LoadMode = Active or Passive
+	// Exists is used upon findChildByID with LoadMode = Cache
 	public Property<StoredProc> ExistsStoredProc() {
 		if (exists_stored_proc == null) {
 			exists_stored_proc = new SimpleObjectProperty<StoredProc>(this, "ExistsStoredProc");
@@ -100,16 +103,22 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 	 * @return
 	 */
 	public T findChildByFieldName(String fieldName, Object value, int childNum) {
-		if (getCount() == 0) {
-			// There's no chance of finding anything anyway if there's no children
-			return null;
+		T result = null;
+		if (getCount() != 0) {
+			T child = get(0);	// dosen't matter if inactive, just need to get attribute reference.
+			BODbAttribute<?> attr = child.findAttributeByFieldName(fieldName);
+			if (attr == null) {
+				throw new IllegalArgumentException("Cannot find attribute of child with fieldname '" + fieldName + "'");
+			}
+			result = findChildByAttribute(attr.Name().getValue(), value, childNum);
 		}
-		T child = get(0);	// dosen't matter if inactive, just need to get attribute reference.
-		BODbAttribute<?> attr = child.findAttributeByFieldName(fieldName);
-		if (attr == null) {
-			throw new IllegalArgumentException("Cannot find attribute of child with fieldname '" + fieldName + "'");
+		if (result == null && LoadMode().getValue() == LOADMODE_CACHE) {
+			//... how would this work... is this a good idea?...will need a special stored
+			// proc to be able to find a field like this... one that can take any
+			// param..eww.. and what if we want to go 
+			// TODO... do nothing for now.
 		}
-		return findChildByAttribute(attr.Name().getValue(), value, childNum);
+		return result;
 	}
 	
 	/**
@@ -163,15 +172,16 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 		if (sp != null) {
 			for (Parameter p : sp.getAllParameters()) {
 				String paramName = p.name().substring(1);
-				if (paramName == ChildIDFieldName().getValue()) {
+				if (paramName.equals(ChildIDFieldName().getValue())) {
 					p.set(id);
 				} else if (owner != null && 
 						(attr = owner.findAttributeByFieldName("paramName")) != null) {
 					// go look in parent
 					p.set(attr.getValue());
 				} else {
-					throw new RuntimeException("Cannot find param field " + paramName + " for " +
-							"storedproc " + sp.getClass().getName());
+					// Just continue?... not that important really...
+//					throw new RuntimeException("Cannot find param field " + paramName + " for " +
+//							"storedproc " + sp.getClass().getName());
 				}
 			}
 			try {

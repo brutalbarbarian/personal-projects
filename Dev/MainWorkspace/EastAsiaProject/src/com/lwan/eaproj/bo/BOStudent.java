@@ -18,6 +18,7 @@ public class BOStudent extends BOCustomer{
 	}
 	
 	public void clearAttributes() {
+		super.clearAttributes();
 		students.clear();
 	}
 }

@@ -149,10 +149,10 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	}
 	
 	public T findChildByID(Object id) {
-		return findChildByID(id, true);
+		return findChildByID(id, true, false);
 	}
 	
-	protected T findChildByID (Object id, boolean ensureActive) {
+	protected T findChildByID (Object id, boolean ensureActive, boolean datasetOnly) {
 		String childAttr = ChildIDName().getValue();
 		if (!StringUtil.isNullOrBlank(childAttr)) {
 			for (Entry e : children) {
@@ -174,7 +174,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 			// Dosen't exist in current set... but in cache mode so might still exist in
 			// the actual dataset...
-			if (LoadMode().getValue() == LOADMODE_CACHE && childExists(id)) {
+			if (!datasetOnly && LoadMode().getValue() == LOADMODE_CACHE && childExists(id)) {
 				return populateChild(id, ensureActive);
 			}
 		}
@@ -314,7 +314,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		if (id == null || id.equals(0)) {
 			child = null;
 		} else {
-			child = findChildByID(id, ensureActive);
+			child = findChildByID(id, ensureActive, true);
 		}
 		if (child == null) {
 			child = createChildInstance(id);
@@ -476,6 +476,19 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 				}
 				e.child.Active().setValue(false);
 			}
+		}
+	}
+	
+	/**
+	 * Force clear this set... this may break synchronization as it
+	 * clears the children instead of marking them inactive. Calling save at 
+	 * a later stage will not delete from the underlying dataset the children
+	 * that was cleared using this method.
+	 * 
+	 */
+	public void forceClear() {
+		if (children != null) {
+			children.clear();
 		}
 	}
 	

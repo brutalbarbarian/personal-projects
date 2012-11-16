@@ -1,9 +1,11 @@
 package com.lwan.jdbc;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -137,12 +139,7 @@ public class StoredProc {
 				
 				for (int j = 1; j <= params.size(); j++) {
 					Parameter param = params.get(j - 1);
-					Object pValue = param.get();
-					if (pValue == null) {
-						statement.setNull(j, param.getType());
-					} else {
-						statement.setObject(j, pValue, param.getType());	
-					}
+					setParam(param.get(), param.getType(), statement, j);
 				}
 			}
 			statement.execute();
@@ -158,6 +155,17 @@ public class StoredProc {
 			} else {
 				statement.close();
 			}
+		}
+	}
+	
+	protected void setParam(Object value, int type, PreparedStatement statement, int statementIndex) throws SQLException {
+		if (value == null) {
+			statement.setNull(statementIndex, type);
+		} else {
+			if (type == Types.DATE) {
+				value = new Date(((java.util.Date)value).getTime());
+			}
+			statement.setObject(statementIndex, value);
 		}
 	}
 	

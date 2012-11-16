@@ -28,7 +28,7 @@ public class BOContactDetails extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, false));
 		address1 = addAsChild(new BODbAttribute<String>(this, "Address1", "cdt_address_1"));
 		address2 = addAsChild(new BODbAttribute<String>(this, "Address2", "cdt_address_2"));
 		address3 = addAsChild(new BODbAttribute<String>(this, "Address3", "cdt_address_3"));
