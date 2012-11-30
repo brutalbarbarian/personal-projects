@@ -1,4 +1,4 @@
-package com.lwan.eaproj.cache;
+package com.lwan.eaproj.bo.cache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

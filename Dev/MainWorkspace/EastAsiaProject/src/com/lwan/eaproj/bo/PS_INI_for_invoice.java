@@ -1,18 +1,19 @@
-package com.lwan.eaproj.sp;
+package com.lwan.eaproj.bo;
 
 import java.sql.Types;
 
 import com.lwan.jdbc.StoredProc;
 
-public class PD_INV extends StoredProc{
+public class PS_INI_for_invoice extends StoredProc{
 	private static final String[] PARAMS = {"@inv_id"};
 	private static final int[] PARAM_TYPES = {Types.NUMERIC};
 	private static final String[] STATEMENTS = {
-		"delete from INV_invoice " +
+		"select ini_id " +
+		"from INI_invoice_item " +
 		"where inv_id = @inv_id"
 	};
 	
-	public PD_INV () {
+	public PS_INI_for_invoice () {
 		super(PARAMS, PARAM_TYPES, STATEMENTS);
 	}
 }

@@ -110,7 +110,7 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 			if (attr == null) {
 				throw new IllegalArgumentException("Cannot find attribute of child with fieldname '" + fieldName + "'");
 			}
-			result = findChildByAttribute(attr.Name().getValue(), value, childNum);
+			result = findChildByAttribute(attr.Name().getValue(), value, childNum, false);
 		}
 		if (result == null && LoadMode().getValue() == LOADMODE_CACHE) {
 			//... how would this work... is this a good idea?...will need a special stored

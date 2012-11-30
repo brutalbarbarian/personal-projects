@@ -56,12 +56,12 @@ public class BOLink<T extends BusinessObject> extends BusinessObject{
 		
 	}
 	
-	public String toString(int spaces) {
+	public String toString(int spaces, int expansion) {
 		T child = getReferencedObject();
 		if (child == null) {
-			return super.toString(spaces);
+			return super.toString(spaces, expansion);
 		}
-		return child.toString(spaces);
+		return child.toString(spaces, expansion);
 	}
 
 	@Override

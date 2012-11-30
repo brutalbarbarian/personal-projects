@@ -1,4 +1,4 @@
-package com.lwan.eaproj.cache;
+package com.lwan.eaproj.bo.cache;
 
 import com.lwan.bo.db.BODbSet;
 import com.lwan.eaproj.bo.BOSchool;

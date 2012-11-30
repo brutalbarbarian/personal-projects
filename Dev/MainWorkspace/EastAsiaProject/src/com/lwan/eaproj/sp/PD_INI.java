@@ -4,15 +4,15 @@ import java.sql.Types;
 
 import com.lwan.jdbc.StoredProc;
 
-public class PD_INV extends StoredProc{
-	private static final String[] PARAMS = {"@inv_id"};
+public class PD_INI extends StoredProc{
+	private static final String[] PARAMS = {"@ini_id"};
 	private static final int[] PARAM_TYPES = {Types.NUMERIC};
 	private static final String[] STATEMENTS = {
-		"delete from INV_invoice " +
-		"where inv_id = @inv_id"
+		"delete from INI_invoice_item " +
+		"where ini_id = @ini_id"
 	};
 	
-	public PD_INV () {
+	public PD_INI () {
 		super(PARAMS, PARAM_TYPES, STATEMENTS);
 	}
 }

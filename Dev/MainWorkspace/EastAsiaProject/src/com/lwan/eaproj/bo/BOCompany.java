@@ -1,5 +1,6 @@
 package com.lwan.eaproj.bo;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
@@ -31,9 +32,9 @@ public class BOCompany extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false, false));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, false));
-		companyName = addAsChild(new BODbAttribute<String>(this, "CompanyName", "com_name"));
+		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", AttributeType.Integer, false, false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", AttributeType.Integer, false, false));
+		companyName = addAsChild(new BODbAttribute<String>(this, "CompanyName", "com_name", AttributeType.String));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
 		contactDetails.Independent().setValue(true);

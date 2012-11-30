@@ -1,5 +1,6 @@
 package com.lwan.eaproj.bo;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
@@ -36,11 +37,11 @@ public class BOProduct extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		productID = addAsChild(new BODbAttribute<Integer>(this, "ProductID", "prd_id", false, false));
-		productCategoryID = addAsChild(new BODbAttribute<Integer>(this, "ProductCategoryID", "prc_id", false, true));
-		name = addAsChild(new BODbAttribute<String>(this, "Name", "prd_name"));
-		description = addAsChild(new BODbAttribute<String>(this, "Description", "prd_description"));
-		defaultPrice = addAsChild(new BODbAttribute<Double>(this, "DefaultPrice", "prd_default_price"));
+		productID = addAsChild(new BODbAttribute<Integer>(this, "ProductID", "prd_id", AttributeType.Integer, false, false));
+		productCategoryID = addAsChild(new BODbAttribute<Integer>(this, "ProductCategoryID", "prc_id", AttributeType.Integer, false, true));
+		name = addAsChild(new BODbAttribute<String>(this, "Name", "prd_name", AttributeType.String));
+		description = addAsChild(new BODbAttribute<String>(this, "Description", "prd_description", AttributeType.String));
+		defaultPrice = addAsChild(new BODbAttribute<Double>(this, "DefaultPrice", "prd_default_price", AttributeType.Currency));
 	}
 
 	@Override

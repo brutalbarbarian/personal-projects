@@ -17,6 +17,7 @@ public class BOAttribute <T> extends BusinessObject {
 	private Property<Boolean> allow_user_modify;
 	private Property<Boolean> user_set;
 	private Property<Object> user_set_source;
+	private Property<AttributeType> attribute_type;
 	
 	private ValidatedProperty<T> value;
 	
@@ -32,6 +33,10 @@ public class BOAttribute <T> extends BusinessObject {
 			value = new ValidatedProperty<>(this, "Value");
 		}
 		return value;
+	}
+	
+	public ReadOnlyProperty<AttributeType> AttributeType () {
+		return _attribute_type();
 	}
 	
 	public Property<Boolean> AllowUserModify() {
@@ -64,6 +69,13 @@ public class BOAttribute <T> extends BusinessObject {
 			user_set = new SimpleObjectProperty<Boolean>(this, "UserSet", false);
 		}
 		return user_set;
+	}
+	
+	private Property<AttributeType> _attribute_type() {
+		if (attribute_type == null) {
+			attribute_type = new SimpleObjectProperty<AttributeType>(this, "AttributeType", AttributeType.Unknown);
+		}
+		return attribute_type;
 	}
 	
 	private Property<Object> _user_set_source() {
@@ -180,14 +192,15 @@ public class BOAttribute <T> extends BusinessObject {
 		return true;
 	}
 	
-	public BOAttribute(BusinessObject parent, String name) {
-		this(parent, name, true, true);
+	public BOAttribute(BusinessObject parent, String name, AttributeType type) {
+		this(parent, name, type, true, true);
 	}
 	
 	
-	public BOAttribute(BusinessObject parent, String name, boolean allowNulls, boolean allowUserModify) {
+	public BOAttribute(BusinessObject parent, String name, AttributeType type, boolean allowNulls, boolean allowUserModify) {
 		super(parent, name);
 		
+		_attribute_type().setValue(type);
 		AllowNulls().setValue(allowNulls);
 		AllowUserModify().setValue(allowUserModify);
 		
@@ -219,7 +232,7 @@ public class BOAttribute <T> extends BusinessObject {
 	 * @param newValue
 	 */
 	public void doChanged(T oldValue, T newValue) {
-		fireModified(new ModifiedEvent(this));
+		fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_ATTRIBUTE));
 	}	
 	
 	/**
@@ -307,6 +320,10 @@ public class BOAttribute <T> extends BusinessObject {
 	@SuppressWarnings("unchecked")
 	public void setAsObject(Object val) {
 		setValue((T)val);
+	}
+	
+	public AttributeType getAttributeType() {
+		return AttributeType().getValue();
 	}
 	
 	/**

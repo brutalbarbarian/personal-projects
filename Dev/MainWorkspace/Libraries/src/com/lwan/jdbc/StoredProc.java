@@ -73,7 +73,8 @@ public class StoredProc {
 					if (!(Character.isLetterOrDigit(statement[i]) || statement[i] == '_')) {
 						Parameter par = parameters.get(param.toString());
 						if (par == null) {
-							throw new RuntimeException("Parameter '" + param.toString() + "' not found in paramList");
+							throw new RuntimeException("Parameter '" + param.toString() + "' not found in paramList " +
+									"for storedproc " + getClass().getName());
 						}
 						paramList.add(par);
 						param.setLength(0);	// reset back to 0
@@ -136,7 +137,6 @@ public class StoredProc {
 			// just ignore params if its null. Likely this stored proc has no parameters
 			if (paramMap != null) { 
 				List<Parameter> params = paramMap.get(i);
-				
 				for (int j = 1; j <= params.size(); j++) {
 					Parameter param = params.get(j - 1);
 					setParam(param.get(), param.getType(), statement, j);
@@ -147,7 +147,8 @@ public class StoredProc {
 			
 			if (res != null) {
 				if (result != null) {
-					throw new SQLException("Cannot return more then one result set");
+					throw new SQLException("Cannot return more then one result set in storedproc " +
+							getClass().getName());
 				}
 				// if there are multiple statements within this stored proc that can return resultsets,
 				// only the one executed last will be kept.

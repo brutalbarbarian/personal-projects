@@ -2,6 +2,7 @@ package com.lwan.eaproj.bo;
 
 import javafx.util.Callback;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
@@ -52,14 +53,14 @@ public class BOUser extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", false, false));
-		userName = addAsChild(new BODbAttribute<String>(this, "UserName", "usr_name", false, true));
+		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", AttributeType.Integer, false, false));
+		userName = addAsChild(new BODbAttribute<String>(this, "UserName", "usr_name", AttributeType.String, false, true));
 		userName.addValidationListener(new Validation.StringValidator(
 				// Stop usage of white space for the username
 				Validation.STR_NO_LIMIT, Validation.STR_NO_LIMIT, true, true, false, false, true, null));
-		timestamp = addAsChild(new BODbAttribute<String>(this, "Timestamp", "usr_timestamp"));
-		password = addAsChild(new BODbAttribute<String>(this, "Password", "usr_password"));
-		description = addAsChild(new BODbAttribute<String>(this, "Description", "usr_description"));		
+		timestamp = addAsChild(new BODbAttribute<String>(this, "Timestamp", "usr_timestamp", AttributeType.String));
+		password = addAsChild(new BODbAttribute<String>(this, "Password", "usr_password", AttributeType.String));
+		description = addAsChild(new BODbAttribute<String>(this, "Description", "usr_description", AttributeType.String));		
 		
 		password.setBeforeChangeListener(new Callback<String, String>() {
 			public String call(String newValue) {

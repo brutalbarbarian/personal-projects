@@ -1,4 +1,4 @@
-package com.lwan.eaproj.cache;
+package com.lwan.eaproj.bo.cache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -124,7 +124,7 @@ public class GUsers extends BODbSet<BOUser>{
 	}
 
 	private GUsers() {
-		super(null, "UserCache", "UserID", "@usr_id");
+		super(null, "UserCache", "UserID", "usr_id");
 		LoadMode().setValue(LOADMODE_CACHE);
 	}
 

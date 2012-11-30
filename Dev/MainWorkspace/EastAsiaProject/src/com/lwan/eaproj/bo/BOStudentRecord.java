@@ -2,12 +2,13 @@ package com.lwan.eaproj.bo;
 
 import java.util.Date;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOLink;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
-import com.lwan.eaproj.cache.GSchools;
+import com.lwan.eaproj.bo.cache.GSchools;
 import com.lwan.eaproj.sp.PD_STU;
 import com.lwan.eaproj.sp.PI_STU;
 import com.lwan.eaproj.sp.PS_STU;
@@ -34,13 +35,13 @@ public class BOStudentRecord extends BODbObject {
 	}
 	
 	protected void createAttributes() {
-		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", false, false));
-		studentID = addAsChild(new BODbAttribute<Integer>(this, "StudentID", "stu_id", false, false));
-		schoolID = addAsChild(new BODbAttribute<Integer>(this, "SchoolID", "sch_id", false, true));
+		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", AttributeType.Integer, false, false));
+		studentID = addAsChild(new BODbAttribute<Integer>(this, "StudentID", "stu_id", AttributeType.Integer, false, false));
+		schoolID = addAsChild(new BODbAttribute<Integer>(this, "SchoolID", "sch_id", AttributeType.Integer, false, true));
 		
-		startDate = addAsChild(new BODbAttribute<Date>(this, "StartDate", "stu_start_date"));
-		endDate = addAsChild(new BODbAttribute<Date>(this, "EndDate", "stu_end_date"));
-		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "stu_notes"));
+		startDate = addAsChild(new BODbAttribute<Date>(this, "StartDate", "stu_start_date", AttributeType.Date));
+		endDate = addAsChild(new BODbAttribute<Date>(this, "EndDate", "stu_end_date", AttributeType.Date));
+		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "stu_notes", AttributeType.String));
 		
 		school = addAsChild(new BOLink<BOSchool>(this, "School"));
 	}

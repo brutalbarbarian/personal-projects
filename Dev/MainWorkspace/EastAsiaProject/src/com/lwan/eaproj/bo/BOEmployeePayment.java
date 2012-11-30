@@ -2,6 +2,7 @@ package com.lwan.eaproj.bo;
 
 import java.util.Date;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
@@ -41,12 +42,12 @@ public class BOEmployeePayment extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		employeePaymentID = addAsChild(new BODbAttribute<Integer>(this, "EmployeePaymentID", "eph_id", false, false));
-		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false, false));
+		employeePaymentID = addAsChild(new BODbAttribute<Integer>(this, "EmployeePaymentID", "eph_id", AttributeType.Integer, false, false));
+		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", AttributeType.Integer, false, false));
 		
-		datePaid = addAsChild(new BODbAttribute<Date>(this, "DatePaid", "eph_date_paid"));
-		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "eph_notes"));
-		paidAmount = addAsChild(new BODbAttribute<Double>(this, "PaidAmount", "eph_paid_amount"));
+		datePaid = addAsChild(new BODbAttribute<Date>(this, "DatePaid", "eph_date_paid", AttributeType.Date));
+		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "eph_notes", AttributeType.String));
+		paidAmount = addAsChild(new BODbAttribute<Double>(this, "PaidAmount", "eph_paid_amount", AttributeType.Currency));
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.lwan.eaproj.bo;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
@@ -43,14 +44,14 @@ public class BOCustomer extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", false, false));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, false));
+		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", AttributeType.Integer, false, false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", AttributeType.Integer, false, false));
 		
-		customerType = addAsChild(new BODbAttribute<Integer>(this, "CustomerType", "cty_id"));
-		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "cus_name_first"));
-		nameLast = addAsChild(new BODbAttribute<String>(this, "NameLast", "cus_name_last"));
-		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "cus_notes"));
-		reference = addAsChild(new BODbAttribute<String>(this, "Reference", "cus_ref"));
+		customerType = addAsChild(new BODbAttribute<Integer>(this, "CustomerType", "cty_id", AttributeType.Integer));
+		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "cus_name_first", AttributeType.String));
+		nameLast = addAsChild(new BODbAttribute<String>(this, "NameLast", "cus_name_last", AttributeType.String));
+		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "cus_notes", AttributeType.String));
+		reference = addAsChild(new BODbAttribute<String>(this, "Reference", "cus_ref", AttributeType.String));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
 		contactDetails.Independent().setValue(true);

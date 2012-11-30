@@ -1,5 +1,6 @@
 package com.lwan.eaproj.bo;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
@@ -28,17 +29,17 @@ public class BOContactDetails extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", false, false));
-		address1 = addAsChild(new BODbAttribute<String>(this, "Address1", "cdt_address_1"));
-		address2 = addAsChild(new BODbAttribute<String>(this, "Address2", "cdt_address_2"));
-		address3 = addAsChild(new BODbAttribute<String>(this, "Address3", "cdt_address_3"));
-		city = addAsChild(new BODbAttribute<String>(this, "City", "cdt_city"));
-		country = addAsChild(new BODbAttribute<String>(this, "Country", "cdt_country"));
-		postCode = addAsChild(new BODbAttribute<String>(this, "PostCode", "cdt_postcode"));
-		phone = addAsChild(new BODbAttribute<String>(this, "Phone", "cdt_phone"));
-		mobile = addAsChild(new BODbAttribute<String>(this, "Mobile", "cdt_mobile"));
-		fax = addAsChild(new BODbAttribute<String>(this, "Fax", "cdt_fax"));
-		site = addAsChild(new BODbAttribute<String>(this, "Site", "cdt_site"));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", AttributeType.Integer, false, false));
+		address1 = addAsChild(new BODbAttribute<String>(this, "Address1", "cdt_address_1", AttributeType.String));
+		address2 = addAsChild(new BODbAttribute<String>(this, "Address2", "cdt_address_2", AttributeType.String));
+		address3 = addAsChild(new BODbAttribute<String>(this, "Address3", "cdt_address_3", AttributeType.String));
+		city = addAsChild(new BODbAttribute<String>(this, "City", "cdt_city", AttributeType.String));
+		country = addAsChild(new BODbAttribute<String>(this, "Country", "cdt_country", AttributeType.String));
+		postCode = addAsChild(new BODbAttribute<String>(this, "PostCode", "cdt_postcode", AttributeType.String));
+		phone = addAsChild(new BODbAttribute<String>(this, "Phone", "cdt_phone", AttributeType.String));
+		mobile = addAsChild(new BODbAttribute<String>(this, "Mobile", "cdt_mobile", AttributeType.String));
+		fax = addAsChild(new BODbAttribute<String>(this, "Fax", "cdt_fax", AttributeType.String));
+		site = addAsChild(new BODbAttribute<String>(this, "Site", "cdt_site", AttributeType.String));
 	}
 
 	@Override

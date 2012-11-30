@@ -1,19 +1,22 @@
 package com.lwan.eaproj.bo;
 
-import com.lwan.bo.BOAttribute;
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOLink;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
-import com.lwan.eaproj.cache.GProducts;
+import com.lwan.eaproj.bo.cache.GProducts;
+import com.lwan.eaproj.sp.PD_INI;
+import com.lwan.eaproj.sp.PI_INI;
+import com.lwan.eaproj.sp.PS_INI;
+import com.lwan.eaproj.sp.PU_INI;
+import com.lwan.eaproj.util.DbUtil;
 
 public class BOInvoiceItem extends BODbObject {
 	public BODbAttribute<Integer> invoiceItemID, invoiceID, productID;
 	public BODbAttribute<String> notes;
 	public BODbAttribute<Double> price;
-	
-	public BOAttribute<Double> actualPrice;
 	
 	public BOLink<BOProduct> product;
 	
@@ -21,31 +24,34 @@ public class BOInvoiceItem extends BODbObject {
 		return product.getReferencedObject();
 	}
 
-	public BOInvoiceItem(BusinessObject owner, String name) {
-		super(owner, name);
+	public BOInvoiceItem(BusinessObject owner) {
+		super(owner, "InvoiceItem");
 	}
 
 	@Override
 	protected void ensureIDExists() {
-		// TODO... this doesn't have an id..
+		if (invoiceItemID.asInteger() == 0) {
+			invoiceItemID.setValue(DbUtil.getNextID("ini_id"));
+		}
+		invoiceID.assign(findOwnerByClass(BOInvoice.class).invoiceID);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		// TODO Auto-generated method stub
-		
+		setSP(new PS_INI(), BOInvoiceItem.class, SP_SELECT);
+		setSP(new PI_INI(), BOInvoiceItem.class, SP_INSERT);
+		setSP(new PU_INI(), BOInvoiceItem.class, SP_UPDATE);
+		setSP(new PD_INI(), BOInvoiceItem.class, SP_DELETE);
 	}
 
 	@Override
 	protected void createAttributes() {
-		invoiceItemID = addAsChild(new BODbAttribute<Integer>(this, "InvoiceItemID", "ini_id", false, false));
-		invoiceID = addAsChild(new BODbAttribute<Integer>(this, "InvoiceID", "inv_id", false, false));
-		productID = addAsChild(new BODbAttribute<Integer>(this, "ProductID", "prd_id", false, false));
+		invoiceItemID = addAsChild(new BODbAttribute<Integer>(this, "InvoiceItemID", "ini_id", AttributeType.Integer, false, false));
+		invoiceID = addAsChild(new BODbAttribute<Integer>(this, "InvoiceID", "inv_id", AttributeType.Integer, false, false));
+		productID = addAsChild(new BODbAttribute<Integer>(this, "ProductID", "prd_id", AttributeType.Integer, false, true));
 		
-		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "ini_notes"));
-		price = addAsChild(new BODbAttribute<Double>(this, "Price", "ini_price"));
-		
-		actualPrice = addAsChild(new BOAttribute<Double>(this, "ActualPrice", false, false));
+		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "ini_notes", AttributeType.String));
+		price = addAsChild(new BODbAttribute<Double>(this, "Price", "ini_price", AttributeType.Double));
 		
 		product = addAsChild(new BOLink<BOProduct>(this, "Product"));
 	}
@@ -68,16 +74,10 @@ public class BOInvoiceItem extends BODbObject {
 	@Override
 	public void handleModified(ModifiedEvent source) {
 		Object src = source.getSource();
-		if (src == productID || src == price) {
-			if (!price.isNull()) {
-				actualPrice.assign(price);
-			} else {
-				BOProduct product = getProduct();
-				if (product == null) {
-					actualPrice.setValue(0d);
-				} else {
-					actualPrice.assign(product.defaultPrice);
-				}
+		if (src == productID && price.isNull()) {
+			BOProduct product = getProduct();
+			if (product != null) {
+				price.assign(product.defaultPrice);
 			}
 		}
 	}

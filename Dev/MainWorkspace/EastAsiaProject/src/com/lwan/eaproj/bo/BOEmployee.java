@@ -2,6 +2,7 @@ package com.lwan.eaproj.bo;
 
 import java.util.Date;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
@@ -48,18 +49,18 @@ public class BOEmployee extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", false, false));
-		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", false, false));
-		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id"));
+		employeeID = addAsChild(new BODbAttribute<Integer>(this, "EmployeeID", "emp_id", AttributeType.Integer, false, false));
+		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", AttributeType.Integer, false, false));
+		contactDetailsID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailsID", "cdt_id", AttributeType.Integer));
 		
-		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "emp_name_first"));
-		nameLast = addAsChild(new BODbAttribute<String>(this, "NameLast", "emp_name_last"));
+		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "emp_name_first", AttributeType.String));
+		nameLast = addAsChild(new BODbAttribute<String>(this, "NameLast", "emp_name_last", AttributeType.String));
 		
-		payMonthly = addAsChild(new BODbAttribute<Double>(this, "PaymentMonthly", "emp_payment_monthly"));
-		taxCode = addAsChild(new BODbAttribute<String>(this, "TaxCode", "emp_tax_code"));
+		payMonthly = addAsChild(new BODbAttribute<Double>(this, "PaymentMonthly", "emp_payment_monthly", AttributeType.Double));
+		taxCode = addAsChild(new BODbAttribute<String>(this, "TaxCode", "emp_tax_code", AttributeType.String));
 		
-		employmentStart = addAsChild(new BODbAttribute<Date>(this, "EmploymentStart", "emp_employment_start"));
-		isActive = addAsChild(new BODbAttribute<Boolean>(this, "IsActive", "emp_is_active", false, true));
+		employmentStart = addAsChild(new BODbAttribute<Date>(this, "EmploymentStart", "emp_employment_start", AttributeType.Date));
+		isActive = addAsChild(new BODbAttribute<Boolean>(this, "IsActive", "emp_is_active", AttributeType.Boolean, false, true));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
 		contactDetails.Independent().setValue(true);

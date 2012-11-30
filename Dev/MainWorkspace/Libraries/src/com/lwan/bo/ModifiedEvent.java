@@ -9,21 +9,76 @@ import com.lwan.util.GenericsUtil;
  *
  */
 public class ModifiedEvent {
+	public static final int TYPE_UNKNOWN = 0;
+	public static final int TYPE_ATTRIBUTE = 1;
+	public static final int TYPE_SET = 2;
+	public static final int TYPE_LINK = 3;
+	
 	private BusinessObject source;
 	private String tags;
 	private BusinessObject directChild;
+	private int type;
 	
-	public ModifiedEvent(BusinessObject source) {
-		this(source, null);
+	public ModifiedEvent(BusinessObject source, int type) {
+		this(source, type, null);
 	}
 	
-	public ModifiedEvent(BusinessObject source, String tags) {
-		this(source, source, tags);
+	public ModifiedEvent(BusinessObject source, int type, String tags) {
+		this(source, source, type, tags);
 	}
 	
-	private ModifiedEvent(BusinessObject source, BusinessObject caller, String tags) {
+	public boolean isUserModified() {
+		return isAttribute() && asAttribute().isUserSet();
+	}
+	
+	public BOAttribute<?> asAttribute() {
+		return (BOAttribute<?>)source;
+	}
+	
+	public boolean checkSource (Class<? extends BusinessObject> parentClass, String attributeName) {
+		if (parentClass == null) return false;
+		BusinessObject parent = getAttributeOwner();
+		if (parent == null || !parentClass.isAssignableFrom(parent.getClass())) {
+			return false;
+		}
+		return parent.isChildByName(source, attributeName);
+	}
+	
+	public int getType() {
+		return type;
+	}
+	
+	/**
+	 * Check if the source which threw this event is an attribute
+	 * 
+	 * @return
+	 */
+	public boolean isAttribute() {
+		if (source == null) {
+			return false;
+		}
+		
+		return source.isAttribute();
+	}
+	
+	/**
+	 * Get the owner of the source if the source is a BOAttribute.
+	 * Will return null otherwise.
+	 * 
+	 * @return
+	 */
+	public BusinessObject getAttributeOwner() {
+		if (isAttribute()) {
+			return source.getOwner();
+		} else {
+			return null;
+		}
+	}
+	
+	private ModifiedEvent(BusinessObject source, BusinessObject caller, int type, String tags) {
+		this.type = type;
 		this.source = source;
-		directChild = source;
+		directChild = caller;
 		this.tags = tags;
 	}
 	
@@ -34,7 +89,7 @@ public class ModifiedEvent {
 	 * @param caller
 	 */
 	protected ModifiedEvent(ModifiedEvent sourceEvent, BusinessObject caller) {
-		this(sourceEvent.source, caller, sourceEvent.tags);
+		this(sourceEvent.source, caller, sourceEvent.type, sourceEvent.tags);
 	}
 
 	/**

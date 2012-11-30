@@ -242,7 +242,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	public BusinessObject findChildByName(String name) {
-		BusinessObject child = children.get(name);
+		BusinessObject child = children.get(name.toLowerCase());
 		if (child == null) return null;
 		return child.getReferencedObject();
 	}
@@ -257,7 +257,61 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	protected BusinessObject getReferencedObject () {
 		return this;
 	}
+	
+	public BusinessObject getOwner() {
+		return Owner().getValue();
+	}
 
+	public String getName() {
+		return Name().getValue();
+	}
+	
+	/**
+	 * Parse the relative path to some other business object.
+	 * The path uses the standard linux path syntax.
+	 * 
+	 * Each segment is separated by a '/'
+	 * Each segment is either the name of the child, or
+	 * alternatively '...' representing the owner.
+	 * Sets can be interacted wtih via keyword '[##]' for activeChildren, or
+	 * {id:###} for id, or {@attriName:###}.
+	 * Example. Employees/[2]/.Name for 2nd active employee's name
+	 * 
+	 * 
+	 * 
+	 * This function will return null if the child requested cannot
+	 * be found.
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public BusinessObject findChildByPath(String path) {
+		if (path == null) {
+			return null;
+		} else if (path.length() == 0) {	// Blank... assume this is the referenced object
+			return this;
+		} else {
+			// find the first path segment
+			int pos = path.indexOf('/');
+			String name, remainder;
+			if (pos == -1) {
+				name = path; 
+				remainder = "";
+			} else {
+				name = path.substring(0, pos);
+				remainder = path.substring(pos + 1);	
+			} 
+			BusinessObject next;
+			if (name.equals("...")) {	// owner
+				next = getOwner();
+			} else {
+				next = findChildByName(name);
+			}
+			if (next == null) return null;
+			return next.findChildByPath(remainder);
+		}
+	}
+	
 	/**
 	 * Effectively the same as called equivilentTo(other, null).
 	 */
@@ -377,9 +431,13 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param source
 	 */
 	public final void fireModified(ModifiedEvent event) {
-		if (AllowNotifications().getValue()) {
+		if (AllowNotifications().getValue()) { 
 			State().getValue().add(State.Modified);
-			handleModified(event);
+			
+			// Don't handle event if this was the object which fired it last
+			if (event.getDirectChild() != this) {
+				handleModified(event);
+			}
 			
 			BusinessObject owner = Owner().getValue();
 			ModifiedEvent modEvent = new ModifiedEvent(event, this);
@@ -412,8 +470,13 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param object
 	 */
 	protected <T extends BusinessObject> T addAsChild(T object) {
-		children.put(object.Name().getValue(), object);
+		children.put(object.Name().getValue().toLowerCase(), object);		
 		return object;
+	}
+	
+	public boolean isChildByName(BusinessObject bo, String name) {
+		if (bo == null) return false;
+		return findChildByName(name) == bo;
 	}
 	
 	/**
@@ -432,6 +495,10 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	public void removeListener(ModifiedEventListener listener) {
 		listeners.remove(listener);
+	}
+	
+	public void setNotifications(boolean allow) {
+		AllowNotifications().setValue(allow);
 	}
 	
 	/**
@@ -553,7 +620,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 */
 	public String toString() {
-		return toString(0);
+		return toString(0, 1);
 	}
 	
 	/**
@@ -593,21 +660,57 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	
 	/**
+	 * Get the string representation of the entire business object tree.
+	 * Note this will cause an infinite loop if there are any loops in the tree,
+	 * which may be caused by BOLinks. This shouldn't usually occur unless the
+	 * tree is poorly designed. 
+	 * 
+	 * @return
+	 */
+	public String toStringAll() {
+		return toStringEx(-1);
+	}
+	
+	/**
+	 * Get the string representation of the business object tree up to
+	 * the passed in depth.
+	 * Pass in -1 is equivalent to calling toStringAll.
+	 * 
+	 * @param depth
+	 * @return
+	 */
+	public String toStringEx(int depth) {
+		return toString(0, depth);
+	}
+	
+	/**
 	 * Recursive function for traversing the tree, building the tree in
 	 * String form.
 	 * 
 	 * @param spaces
+	 * @param expansion TODO
 	 * @return
 	 */
-	protected String toString(int spaces) {
+	protected String toString(int spaces, int expansion) {
 		StringBuilder sb = new StringBuilder();
 		// first line: Name:ClassName
 		sb.append(StringUtil.getRepeatedString(" ", spaces)).append(Name().getValue()).append(':').append(getClass().getSimpleName()).
 				append(' ').append(getPropertyStrings()).append('\n');
 		
 		// call toString on all children with spaces += 4
-		for (BusinessObject child : children.values()) {
-			sb.append(child.toString(spaces + 4));
+		if (expansion != 0) {
+			// Print attributes first
+			for (BusinessObject child : children.values()) {
+				if (child.isAttribute()) {
+					sb.append(child.toString(spaces + 4, expansion - 1));
+				}
+			}
+			// Print everything else
+			for (BusinessObject child : children.values()) {
+				if (!child.isAttribute()) {
+					sb.append(child.toString(spaces + 4, expansion - 1));
+				}
+			}
 		}
 		return sb.toString();
 	}
@@ -652,8 +755,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	
 	/**
 	 * Clear all child attribute objects to a neutral state.</br>
-	 * This will not be automatically called on any children(unlike clear(), thus
-	 * the parent must be responsible for all values being set.
+	 * This will not be automatically called on any children(unlike clear()), thus
+	 * the parent must be responsible for all values being set.</br>
+	 * This should be implemented on the assumption that we want the object to reset
+	 * to its neutral state, without losing its identity or losing any connections
+	 * to its parent.
 	 */
 	public abstract void clearAttributes();
 	

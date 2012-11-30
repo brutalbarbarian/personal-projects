@@ -110,7 +110,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * @param value
 	 * @return
 	 */
-	public T findChildByAttribute(String attrName, Object value, int childNum) {
+	public T findChildByAttribute(String attrName, Object value, int childNum, boolean forceString) {
 		int found = 0;
 		for (T child : childIterable()) {
 			Object attr = child.findChildByName(attrName);
@@ -120,7 +120,8 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 				throw new IllegalArgumentException(attr.getClass().getName() + " is not a BOAttribute");
 			} else {
 				BOAttribute<?> attribute = (BOAttribute<?>)attr;
-				if (GenericsUtil.Equals(value, attribute.getValue())) {
+				if ((forceString && GenericsUtil.Equals(value, attribute.asString())) ||  
+						(!forceString && GenericsUtil.Equals(value, attribute.getValue()))) {
 					found++;
 					if (found == childNum) {
 						return child;
@@ -129,6 +130,56 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Clears all items from this set. 
+	 * Note this is unsafe, as the set will likely be 
+	 * no longer synchronized with the datastructure.
+	 * Recommended to call clear() instead.
+	 */
+	public void clearChildren() {
+		children.clear();
+	}
+	
+	public BusinessObject findChildByPath(String path) {
+		BusinessObject result = super.findChildByPath(path);
+		if (result == null && path != null) {
+			int pos = path.indexOf('/');
+			String child, remainder;
+			if (pos == -1) {
+				child = path;
+				remainder = "";
+			} else {
+				child = path.substring(0, pos);
+				remainder = path.substring(pos + 1);
+			}
+			BusinessObject next = null;
+			int startIndex = child.indexOf('[');
+			int endIndex = child.indexOf(']');
+			if (startIndex >= 0 && endIndex > startIndex) {
+				int activeChild = Integer.parseInt(child.substring(startIndex + 1, endIndex));
+				next = getActive(activeChild);
+			} else {
+				startIndex = child.indexOf('{');
+				endIndex = child.indexOf('}');
+				pos = child.indexOf(':');
+				if (startIndex >= 0 && pos > startIndex && endIndex > pos) {
+					String id = child.substring(startIndex + 1, pos);
+					String value = child.substring(pos + 1, endIndex);
+					if (id.equalsIgnoreCase("id")) {
+						next = findChildByID(Integer.parseInt(value));
+					} else if (id.indexOf('@') == 0) {
+						next = findChildByAttributeString(id.substring(1), value);
+					}
+				}
+			}
+			if (next != null) {
+				return next.findChildByPath(remainder);
+			}
+		}
+		
+		return result;
 	}
 	
 	public boolean isSet() {
@@ -145,7 +196,11 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * @return
 	 */
 	public T findChildByAttribute(String attrName, Object value) {
-		return findChildByAttribute(attrName, value, 1);
+		return findChildByAttribute(attrName, value, 1, false);
+	}
+	
+	public T findChildByAttributeString(String attrName, String str) {
+		return findChildByAttribute(attrName, str, 1, true);
 	}
 	
 	public T findChildByID(Object id) {
@@ -331,6 +386,8 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 				child.ensureActive();
 				e.loaded = true;
 			}
+			
+			fireModified(new ModifiedEvent(child, ModifiedEvent.TYPE_SET));
 		}
 		return child;
 	}
@@ -423,16 +480,18 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		}
 	}
 	
-	protected String toString(int spaces) {
+	protected String toString(int spaces, int expansion) {
 		StringBuilder sb = new StringBuilder();
 		// first line: Name:ClassName
-		sb.append(super.toString(spaces));
+		sb.append(super.toString(spaces, expansion));
 		
-		sb.append(StringUtil.getRepeatedString(" ", spaces) + "children\n");
+//		sb.append(StringUtil.getRepeatedString(" ", spaces) + "children\n");
 		
 		// call toString on all children with spaces += 4
-		for (BusinessObject child : childIterable()) {
-			sb.append(child.toString(spaces + 4));
+		if (expansion != 0) {
+			for (BusinessObject child : childIterable()) {
+				sb.append(child.toString(spaces + 2, expansion - 1));
+			}
 		}
 		return sb.toString();
 	}

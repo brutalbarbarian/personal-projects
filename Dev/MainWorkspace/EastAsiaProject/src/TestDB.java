@@ -5,9 +5,9 @@ import java.sql.SQLException;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOSet;
 import com.lwan.eaproj.bo.*;
-import com.lwan.eaproj.cache.GCompany;
-import com.lwan.eaproj.cache.GCustomers;
-import com.lwan.eaproj.cache.GUsers;
+import com.lwan.eaproj.bo.cache.GCompany;
+import com.lwan.eaproj.bo.cache.GCustomers;
+import com.lwan.eaproj.bo.cache.GUsers;
 import com.lwan.eaproj.util.BOConstants;
 import com.lwan.jdbc.GConnection;
 
@@ -289,19 +289,26 @@ public class TestDB {
 		if (GUsers.setActiveUser("sa", "password")) {
 			System.out.println("Login success");
 			
-			BOInvoice inv = new BOInvoice(null);
-			inv.ensureActive();
-			inv.companyID.setValue(10);
-			inv.customerID.setValue(4);
-			inv.dateRequired.setValue(Date.valueOf("2012-04-12"));
+//			BOInvoice inv = new BOInvoice(null);
+//			inv.invoiceID.setValue(12);
+//			inv.ensureActive();
+//			inv.companyID.setValue(10);
+//			inv.customerID.setValue(4);
+//			inv.dateRequired.setValue(Date.valueOf("2012-04-08"));
+//			BOInvoiceItem ini = inv.invoiceItems.createNewChild();
+//			ini.productID.setValue(2);
+//			ini.price.setValue(400d);
+//			ini.notes.setValue("Owed for services");
+//			BOInvoiceSentHistory ish = inv.invoiceSentHistory.createNewChild();
+//			ish.paidAmount.setValue(200d);
 			
-			System.out.println(inv.toString());
-			
-			try {
-				inv.trySave();
-			} catch (BOException e) {
-				e.printStackTrace();
-			}
+//			System.out.println(inv.toStringAll());
+//			
+//			try {
+//				inv.trySave();
+//			} catch (BOException e) {
+//				e.printStackTrace();
+//			}
 			
 		} else {
 			System.out.println("Login failed");

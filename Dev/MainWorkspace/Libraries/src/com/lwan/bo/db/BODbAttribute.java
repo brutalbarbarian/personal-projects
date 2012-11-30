@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleObjectProperty;
 
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BusinessObject;
+import com.lwan.bo.AttributeType;
 
 public class BODbAttribute <T> extends BOAttribute<T> {
 	private Property<String> field_name;
@@ -21,13 +22,13 @@ public class BODbAttribute <T> extends BOAttribute<T> {
 		return field_name;
 	}
 
-	public BODbAttribute(BusinessObject parent, String name, String field) {
-		this(parent, name, field, true, true);
+	public BODbAttribute(BusinessObject parent, String name, String field, AttributeType type) {
+		this(parent, name, field, type, true, true);
 	}
 	
-	public BODbAttribute(BusinessObject parent, String name, String field,
+	public BODbAttribute(BusinessObject parent, String name, String field, AttributeType type,
 			boolean allowNulls, boolean allowUserModify) {
-		super(parent, name, allowNulls, allowUserModify);
+		super(parent, name, type, allowNulls, allowUserModify);
 		
 		_field_name().setValue(field);
 	}
