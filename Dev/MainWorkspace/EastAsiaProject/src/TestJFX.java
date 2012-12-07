@@ -31,7 +31,7 @@ public class TestJFX extends Application{
 
 		
 		final BOLinkEx<BOContactDetails> link = new BOLinkEx<>();
-		final BOTextField txtField = new BOTextField<String>(link, "Address1");
+		final BOTextField txtField = new BOTextField(link, "Address1");
 		final BOContactDetails cdt = new BOContactDetails(null);
 		cdt.contactDetailsID.setValue(35);
 		cdt.ensureActive();

@@ -1,54 +1,56 @@
 package com.lwan.javafx.controls.bo;
 
-import com.lwan.bo.BOAttribute;
+import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
+import com.lwan.util.JavaFXUtil;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.Node;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.scene.control.TextField;
-import javafx.util.Callback;
 
-public class BOTextField <S> extends TextField implements BOBoundControl<S, String> {
-	public BOTextField(BOLinkEx<?> link, String path, 
-			Callback<String, S> storedMap, Callback<S, String> displayMap) {
-		this(link, path);
-		
-		dataBindingProperty().StoredValueMap().setValue(storedMap);
-		dataBindingProperty().DisplayValueMap().setValue(displayMap);
+public class BOTextField extends TextField implements BoundControl<String, BOTextField> {
+	private StringBoundProperty dataBindingProperty;
+	
+	@Override
+	public StringBoundProperty dataBindingProperty() {
+		return dataBindingProperty;
 	}
 	
 	public BOTextField(BOLinkEx<?> link, String path) {
-		dataBinding = new BOBoundProperty<S, String>(this, link, path);
-		textProperty().bindBidirectional(dataBinding);
-	}
-
-	private BOBoundProperty<S, String> dataBinding;
-	@Override
-	public BOBoundProperty<S, String> dataBindingProperty() {
-		if (dataBinding == null) {
-			throw new RuntimeException("Databinding not initialised");
-		}
-		return dataBinding;
-	}
-
-	@Override
-	public void rebuildAttributeLinks() {
-		dataBindingProperty().buildAttributeLinks();
+		dataBindingProperty = new StringBoundProperty(this, link, path);
+		textProperty().bindBidirectional(dataBindingProperty);
+		editableProperty().bind(dataBindingProperty.editableProperty());
 		
-		BOAttribute<S> link = dataBindingProperty().getAttributeLink();
-		editableProperty().setValue(link != null);
+		// Focus Listener for managing the edit state of the textfield
+		focusedProperty().addListener(new InvalidationListener() {
+			public void invalidated(Observable observable) {
+				if (isFocused()) {
+					dataBindingProperty().beginEdit();
+				} else {
+					try {
+						dataBindingProperty().endEdit(true);
+					} catch (BOException e) {
+						JavaFXUtil.ShowErrorDialog(getScene().getWindow(), e.getMessage());
+						requestFocus();
+					}
+				}
+			}
+		});
+	}
+	
+	public void replaceText(int start, int end, String text) {
+		System.out.println(start + ":" + end + "::" + text);
+		super.replaceText(start, end, text);
+	}
+	
+	public void replaceSelection(String text) {
+		System.out.println(text);
+		super.replaceSelection(text);
 	}
 
 	@Override
-	public Node node() {
+	public BOTextField getNode() {
 		return this;
-	}
-
-	@Override
-	public void update(BOAttribute<S> attri) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }

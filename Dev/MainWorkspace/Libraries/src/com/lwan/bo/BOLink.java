@@ -56,6 +56,41 @@ public class BOLink<T extends BusinessObject> extends BusinessObject{
 		
 	}
 	
+	public BusinessObject findChildByName(String name) {
+		T ref = getReferencedObject();
+		if (ref == null) {
+			return null;
+		} else {
+			return ref.findChildByName(name);
+		}
+	}
+	
+	public BusinessObject findChildByPath(String path) {
+		// Need to make sure that the next path isn't owner first...
+		if (path != null && path.length() > 0) {
+			int index = path.indexOf('/');
+			String ref, remainder;
+			if (index == -1) {
+				ref = path;
+				remainder = "";
+			} else {
+				ref = path.substring(0, index);
+				remainder = path.substring(index + 1);
+			}
+			if (ref.equals("...")) {
+				return getOwner().findChildByPath(remainder);
+			}
+		}
+		// if it's reached here, then it can't be the owner... only continue if
+		// the referenced child exists
+		T ref = getReferencedObject();
+		if (ref == null) {
+			return null;
+		} else {
+			return ref.findChildByPath(path);
+		}
+	}
+	
 	public String toString(int spaces, int expansion) {
 		T child = getReferencedObject();
 		if (child == null) {

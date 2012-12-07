@@ -278,6 +278,11 @@ public class BOAttribute <T> extends BusinessObject {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	public void userSetValueAsObject(Object val, Object source) {
+		userSetValue((T)val, source);
+	}
+	
 	/**
 	 * All interface objects clearing the value of this attribute representing a user's
 	 * change should call this function, passing some representation of itself as the source.
