@@ -8,5 +8,11 @@ public enum AttributeType {
 	Time,			// Date
 	String,			// String
 	Boolean,		// Boolean
-	Unknown,		// ???
+	Unknown;		// ???
+	
+	public boolean isNumeric() {
+		return 	this == Integer || 
+				this == Currency || 
+				this == Double;
+	}
 }

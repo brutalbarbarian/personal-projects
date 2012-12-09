@@ -65,11 +65,20 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		return linkedAttributeProperty().getValue();
 	}
 	
-	public BoundProperty(Object owner, BOLinkEx<?> link, String path) {
+	public BoundProperty(BoundControl<T, ?> owner, BOLinkEx<?> link, String path) {
 		super(owner, "DataBinding");
 		
 		attributeLinkproperty().setValue(link);
 		pathProperty().setValue(path);
+	}
+	
+	public BoundProperty(BoundControl<T, ?> owner, BoundProperty<?> existing) {
+		this(owner, existing.getAttributeLink(), existing.getPath());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public BoundControl<T, ?> getBoundControl() {
+		return (BoundControl<T, ?>)getBean();
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -18,7 +18,7 @@ public class TestDB {
 //		Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 		
 //		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
-		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
 		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 //		Connection con = DriverManager.getConnection(url,"","");
 		

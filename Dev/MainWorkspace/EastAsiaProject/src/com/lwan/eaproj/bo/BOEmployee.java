@@ -56,7 +56,7 @@ public class BOEmployee extends BODbObject {
 		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "emp_name_first", AttributeType.String));
 		nameLast = addAsChild(new BODbAttribute<String>(this, "NameLast", "emp_name_last", AttributeType.String));
 		
-		payMonthly = addAsChild(new BODbAttribute<Double>(this, "PaymentMonthly", "emp_payment_monthly", AttributeType.Double));
+		payMonthly = addAsChild(new BODbAttribute<Double>(this, "PayMonthly", "emp_payment_monthly", AttributeType.Currency));
 		taxCode = addAsChild(new BODbAttribute<String>(this, "TaxCode", "emp_tax_code", AttributeType.String));
 		
 		employmentStart = addAsChild(new BODbAttribute<Date>(this, "EmploymentStart", "emp_employment_start", AttributeType.Date));

@@ -182,6 +182,22 @@ public class CollectionUtil {
 	}
 	
 	/**
+	 * Check if an array to see if it contains a single value
+	 * 
+	 * @param item
+	 * @param array
+	 * @return
+	 */
+	public static <T> boolean contains(T item, T[] array) {
+		for (T t : array) {
+			if (t == item) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Convert a collection to an array
 	 * 
 	 * @param col

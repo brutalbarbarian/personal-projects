@@ -1,5 +1,8 @@
 import com.lwan.bo.BOLinkEx;
+import com.lwan.bo.BusinessObject;
 import com.lwan.eaproj.bo.BOContactDetails;
+import com.lwan.eaproj.bo.BOCustomer;
+import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.eaproj.bo.cache.GUsers;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.jdbc.GConnection;
@@ -25,22 +28,29 @@ public class TestJFX extends Application{
 	public void start(Stage stage) throws Exception {
 		
 		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
-		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
 		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 		GConnection.initialise(driverName, url, "", "");
 
 		
-		final BOLinkEx<BOContactDetails> link = new BOLinkEx<>();
-		final BOTextField txtField = new BOTextField(link, "Address1");
-		final BOContactDetails cdt = new BOContactDetails(null);
-		cdt.contactDetailsID.setValue(35);
-		cdt.ensureActive();
+		final BOLinkEx<BOEmployee> link = new BOLinkEx<>();
+		final BOTextField txtField = new BOTextField(link, "EmploymentStart");
+//		final BOContactDetails cdt = new BOContactDetails(null);
+//		cdt.contactDetailsID.setValue(35);
+//		cdt.ensureActive();
+//		final BOCustomer cus = new BOCustomer(null);
+//		cus.customerID.setValue(4);
+//		cus.ensureActive();
+		final BOEmployee emp = new BOEmployee(null);
+		emp.employeeID.setValue(20);
+		emp.ensureActive();
+		
 		
 		Button btn = new Button("Do Something!!!");
 		btn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent arg0) {
 				System.out.println("Do something");
-				link.setLinkedObject(cdt);				
+				link.setLinkedObject(emp);
 				
 				txtField.dataBindingProperty().buildAttributeLinks();
 				
@@ -50,7 +60,7 @@ public class TestJFX extends Application{
 		Button btnPrint = new Button("Print BO");
 		btnPrint.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent arg0) {
-				System.out.println(cdt.toStringAll());
+				System.out.println(emp.toStringAll());
 			}			
 		});
 		

@@ -3,6 +3,7 @@ package com.lwan.javafx.controls.bo;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.util.JavaFXUtil;
+import com.lwan.util.StringUtil;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -38,14 +39,22 @@ public class BOTextField extends TextField implements BoundControl<String, BOTex
 		});
 	}
 	
+	public void setMasked(char maskChar) {
+		
+	}
+	
 	public void replaceText(int start, int end, String text) {
-		System.out.println(start + ":" + end + "::" + text);
-		super.replaceText(start, end, text);
+		if (!dataBindingProperty().requireValidation() || 
+				dataBindingProperty().validate(StringUtil.replaceString(getText(), start, end, text))) {
+			super.replaceText(start, end, text);
+		}
 	}
 	
 	public void replaceSelection(String text) {
-		System.out.println(text);
-		super.replaceSelection(text);
+		if (!dataBindingProperty().requireValidation() ||
+				dataBindingProperty().validate(text)) {
+			super.replaceSelection(text);
+		}
 	}
 
 	@Override

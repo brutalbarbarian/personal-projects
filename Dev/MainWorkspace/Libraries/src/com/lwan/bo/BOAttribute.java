@@ -2,6 +2,7 @@ package com.lwan.bo;
 
 import com.lwan.javafx.property.ValidatedProperty;
 import com.lwan.javafx.property.ValidationListener;
+import com.lwan.util.CollectionUtil;
 import com.lwan.util.GenericsUtil;
 
 import javafx.beans.property.Property;
@@ -21,6 +22,10 @@ public class BOAttribute <T> extends BusinessObject {
 	
 	private ValidatedProperty<T> value;
 	
+	// Specific for numerics... note these only impact UI input validation
+	private Property<Boolean> allow_negative;
+	private Property<Integer> percision;
+	
 	
 	/* Property accessors */
 	/**
@@ -33,6 +38,27 @@ public class BOAttribute <T> extends BusinessObject {
 			value = new ValidatedProperty<>(this, "Value");
 		}
 		return value;
+	}
+	
+	/**
+	 * This is only relevant for numeric type attributes.
+	 * 
+	 * @return
+	 */
+	public Property<Boolean> AllowNegative() {
+		if (allow_negative == null) {
+			allow_negative = new SimpleObjectProperty<Boolean>(this, "AllowNegative", true);
+		}
+		return allow_negative;
+	}
+	
+	public Property<Integer> Percision() {
+		if (percision == null) {
+			percision = new SimpleObjectProperty<Integer>(this, "Percision", 
+					// Default to 2 if is currency
+					getAttributeType() == AttributeType.Currency? 2 : 10);
+		}
+		return percision;
 	}
 	
 	public ReadOnlyProperty<AttributeType> AttributeType () {
@@ -127,7 +153,7 @@ public class BOAttribute <T> extends BusinessObject {
 					" into an integer."); 
 		}
 	}
-	
+
 	/**
 	 * Effectively 0 if the value is null, or cast as double if the value is
 	 * of type number. If the value is not null and is not a number, a

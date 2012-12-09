@@ -53,6 +53,27 @@ public class MathUtil {
 		return min;
 	}
 	
+	public double round(double d, int percision) {
+		double multiplier = Math.pow(10, percision);
+		return round(d * multiplier)/multiplier;
+	}
+	
+	/**
+	 * Rounds a double value such that it has 0 decimal places.
+	 * This is exactly the same as Math.round() except it dosen't add the
+	 * extra step of casting into a long, which may cause issues.
+	 * 
+	 * @param a
+	 * @return
+	 */
+	public static double round(double a) {
+		if (a != 0x1.fffffffffffffp-2) { // greatest double value less than 0.5
+			return Math.floor(a + 0.5d);
+		} else {
+			return 0;
+		}
+	}
+
 	/**
 	 * Find the maximum value of a list of doubles
 	 * 

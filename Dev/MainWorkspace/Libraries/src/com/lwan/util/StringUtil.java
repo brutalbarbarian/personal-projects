@@ -3,6 +3,10 @@ package com.lwan.util;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
+
+import com.sun.javafx.binding.StringFormatter;
+import javafx.util.Callback;
 
 public class StringUtil {
 	public static String getRepeatedString (String s, int num){
@@ -10,6 +14,112 @@ public class StringUtil {
 		for (int i = 0; i < num; i++) {
 			sb.append(s);
 		}
+		return sb.toString();
+	}
+	
+	public static boolean validateString(String s, String expression) {
+		return Pattern.matches(expression, s);
+	}
+	
+	public static boolean validateString(String s, Callback<Character, Boolean> validator) {
+		for (char c : s.toCharArray()) {
+			if (!validator.call(c)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public static boolean validateDouble(String value, int percision) {
+		return validateString(value, "^-?\\d*\\.?\\d{0," + percision + "}$");
+	}
+	
+	public static String formatString(String format, Object...args) {
+		return StringFormatter.format(format, args).getValue();
+	}
+	
+	public static String doubleToString(double d, int percision) {
+		return formatString("%."+percision+"f", d);
+	}
+
+	/**
+	 * Validate if a string can be parsed into an integer without having to rely on
+	 * a try, catch model around Integer.parseInt. If this returns true, then integer.parseInt() is guaranteed to
+	 * parse correctly without exception.
+	 * 
+	 * See Integer.parseInt();
+	 * 
+	 * @param s
+	 * @param radix
+	 * @return
+	 */
+	public static boolean validateInt(String s, int radix) {
+		if (s == null) {
+			return false;
+		}
+
+		if (radix < Character.MIN_RADIX) {
+			return false;
+		}
+
+		if (radix > Character.MAX_RADIX) {
+			return false;
+		}
+
+		int result = 0;
+		int i = 0, len = s.length();
+		int limit = -Integer.MAX_VALUE;
+		int multmin;
+		int digit;
+
+		if (len > 0) {
+			char firstChar = s.charAt(0);
+			if (firstChar < '0') { // Possible leading "+" or "-"
+				if (firstChar == '-') {
+					limit = Integer.MIN_VALUE;
+				} else if (firstChar != '+')
+					return false;
+
+				if (len == 1) // Cannot have lone "+" or "-"
+					return false;
+				i++;
+			}
+			multmin = limit / radix;
+			while (i < len) {
+				// Accumulating negatively avoids surprises near MAX_VALUE
+				digit = Character.digit(s.charAt(i++),radix);
+				if (digit < 0) {
+					return false;
+				}
+				if (result < multmin) {
+					return false;
+				}
+				result *= radix;
+				if (result < limit + digit) {
+					return false;
+				}
+				result -= digit;
+			}
+		} else {
+			return false;
+		}
+		// Valid integer if it makes it up to this point...
+		return true;
+	}
+	
+	/**
+	 * Replace characters between start and end of the original string with the replacement string.
+	 * e.g.
+	 * 
+	 * @param original
+	 * @param start
+	 * @param end
+	 * @param replacement
+	 * @return
+	 */
+	public static String replaceString (String original, int start, int end, String replacement) {
+		StringBuilder sb = new StringBuilder(original.length() + (end - start) + replacement.length());
+		sb.append(original.substring(0, start)).append(replacement).append(original.substring(end));
 		return sb.toString();
 	}
 	

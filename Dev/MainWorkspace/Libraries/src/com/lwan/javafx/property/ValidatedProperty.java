@@ -43,6 +43,15 @@ public class ValidatedProperty <T> extends SimpleObjectProperty<T> {
 		}
 	}
 	
+	public boolean requiresValidation() {
+		return !validationListeners.isEmpty();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean validateAsObject(Object newValue) {
+		return validate(get(), (T)newValue);
+	}
+	
 	protected boolean validate(T oldValue, T newValue) {
 		// if any of the validationListeners return false, assume this value is invalid
 		for (ValidationListener<T> listener : validationListeners) {
