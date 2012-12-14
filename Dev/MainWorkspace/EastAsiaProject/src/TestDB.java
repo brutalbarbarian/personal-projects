@@ -4,11 +4,11 @@ import java.sql.SQLException;
 
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOSet;
+import com.lwan.eaproj.app.Constants;
 import com.lwan.eaproj.bo.*;
 import com.lwan.eaproj.bo.cache.GCompany;
 import com.lwan.eaproj.bo.cache.GCustomers;
 import com.lwan.eaproj.bo.cache.GUsers;
-import com.lwan.eaproj.util.BOConstants;
 import com.lwan.jdbc.GConnection;
 
 

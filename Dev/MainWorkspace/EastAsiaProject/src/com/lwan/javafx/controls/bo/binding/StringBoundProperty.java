@@ -1,17 +1,18 @@
-package com.lwan.javafx.controls.bo;
+package com.lwan.javafx.controls.bo.binding;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
-import java.util.Locale;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.util.Callback;
 
 import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
+import com.lwan.eaproj.app.Lng;
 import com.lwan.util.JavaFXUtil;
 import com.lwan.util.StringUtil;
 import com.sun.javafx.binding.StringFormatter;
@@ -82,7 +83,9 @@ public class StringBoundProperty extends BoundProperty<String>{
 		try {
 			switch (attr.getAttributeType()) {
 			case Boolean:
-				break;
+				// This will allow empty string too
+				return (StringUtil.beginsWith(Lng._("Yes"), value, true) ||
+						StringUtil.beginsWith(Lng._("No"), value, true));
 			case Currency:
 			case Double:
 				if (value.length() == 0) {
@@ -101,7 +104,23 @@ public class StringBoundProperty extends BoundProperty<String>{
 							attr.Value().validateAsObject(Double.parseDouble(value));
 				}
 			case Date:
-				break;
+				// Not particularly restrictive validating... otherwise will choke user input
+				// will be validated prior to saving anyway
+				return StringUtil.validateString(value, new Callback<Character, Boolean>(){
+					int dividerCount = 0;
+					int digitCount = 0;
+					public Boolean call(Character c) {
+						if (Character.isDigit(c)) {
+							digitCount++;
+							return digitCount <= 8;
+						} else if (c == '/' || c == '\\') {
+							dividerCount++;
+							return dividerCount <= 2;
+						} else {
+							return false;	
+						}
+					}				
+				});
 			case Integer:
 				if (value.length() == 0) {
 					return true;	// always accept empty
@@ -117,6 +136,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 			case String:
 				return attr.Value().validateAsObject(value);
 			case Time:
+				// TODO
 				break;
 			case Unknown:
 				break;
@@ -151,11 +171,21 @@ public class StringBoundProperty extends BoundProperty<String>{
 				// we want the sign to be on the outside of the currency symbol
 				return StringFormatter.format("-$%.2f", -value).getValue();
 			}
-		case Boolean: return attr.asBoolean() ? "Yes" : "No";
+		case Boolean:
+			if (attr.getValue() == null) {
+				return "";
+			} else {
+				return attr.asBoolean() ? Lng._("Yes") : Lng._("No");
+			}
 		case Date:
 			Date d = (Date)attr.getValue();
-			return DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+			if (d != null) {
+				return DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+			} else {
+				return "";
+			}
 		case Time:
+			// TODO
 		case Unknown:
 		default:
 			return "";
@@ -166,6 +196,9 @@ public class StringBoundProperty extends BoundProperty<String>{
 		if (attr == null) {
 			return false;
 		} else if (attr.getAttributeType() == AttributeType.String) {
+			// Majority of text fields don't require validation. Attempting to validate
+			// will just slow things down. Especially with larger textfields such as 
+			// memos.
 			return attr.Value().requiresValidation();
 		} else {
 			return true;
@@ -184,12 +217,23 @@ public class StringBoundProperty extends BoundProperty<String>{
 		switch (type) {
 		case String : return attr.asString();
 		case Integer : return Integer.toString(attr.asInteger());
-		case Double : 
-		case Currency: return Double.toString(attr.asDouble());
-		case Boolean: return attr.asBoolean() ? "Yes" : "No";
+		case Double : case Currency: 
+			return Double.toString(attr.asDouble());
+		case Boolean: 
+			if (attr.getValue() == null) {
+				return "";
+			} else {
+				return attr.asBoolean() ? Lng._("Yes") : Lng._("No");
+			}
 		case Date: 
-			// TODO
+			Date d = (Date)attr.getValue();
+			if (d != null) {
+				return DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+			} else {
+				return "";
+			}
 		case Time:
+			// TODO
 		case Unknown:
 		default:
 			return "";
@@ -232,10 +276,30 @@ public class StringBoundProperty extends BoundProperty<String>{
 			attr.userSetValueAsObject(effectiveValue, getBean());
 			break;
 		}
-		case Boolean: 
-			// TODO
+		case Boolean: {
+			if (editValue.isEmpty()) {
+				if (!attr.isNull()) {
+					return Lng._("Unknown user input");
+				}
+			} else if (StringUtil.beginsWith(Lng._("Yes"), editValue, true)) {
+				attr.userSetValueAsObject(true, getBean());
+			} else if (StringUtil.beginsWith(Lng._("No"), editValue, true)) {
+				attr.userSetValueAsObject(false, getBean());
+			} else {
+				return Lng._("Unknown user input.");
+			}
+			break;
+		}
 		case Date: 
+			// Attempt to parse...
+			try {
+				Date d = DateFormat.getDateInstance(DateFormat.SHORT).parse(editValue);
+				attr.userSetValueAsObject(d, getBean());
+			} catch (ParseException e) {
+				return Lng._("Date is not entered in a recognizable format.");
+			}
 		case Time:
+			// TODO
 		case Unknown:
 		default:
 			return "";

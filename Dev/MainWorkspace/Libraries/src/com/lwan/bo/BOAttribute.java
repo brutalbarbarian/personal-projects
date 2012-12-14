@@ -2,7 +2,6 @@ package com.lwan.bo;
 
 import com.lwan.javafx.property.ValidatedProperty;
 import com.lwan.javafx.property.ValidationListener;
-import com.lwan.util.CollectionUtil;
 import com.lwan.util.GenericsUtil;
 
 import javafx.beans.property.Property;
@@ -190,7 +189,7 @@ public class BOAttribute <T> extends BusinessObject {
 		if (val == null) {
 			return false;
 		} else if (val instanceof Boolean) {
-			return true;
+			return (Boolean)val;
 		} else {
 			throw new IllegalArgumentException("Cannot convert object of type " + val.getClass().getName() +
 					" into a boolean");

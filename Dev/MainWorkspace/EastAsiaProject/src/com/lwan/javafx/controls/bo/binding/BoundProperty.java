@@ -1,4 +1,4 @@
-package com.lwan.javafx.controls.bo;
+package com.lwan.javafx.controls.bo.binding;
 
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;

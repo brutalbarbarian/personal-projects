@@ -5,11 +5,11 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
+import com.lwan.eaproj.app.Constants;
 import com.lwan.eaproj.sp.PD_CUS;
 import com.lwan.eaproj.sp.PI_CUS;
 import com.lwan.eaproj.sp.PS_CUS;
 import com.lwan.eaproj.sp.PU_CUS;
-import com.lwan.eaproj.util.BOConstants;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOCustomer extends BODbObject {
@@ -23,7 +23,7 @@ public class BOCustomer extends BODbObject {
 	}
 	
 	public boolean isStudent() {
-		return customerType.asInteger() == BOConstants.CTY_STUDENT; 
+		return customerType.asInteger() == Constants.CTY_STUDENT; 
 	}
 
 	@Override

@@ -32,6 +32,10 @@ public class GConnection {
 		return con;
 	}
 	
+	public static boolean isInitialised() {
+		return initialised;
+	}
+	
 	public static void uninitialise() throws SQLException {
 		if (initialised) {
 			con.close();

@@ -1,4 +1,4 @@
-package com.lwan.javafx.controls.bo;
+package com.lwan.javafx.controls.bo.binding;
 
 import javafx.scene.Node;
 

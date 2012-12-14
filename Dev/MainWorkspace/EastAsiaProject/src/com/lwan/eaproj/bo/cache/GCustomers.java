@@ -4,10 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.lwan.bo.db.BODbSet;
+import com.lwan.eaproj.app.Constants;
 import com.lwan.eaproj.bo.BOCustomer;
 import com.lwan.eaproj.bo.BOStudent;
 import com.lwan.eaproj.sp.PS_CUS;
-import com.lwan.eaproj.util.BOConstants;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.StoredProc;
 
@@ -55,8 +55,8 @@ public class GCustomers extends BODbSet<BOCustomer> {
 				type = res.getInt("cty_id");
 			}
 			switch (type) {
-			case BOConstants.CTY_DEFAULT : return new BOCustomer(this);
-			case BOConstants.CTY_STUDENT : return new BOStudent(this);
+			case Constants.CTY_DEFAULT : return new BOCustomer(this);
+			case Constants.CTY_STUDENT : return new BOStudent(this);
 			default : return null; // Shouldn't happen???
 			}		
 		} catch (SQLException e) {

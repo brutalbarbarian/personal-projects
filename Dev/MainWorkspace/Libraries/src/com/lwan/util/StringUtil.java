@@ -144,12 +144,13 @@ public class StringUtil {
 		}
 		return s.substring(index).equalsIgnoreCase(suffix);
 	}
-
-	public static boolean beginsWith (String s, String prefix) {
+	
+	public static boolean beginsWith (String s, String prefix, boolean ignoreCase) {
 		if (s.length() < prefix.length()) {
 			return false;
 		}
-		return s.substring(0, prefix.length()).equalsIgnoreCase(prefix);
+		return ignoreCase? s.substring(0, prefix.length()).equalsIgnoreCase(prefix) :
+			s.substring(0, prefix.length()).equals(prefix);
 	}
 	
 	public static String getFileExtension(String s) {

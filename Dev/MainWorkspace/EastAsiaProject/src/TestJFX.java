@@ -1,7 +1,8 @@
+import java.util.Locale;
+
 import com.lwan.bo.BOLinkEx;
-import com.lwan.bo.BusinessObject;
-import com.lwan.eaproj.bo.BOContactDetails;
-import com.lwan.eaproj.bo.BOCustomer;
+import com.lwan.eaproj.app.App;
+import com.lwan.eaproj.app.Lng;
 import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.eaproj.bo.cache.GUsers;
 import com.lwan.javafx.controls.bo.BOTextField;
@@ -10,31 +11,29 @@ import com.lwan.jdbc.GConnection;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
-public class TestJFX extends Application{
+public class TestJFX extends App{
 	public static void main(String[] args) {
 		Application.launch(args);
 	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		
-		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
-		String fileName = "D:/User Files/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
-		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
-		GConnection.initialise(driverName, url, "", "");
+//		App.initaliseApplication();
+//		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
+//		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
+//		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
+//		GConnection.initialise(driverName, url, "", "");
 
 		
 		final BOLinkEx<BOEmployee> link = new BOLinkEx<>();
-		final BOTextField txtField = new BOTextField(link, "EmploymentStart");
+		final BOTextField txtField = new BOTextField(link, "IsActive");
 //		final BOContactDetails cdt = new BOContactDetails(null);
 //		cdt.contactDetailsID.setValue(35);
 //		cdt.ensureActive();
@@ -76,7 +75,7 @@ public class TestJFX extends Application{
 	
 	public void stop() throws Exception {
 		GUsers.clearActiveUser();
-		GConnection.uninitialise();
+//		GConnection.uninitialise();
 		
 		super.stop();
 	}
