@@ -17,6 +17,14 @@ public class StringUtil {
 		return sb.toString();
 	}
 	
+	public static String getRepeatedString(char c, int num) {
+		StringBuilder sb = new StringBuilder(num);
+		for (int i = 0; i < num; i++) {
+			sb.append(c);
+		}
+		return sb.toString();
+	}
+	
 	public static boolean validateString(String s, String expression) {
 		return Pattern.matches(expression, s);
 	}

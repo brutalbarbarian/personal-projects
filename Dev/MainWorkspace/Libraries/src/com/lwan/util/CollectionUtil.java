@@ -90,8 +90,32 @@ public class CollectionUtil {
 		};
 	}
 	
+	public static <K, V> Iterator<String> getMapIterator(final Map<K, V> map, final String sep, final String nullValue) {
+		return new Iterator<String>() {
+			Iterator<Entry<K, V>> it = map.entrySet().iterator();
+			
+			@Override
+			public void remove() {
+				it.remove();
+			}
+			
+			@Override
+			public String next() {
+				Entry<K, V> e = it.next();
+				if (e == null) return null;
+				return e.getKey().toString() + sep + 
+						GenericsUtil.Coalice(e.getValue(), nullValue).toString();
+			}
+			
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+		};
+	}
+	
 	/**
-	 * Convience method for sorting a list by ether ascending or descending
+	 * Convenience method for sorting a list by either ascending or descending
 	 * Ascending is exactly the same as calling Collections.sort(list)
 	 * Descending is exactly the same as calling Collections.sort(list, Collections.reverseOrder())
 	 * 

@@ -5,11 +5,13 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import com.lwan.jdbc.GConnection;
+import com.lwan.util.IOUtil;
 
 
 import javafx.application.Application;
@@ -48,7 +50,9 @@ public class App extends Application{
 		super.stop();
 		
 		// save the key values
-		
+		Path p = Paths.get(KEY_FILENAME);
+		IOUtil.storeMap(keyMap, "=", "", p, Charset.defaultCharset(), 
+				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		
 		// save language file
 		Lng.store();
@@ -145,5 +149,9 @@ public class App extends Application{
 
 	public static void putKey(String key, String value) {
 		getApp().keyMap.put(key, value);
+	}
+	
+	public static String getKey(String key) {
+		return getApp().keyMap.get(key);
 	}
 }

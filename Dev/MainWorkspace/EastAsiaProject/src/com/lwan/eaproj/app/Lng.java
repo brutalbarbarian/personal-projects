@@ -7,13 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
+import com.lwan.util.IOUtil;
 import com.lwan.util.StringUtil;
 
 
@@ -63,39 +62,8 @@ public class Lng {
 	
 	public static void store() throws IOException {
 		Path p = Paths.get(locale.toLanguageTag() + EXT);
-		Files.write(p, new Iterable<String>() {
-			public Iterator<String> iterator() {
-				return new Iterator<String>() {
-					Iterator<Entry<String, String>> it = map.entrySet().iterator();
-					
-					@Override
-					public boolean hasNext() {
-						return it.hasNext();
-					}
-
-					@Override
-					public String next() {
-						Entry<String, String> entry = it.next();
-						if (entry == null) {
-							return null;
-						} else {
-							String value = entry.getValue();
-							if (value == null) {
-								// in case its null..
-								value = "";
-							}
-							return entry.getKey() + SEP + value;
-						}
-					}
-
-					@Override
-					public void remove() {
-						it.remove();
-					}
-					
-				};
-			}
-		}, Charset.defaultCharset(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+		IOUtil.storeMap(map, SEP, "", p, Charset.defaultCharset(), 
+				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 	}
 	
 	/**

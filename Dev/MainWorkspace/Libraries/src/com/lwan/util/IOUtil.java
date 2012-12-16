@@ -7,8 +7,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 public class IOUtil {
@@ -132,5 +134,11 @@ public class IOUtil {
 		}
 		reader.close();
 		return v;
+	}
+	
+	public static void storeMap (Map<?, ?> map, String sep, String nullValue, 
+			Path path, Charset cs, OpenOption... options) throws IOException {
+		Files.write(path, CollectionUtil.getIterable(
+				CollectionUtil.getMapIterator(map, sep, nullValue)), cs, options);
 	}
 }
