@@ -7,3 +7,8 @@ thumbs.db
 ## eclipse files
 .metadata/
 
+## options
+keys.ini
+## test files
+## TestJFX.java
+## TestDB.java

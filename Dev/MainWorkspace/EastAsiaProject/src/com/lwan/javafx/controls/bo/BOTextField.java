@@ -9,13 +9,14 @@ import com.lwan.util.StringUtil;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
 
-public class BOTextField extends TextField implements BoundControl<String, BOTextField> {
+public class BOTextField extends TextField implements BoundControl<String> {
 	private StringBoundProperty dataBindingProperty;
 	private BooleanProperty selectAllOnEditProperty;
 	
@@ -35,7 +36,7 @@ public class BOTextField extends TextField implements BoundControl<String, BOTex
 	public BOTextField(BOLinkEx<?> link, String path) {
 		dataBindingProperty = new StringBoundProperty(this, link, path);
 		textProperty().bindBidirectional(dataBindingProperty);
-		editableProperty().bind(dataBindingProperty.editableProperty());
+		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
 		actualInvalidate = true;
 		
 		// Focus Listener for managing the edit state of the textfield
@@ -82,11 +83,6 @@ public class BOTextField extends TextField implements BoundControl<String, BOTex
 				dataBindingProperty	().validate(text)) {
 			super.replaceSelection(text);
 		}
-	}
-
-	@Override
-	public BOTextField getNode() {
-		return this;
 	}
 	
 }

@@ -13,7 +13,6 @@ import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.eaproj.app.Lng;
-import com.lwan.util.JavaFXUtil;
 import com.lwan.util.StringUtil;
 import com.sun.javafx.binding.StringFormatter;
 
@@ -51,12 +50,12 @@ public class StringBoundProperty extends BoundProperty<String>{
 		return editModeProperty;
 	}
 	
-	public StringBoundProperty(BoundControl<String, ?> owner, BOLinkEx<?> link,
+	public StringBoundProperty(BoundControl<String> owner, BOLinkEx<?> link,
 			String path) {
 		super(owner, link, path);
 	}
 	
-	public StringBoundProperty(BoundControl<String, ?> owner, BoundProperty<?> existing) {
+	public StringBoundProperty(BoundControl<String> owner, BoundProperty<?> existing) {
 		this(owner, existing.getAttributeLink(), existing.getPath());
 	}
 	
@@ -146,7 +145,8 @@ public class StringBoundProperty extends BoundProperty<String>{
 		} catch (Exception e) {
 			// If any exceptions occur... just return false if an error occurred... though we probably should
 			// still notify the developer that something went wrong?
-			JavaFXUtil.ShowErrorDialog(getBoundControl().getNode().getScene().getWindow(), e.getMessage());
+			e.printStackTrace();
+//			JavaFXUtil.ShowErrorDialog(getBoundControl().getNode().getScene().getWindow(), e.getMessage());
 			return false;
 		}
 		

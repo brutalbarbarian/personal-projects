@@ -5,10 +5,18 @@ import com.lwan.eaproj.app.App;
 import com.lwan.eaproj.app.Lng;
 import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.eaproj.bo.cache.GUsers;
+import com.lwan.eaproj.util.LngUtil;
+import com.lwan.javafx.controls.ComboBox;
+import com.lwan.javafx.controls.MaskedTextField;
+import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.jdbc.GConnection;
+import com.lwan.util.CollectionUtil;
+import com.sun.org.apache.bcel.internal.generic.ALOAD;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -16,6 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 
 public class TestJFX extends App{
@@ -31,9 +40,24 @@ public class TestJFX extends App{
 //		String url = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+fileName;
 //		GConnection.initialise(driverName, url, "", "");
 
-		
 		final BOLinkEx<BOEmployee> link = new BOLinkEx<>();
-		final BOTextField txtField = new BOTextField(link, "IsActive");
+		final BOTextField txtField = new BOTextField(link, "EmployeeID");
+		
+		final BOComboBox<Boolean> cb = new BOComboBox<>(link, "IsActive");
+//		cb.addAllItems(LngUtil.translate(new String[] {"<No Value>", "One", "Two", "Three", "Four"}));
+//		cb.setAppendUniqueStrings(true);
+//		cb.uniqueStringConverterProperty().setValue(new Callback<String, String>() {
+//			public String call(String arg0) {
+//				System.out.println(arg0);
+//				return arg0;
+//			}			
+//		});
+		cb.addAllItems(new Boolean[]{true, false}, 
+				LngUtil.translate(new String[]{"Yes", "No"}));
+		
+//		cb.addAllItems(new Integer[]{null, 1, 2, 3, 4}, 
+//				LngUtil.translate(new String[] {"<No Value>", "One", "Two", "Three", "Four"}));
+		
 //		final BOContactDetails cdt = new BOContactDetails(null);
 //		cdt.contactDetailsID.setValue(35);
 //		cdt.ensureActive();
@@ -49,11 +73,16 @@ public class TestJFX extends App{
 		btn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent arg0) {
 				System.out.println("Do something");
+				
+//				cb.setSelected(null);
+				System.out.println(cb.getSelected());
+				
 				link.setLinkedObject(emp);
 				
 				txtField.dataBindingProperty().buildAttributeLinks();
+				cb.dataBindingProperty().buildAttributeLinks();
 				
-				System.out.println(txtField.dataBindingProperty().getValue());
+//				System.out.println(txtField.dataBindingProperty().getValue());
 			}			
 		});
 		Button btnPrint = new Button("Print BO");
@@ -63,8 +92,16 @@ public class TestJFX extends App{
 			}			
 		});
 		
+//		MaskedTextField tf = new MaskedTextField();
+//		tf.actualValueProperty().addListener(new ChangeListener<String>(){
+//			public void changed(ObservableValue<? extends String> arg0,
+//					String arg1, String arg2) {
+//				System.out.println(arg2);
+//			}			
+//		});
+		
 		VBox box = new VBox();
-		box.getChildren().addAll(txtField, HBoxBuilder.create().children(btn, btnPrint).build());
+		box.getChildren().addAll(cb, txtField, HBoxBuilder.create().children(btn, btnPrint).build());
 		Scene sc = new Scene(box);
 		stage.setScene(sc);
 //		stage.setWidth(400);

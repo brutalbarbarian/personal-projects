@@ -3,20 +3,22 @@ package com.lwan.javafx.controls.bo.binding;
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableBooleanValue;
 
 public class BoundProperty <T> extends SimpleObjectProperty<T>{
 	private Property<BOLinkEx<?>> attributeLinkProperty;
 	private Property<String> pathProperty;
 	private Property<BOAttribute<?>> linkedAttributeProperty;
-	private Property<Boolean> editableProperty;
+	private BooleanProperty editableProperty;
 	
 	// This should be binded by the control
-	public ReadOnlyProperty<Boolean> editableProperty() {
+	public ObservableBooleanValue editableProperty() {
 		return _editableProperty();
 	}
 	
@@ -48,7 +50,7 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		return _linkedAttributeProperty();
 	}
 	
-	protected Property<Boolean> _editableProperty() {
+	protected BooleanProperty _editableProperty() {
 		if(editableProperty == null) {
 			editableProperty = new SimpleBooleanProperty(this, "Editable", false);
 		}
@@ -65,20 +67,20 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		return linkedAttributeProperty().getValue();
 	}
 	
-	public BoundProperty(BoundControl<T, ?> owner, BOLinkEx<?> link, String path) {
+	public BoundProperty(BoundControl<T> owner, BOLinkEx<?> link, String path) {
 		super(owner, "DataBinding");
 		
 		attributeLinkproperty().setValue(link);
 		pathProperty().setValue(path);
 	}
 	
-	public BoundProperty(BoundControl<T, ?> owner, BoundProperty<?> existing) {
+	public BoundProperty(BoundControl<T> owner, BoundProperty<?> existing) {
 		this(owner, existing.getAttributeLink(), existing.getPath());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public BoundControl<T, ?> getBoundControl() {
-		return (BoundControl<T, ?>)getBean();
+	public BoundControl<T> getBoundControl() {
+		return (BoundControl<T>)getBean();
 	}
 	
 	@SuppressWarnings("unchecked")
