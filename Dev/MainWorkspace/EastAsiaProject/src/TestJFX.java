@@ -6,8 +6,10 @@ import com.lwan.eaproj.app.Lng;
 import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.eaproj.bo.cache.GUsers;
 import com.lwan.eaproj.util.LngUtil;
+import com.lwan.javafx.controls.CheckBox;
 import com.lwan.javafx.controls.ComboBox;
 import com.lwan.javafx.controls.MaskedTextField;
+import com.lwan.javafx.controls.bo.BOCheckBox;
 import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.jdbc.GConnection;
@@ -58,6 +60,9 @@ public class TestJFX extends App{
 //		cb.addAllItems(new Integer[]{null, 1, 2, 3, 4}, 
 //				LngUtil.translate(new String[] {"<No Value>", "One", "Two", "Three", "Four"}));
 		
+		final BOCheckBox chk = new BOCheckBox("TEST BOX", link, "IsActive");
+//		chk.setAllowIndeterminate(true);
+		
 //		final BOContactDetails cdt = new BOContactDetails(null);
 //		cdt.contactDetailsID.setValue(35);
 //		cdt.ensureActive();
@@ -81,6 +86,7 @@ public class TestJFX extends App{
 				
 				txtField.dataBindingProperty().buildAttributeLinks();
 				cb.dataBindingProperty().buildAttributeLinks();
+				chk.dataBindingProperty().buildAttributeLinks();
 				
 //				System.out.println(txtField.dataBindingProperty().getValue());
 			}			
@@ -101,7 +107,7 @@ public class TestJFX extends App{
 //		});
 		
 		VBox box = new VBox();
-		box.getChildren().addAll(cb, txtField, HBoxBuilder.create().children(btn, btnPrint).build());
+		box.getChildren().addAll(chk, cb, txtField, HBoxBuilder.create().children(btn, btnPrint).build());
 		Scene sc = new Scene(box);
 		stage.setScene(sc);
 //		stage.setWidth(400);

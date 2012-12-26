@@ -18,7 +18,7 @@ import javafx.application.Application;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class App extends Application{
+public abstract class App extends Application{
 	// File names
 	public static final String KEY_FILENAME = "keys.ini";
 	
@@ -38,11 +38,6 @@ public class App extends Application{
 			throw new RuntimeException("App has not been initialised yet");
 		}
 		return app;
-	}
-
-	@Override
-	public void start(Stage mainStage) throws Exception {
-		
 	}
 	
 	@Override

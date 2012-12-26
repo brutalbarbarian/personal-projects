@@ -282,6 +282,7 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 	 * 
 	 */
 	protected void refreshItems() {
+		getSelectionModel().clearSelection();	// Must call this first..
 		ObservableList<ComboBoxItem<T>> list = getItems();
 		setItems(null);
 		setItems(list);
