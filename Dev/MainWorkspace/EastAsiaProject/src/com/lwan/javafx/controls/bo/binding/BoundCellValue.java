@@ -4,6 +4,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.util.Callback;
 
+import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BusinessObject;
 
 public class BoundCellValue <T, B extends BusinessObject> implements Callback<CellDataFeatures<B, T>, ObservableValue<T>>{
@@ -15,6 +16,6 @@ public class BoundCellValue <T, B extends BusinessObject> implements Callback<Ce
 	
 	@SuppressWarnings("unchecked")
 	public ObservableValue<T> call(CellDataFeatures<B, T> p) {
-		return (ObservableValue<T>) p.getValue().findChildByPath(path);
+		return ((BOAttribute<T>)p.getValue().findChildByPath(path)).Value();
 	}	
 }
