@@ -42,9 +42,11 @@ public class BOTextField extends TextField implements BoundControl<String> {
 		// Focus Listener for managing the edit state of the textfield
 		focusedProperty().addListener(new InvalidationListener() {
 			public void invalidated(Observable observable) {
+				System.out.println(getParent());
 				if (actualInvalidate && 
 						// We only want to do anything is focus is still on the same form
-						getScene().getWindow().isFocused()) {
+						(getParent() == null ||	// Assume null parent means the window is still focused.
+						getScene().getWindow().isFocused())) {
 					if (isFocused()) {
 						dataBindingProperty().beginEdit();
 					} else {

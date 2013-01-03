@@ -24,8 +24,9 @@ public class TestJFXGrid extends App{
 //		System.out.println(emp.toStringAll());
 		
 		BOGrid<BOEmployeePayment> grid = new BOGrid<>(emp.employeePayments, 
-				new String[]{"Paid", "Notes"}, 
-				new String[]{"paidAmount", "notes"});
+				new String[]{"Notes", "Paid Amount"}, 
+				new String[]{"notes", "PaidAmount"});
+		grid.setEditable(true);
 		
 		stage.setScene(new Scene(grid));
 		

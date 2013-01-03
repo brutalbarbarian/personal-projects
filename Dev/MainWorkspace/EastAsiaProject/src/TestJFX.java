@@ -17,6 +17,8 @@ import com.lwan.util.CollectionUtil;
 import com.sun.org.apache.bcel.internal.generic.ALOAD;
 
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -36,6 +38,7 @@ public class TestJFX extends App{
 
 	@Override
 	public void start(Stage stage) throws Exception {
+		
 //		App.initaliseApplication();
 //		String driverName = "sun.jdbc.odbc.JdbcOdbcDriver";
 //		String fileName = "C:/Users/Brutalbarbarian/Dropbox/EastAsiaProject/EastAsiaDB.mdb";
@@ -43,7 +46,27 @@ public class TestJFX extends App{
 //		GConnection.initialise(driverName, url, "", "");
 
 		final BOLinkEx<BOEmployee> link = new BOLinkEx<>();
-		final BOTextField txtField = new BOTextField(link, "EmployeeID");
+		final BOTextField txtField = new BOTextField(link, "PayMonthly");
+		
+//		txtField.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//
+//			@Override
+//			public void changed(ObservableValue<? extends Boolean> arg0,
+//					Boolean arg1, Boolean arg2) {
+//				// TODO Auto-generated method stub
+//				System.out.println("Changed");
+//			}
+//			
+//		});
+//		txtField.focusedProperty().addListener(new InvalidationListener() {
+//			
+//			@Override
+//			public void invalidated(Observable arg0) {
+//				// TODO Auto-generated method stub
+//				System.out.println("Invalidated");
+//			}
+//		});
+//		
 		
 		final BOComboBox<Boolean> cb = new BOComboBox<>(link, "IsActive");
 //		cb.addAllItems(LngUtil.translate(new String[] {"<No Value>", "One", "Two", "Three", "Four"}));
