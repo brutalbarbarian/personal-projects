@@ -16,7 +16,6 @@ import com.lwan.util.IOUtil;
 
 import javafx.application.Application;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 public abstract class App extends Application{
 	// File names

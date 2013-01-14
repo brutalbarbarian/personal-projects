@@ -387,7 +387,8 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 				e.loaded = true;
 			}
 			
-			fireModified(new ModifiedEvent(child, ModifiedEvent.TYPE_SET));
+			// Let the child fire its own event...
+//			fireModified(new ModifiedEvent(child, ModifiedEvent.TYPE_SET));
 		}
 		return child;
 	}
@@ -456,6 +457,11 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		}
 		
 		super.handleActive(isActive);
+	}
+
+	protected void setActiveChildren(boolean isActive) {
+		super.setActiveChildren(isActive);
+		
 		// Set the active state of all children to match this
 		if (children != null) {
 			for (Entry e : children) {

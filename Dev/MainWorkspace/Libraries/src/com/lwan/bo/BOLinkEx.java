@@ -76,4 +76,9 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 	public T getReferencedObject() {
 		return getLinkedObject();
 	}
+	
+	public BusinessObject findChildByPath(String path) {
+		// Unlike BOLink... just pass this call directly to child.
+		return getLinkedObject() == null? null : getLinkedObject().findChildByPath(path);
+	}
 }

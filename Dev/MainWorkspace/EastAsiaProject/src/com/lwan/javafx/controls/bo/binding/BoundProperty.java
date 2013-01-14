@@ -9,7 +9,9 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableValue;
 
 public class BoundProperty <T> extends SimpleObjectProperty<T>{
 	private Property<BOLinkEx<?>> attributeLinkProperty;
@@ -67,35 +69,41 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		return linkedAttributeProperty().getValue();
 	}
 	
-	public BoundProperty(BoundControl<T> owner, BOLinkEx<?> link, String path) {
+	public BoundProperty(Object owner, BOLinkEx<?> link, String path) {
 		super(owner, "DataBinding");
 		
 		attributeLinkproperty().setValue(link);
 		pathProperty().setValue(path);
+		buildBindings();
 	}
 	
-	public BoundProperty(BoundControl<T> owner, BoundProperty<?> existing) {
+	public BoundProperty(Object owner, BoundProperty<?> existing) {
 		this(owner, existing.getAttributeLink(), existing.getPath());
 	}
 	
-	@SuppressWarnings("unchecked")
-	public BoundControl<T> getBoundControl() {
-		return (BoundControl<T>)getBean();
+	protected void buildBindings() {
+		addListener(new ChangeListener<T>() {
+			public void changed(ObservableValue<? extends T> arg0, T oldValue,
+					T newValue) {
+				if (getLinkedAttribute() != null) {
+					getLinkedAttribute().userSetValueAsObject(newValue, getBean());
+				}
+			}
+		});
 	}
 	
 	@SuppressWarnings("unchecked")
 	public void buildAttributeLinks () {
 		// Unbind previous attribute if exists
-		if (getLinkedAttribute() != null) {
-			unbindBidirectional((Property<T>) getLinkedAttribute().Value());
-		}
+		unbind();
 		
 		// Build the attributelink
 		doBuildAttributeLinks();
 		
 		// Bind new attribute
 		if (getLinkedAttribute() != null) {
-			bindBidirectional((Property<T>) getLinkedAttribute().Value());
+			// Only one way bindings.
+			bind((Property<T>) getLinkedAttribute().Value());
 		} else {
 			setValue(null);
 		}

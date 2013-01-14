@@ -6,6 +6,7 @@ import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.JavaFXUtil;
 import com.lwan.util.StringUtil;
+import com.sun.glass.ui.Application;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -19,6 +20,7 @@ import javafx.scene.control.TextField;
 public class BOTextField extends TextField implements BoundControl<String> {
 	private StringBoundProperty dataBindingProperty;
 	private BooleanProperty selectAllOnEditProperty;
+	private BooleanProperty externalControlledProperty;
 	
 	@Override
 	public StringBoundProperty dataBindingProperty() {
@@ -32,9 +34,23 @@ public class BOTextField extends TextField implements BoundControl<String> {
 		return selectAllOnEditProperty;
 	}
 	
-	private boolean actualInvalidate;	// This is to avoid triggering twice invalidation upon failure 
+	public BooleanProperty externalControlledProperty() {
+		if (externalControlledProperty == null) {
+			externalControlledProperty = new SimpleBooleanProperty(this, "ExternalControlled", false);
+		}
+		return externalControlledProperty;
+	}
+	
+	public boolean isExternalControlled() {
+		return externalControlledProperty().getValue();
+	}
+	
 	public BOTextField(BOLinkEx<?> link, String path) {
 		dataBindingProperty = new StringBoundProperty(this, link, path);
+		initialise();
+	}
+	
+	protected void initialise() {
 		textProperty().bindBidirectional(dataBindingProperty);
 		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
 		actualInvalidate = true;
@@ -42,8 +58,8 @@ public class BOTextField extends TextField implements BoundControl<String> {
 		// Focus Listener for managing the edit state of the textfield
 		focusedProperty().addListener(new InvalidationListener() {
 			public void invalidated(Observable observable) {
-				System.out.println(getParent());
-				if (actualInvalidate && 
+				if (!isExternalControlled() &&	// Do nothing if externally controlled. 
+						actualInvalidate &&
 						// We only want to do anything is focus is still on the same form
 						(getParent() == null ||	// Assume null parent means the window is still focused.
 						getScene().getWindow().isFocused())) {
@@ -67,10 +83,21 @@ public class BOTextField extends TextField implements BoundControl<String> {
 			public void changed(ObservableValue<? extends Boolean> property,
 					Boolean oldValue, Boolean newValue) {
 				if (newValue && selectAllOnEditProperty().getValue()) {
-					selectAll();
+					Application.invokeLater(new Runnable() {
+						public void run() {
+							selectAll();	
+						}	
+					});
+					
 				}
 			}
 		});
+	}
+	
+	private boolean actualInvalidate;	// This is to avoid triggering twice invalidation upon failure 
+	public BOTextField(StringBoundProperty dataBinding) {
+		dataBindingProperty = dataBinding;
+		initialise();
 	}
 	
 	public void replaceText(int start, int end, String text) {

@@ -50,12 +50,12 @@ public class StringBoundProperty extends BoundProperty<String>{
 		return editModeProperty;
 	}
 	
-	public StringBoundProperty(BoundControl<String> owner, BOLinkEx<?> link,
+	public StringBoundProperty(Object owner, BOLinkEx<?> link,
 			String path) {
 		super(owner, link, path);
 	}
 	
-	public StringBoundProperty(BoundControl<String> owner, BoundProperty<?> existing) {
+	public StringBoundProperty(Object owner, BoundProperty<?> existing) {
 		this(owner, existing.getAttributeLink(), existing.getPath());
 	}
 	
@@ -217,8 +217,8 @@ public class StringBoundProperty extends BoundProperty<String>{
 		switch (type) {
 		case String : return attr.asString();
 		case Integer : return Integer.toString(attr.asInteger());
-		case Double : case Currency: 
-			return Double.toString(attr.asDouble());
+		case Double : return StringUtil.formatString("%f", attr.asDouble());
+		case Currency: return StringUtil.formatString("%.2f", attr.asDouble());
 		case Boolean: 
 			if (attr.getValue() == null) {
 				return "";
@@ -334,5 +334,19 @@ public class StringBoundProperty extends BoundProperty<String>{
 			// Not in edit mode, and not trying to commit... just update display
 			setValue(getDisplayValue());
 		}
+	}
+	
+	/**
+	 * As StringBoundProperty abstracts the actual value with display and edit values,
+	 * this allows easy access to the actual value.
+	 * 
+	 * @return
+	 */
+	public Object getActualValue() {
+		return getLinkedAttribute() == null? null : getLinkedAttribute().getValue();
+	}
+	
+	protected void buildBindings() {
+		// Do not inherit...
 	}
 }

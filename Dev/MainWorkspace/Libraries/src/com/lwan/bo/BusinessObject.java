@@ -79,6 +79,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	private Property<Boolean> independent;
 	private Property<Set<State>> state;
 	private Property<Boolean> is_populating;
+	private Property<Boolean> is_handling_active;
 	
 	/* Property Accessor Methods */
 	public ReadOnlyProperty<BusinessObject> Owner() {
@@ -96,6 +97,10 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	public ReadOnlyProperty<Boolean> IsPopulating() {
 		return _is_populating();
+	}
+	
+	public ReadOnlyProperty<Boolean> IsHandlingActive() {
+		return _is_handling_active();
 	}
 	
 	/** 
@@ -202,6 +207,13 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		}
 		return state;
 	}
+	
+	private Property<Boolean> _is_handling_active() {
+		if (is_handling_active == null) {
+			is_handling_active = new SimpleObjectProperty<>(this, "IsHandlingActive", false);
+		}
+		return is_handling_active;
+	}
 
 	/* Private Fields  */
 	// Children of this object. This should never be exposed.
@@ -245,6 +257,24 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		BusinessObject child = children.get(name.toLowerCase());
 		if (child == null) return null;
 		return child.getReferencedObject();
+	}
+	
+	public BOAttribute<?> findAttributeByName(String name) {
+		BusinessObject attr = findChildByName(name);
+		if (attr != null && attr.isAttribute()) {
+			return (BOAttribute<?>)attr;
+		} else {
+			return null;	// Just return null...
+		}
+	}
+	
+	public BOAttribute<?> findAttributeByPath(String path) {
+		BusinessObject attr = findChildByPath(path);
+		if (attr != null && attr.isAttribute()) {
+			return (BOAttribute<?>)attr;
+		} else {
+			return null;	// Just return null...
+		}
 	}
 	
 	/**
@@ -388,21 +418,41 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param isActive
 	 */
 	protected void handleActive(Boolean isActive) {
-		if (isActive) {
-			// Any modifications occurring while populating from dataset should be ignored
-			AllowNotifications().setValue(false);
-			_is_populating().setValue(true);
-			State().getValue().clear();	// Reset all states upon setting active.
-			if (populateAttributes()) {
-				State().getValue().add(State.Dataset);
-			} else {
-				// If its new, then set attributes to defaults and modified is automatically triggered
-				clearAttributes();
-				State().getValue().add(State.Modified);
+		_is_handling_active().setValue(true);
+		try {
+			if (isActive) {
+				// Any modifications occurring while populating from dataset should be ignored
+				AllowNotifications().setValue(false);
+				_is_populating().setValue(true);
+				try {
+					State().getValue().clear();	// Reset all states upon setting active.
+					if (populateAttributes()) {
+						State().getValue().add(State.Dataset);
+					} else {
+						// If its new, then set attributes to defaults and modified is automatically triggered
+						clearAttributes();
+						State().getValue().add(State.Modified);
+					}
+				} finally {
+					_is_populating().setValue(false);
+					AllowNotifications().setValue(true);
+				}
+	
 			}
-			_is_populating().setValue(false);
-			AllowNotifications().setValue(true);
+			
+			// Ensure all children are of the same active state
+			setActiveChildren(isActive);
+			
+			// If the owner is currently handling its active state, let the parent throw the event
+			if (getOwner() == null || !getOwner().IsHandlingActive().getValue()) {
+				fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_ACTIVE));
+			}
+		} finally {
+			_is_handling_active().setValue(false);	
 		}
+	}
+	
+	protected void setActiveChildren(boolean isActive) {
 		// Set the active state of all children to match this
 		for (BusinessObject child : children.values()) {
 			// Active state is meaningless to BOAttributes
