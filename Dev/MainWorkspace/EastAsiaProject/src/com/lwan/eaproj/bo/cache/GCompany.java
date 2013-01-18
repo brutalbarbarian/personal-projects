@@ -21,12 +21,12 @@ public class GCompany extends BODbSet<BOCompany>{
 	private GCompany() {
 		super(null, "CompanyCache", "CompanyID", "com_id");
 		
-		LoadMode().setValue(LOADMODE_CACHE);
+		loadModeProperty().setValue(LOADMODE_CACHE);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		ExistsStoredProc().setValue(new PS_COM());
+		existsStoredProcProperty().setValue(new PS_COM());
 	}
 
 	@Override

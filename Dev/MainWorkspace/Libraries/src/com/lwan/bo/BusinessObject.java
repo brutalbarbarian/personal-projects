@@ -71,46 +71,46 @@ import javafx.util.Callback;
 public abstract class BusinessObject implements ModifiedEventListener{
 	/* Property Declarations */
 	
-	private Property<BusinessObject> owner;
-	private Property<Boolean> active;
-	private Property<String> name;
-	private Property<String> tag;
-	private Property<Boolean> allow_notifications;
-	private Property<Boolean> independent;
-	private Property<Set<State>> state;
-	private Property<Boolean> is_populating;
-	private Property<Boolean> is_handling_active;
+	private Property<BusinessObject> ownerProperty;
+	private Property<Boolean> activeProperty;
+	private Property<String> nameProperty;
+	private Property<String> tagProperty;
+	private Property<Boolean> allowNotificationsProperty;
+	private Property<Boolean> independentProperty;
+	private Property<Set<State>> stateProperty;
+	private Property<Boolean> isPopulatingProperty;
+	private Property<Boolean> isHandlingActiveProperty;
 	
 	/* Property Accessor Methods */
-	public ReadOnlyProperty<BusinessObject> Owner() {
-		return _owner();
+	public ReadOnlyProperty<BusinessObject> ownerProperty() {
+		return _ownerProperty();
 	}
-	public Property<String> Name() {
-		if(name == null) {
-			name = new SimpleObjectProperty<>(this, "Name", "");
+	public Property<String> nameProperty() {
+		if(nameProperty == null) {
+			nameProperty = new SimpleObjectProperty<>(this, "Name", "");
 		}
-		return name;
+		return nameProperty;
 	}
 	
-	public ReadOnlyProperty<Set<State>> State(){
-		return _state();
+	public ReadOnlyProperty<Set<State>> stateProperty(){
+		return _stateProperty();
 	}
-	public ReadOnlyProperty<Boolean> IsPopulating() {
-		return _is_populating();
+	public ReadOnlyProperty<Boolean> isPopulatingProperty() {
+		return _isPopulatingProperty();
 	}
 	
-	public ReadOnlyProperty<Boolean> IsHandlingActive() {
-		return _is_handling_active();
+	public ReadOnlyProperty<Boolean> isHandlingActiveProperty() {
+		return _isHandlingActiveProperty();
 	}
 	
 	/** 
 	 * Active represents if this objects is in use. 
 	 */
-	public Property<Boolean> Active() {
-		if (active == null) {
-			active = new SimpleObjectProperty<>(this, "Active", false);
+	public Property<Boolean> activeProperty() {
+		if (activeProperty == null) {
+			activeProperty = new SimpleObjectProperty<>(this, "Active", false);
 		}
-		return active;
+		return activeProperty;
 	}
 	
 	/**
@@ -120,11 +120,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 * @return
 	 */
-	public Property<String> Tag() {
-		if (tag == null) {
-			tag = new SimpleObjectProperty<>(this, "Tag", "");
+	public Property<String> tagProperty() {
+		if (tagProperty == null) {
+			tagProperty = new SimpleObjectProperty<>(this, "Tag", "");
 		}
-		return tag;
+		return tagProperty;
 	}
 	/**
 	 * <p>
@@ -150,11 +150,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 * @return
 	 */
-	public Property<Boolean> Independent() {
-		if (independent == null) {
-			independent = new SimpleObjectProperty<Boolean>(this, "Independent", false);
+	public Property<Boolean> independentProperty() {
+		if (independentProperty == null) {
+			independentProperty = new SimpleObjectProperty<Boolean>(this, "Independent", false);
 		}
-		return independent;
+		return independentProperty;
 	}
 	
 	/**
@@ -179,40 +179,40 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * Use this flag to disable notifications if needed.
 	 * This will effectively disable fireModified for this object only. 
 	 */
-	public Property<Boolean> AllowNotifications() {
-		if (allow_notifications == null) {
-			allow_notifications = new SimpleObjectProperty<>(this, "AllowNotifications", true);
+	public Property<Boolean> allowNotificationsProperty() {
+		if (allowNotificationsProperty == null) {
+			allowNotificationsProperty = new SimpleObjectProperty<>(this, "AllowNotifications", true);
 		}
-		return allow_notifications;
+		return allowNotificationsProperty;
 	}
 	
 	/* Private Property Accessor Methods */
-	private Property<BusinessObject> _owner() {
-		if (owner == null) {
-			owner = new SimpleObjectProperty<>(this, "Owner", null);
+	private Property<BusinessObject> _ownerProperty() {
+		if (ownerProperty == null) {
+			ownerProperty = new SimpleObjectProperty<>(this, "Owner", null);
 		}
-		return owner;
+		return ownerProperty;
 	}
 	
-	private Property<Boolean> _is_populating() {
-		if (is_populating == null) {
-			is_populating = new SimpleObjectProperty<>(this, "IsPopulating", false);
+	private Property<Boolean> _isPopulatingProperty() {
+		if (isPopulatingProperty == null) {
+			isPopulatingProperty = new SimpleObjectProperty<>(this, "IsPopulating", false);
 		}
-		return is_populating;
+		return isPopulatingProperty;
 	}
-	private Property<Set<State>> _state() {
-		if (state == null) {
-			state = new SimpleObjectProperty<>(this, "State", null);
-			state.setValue(new HashSet<State>());
+	private Property<Set<State>> _stateProperty() {
+		if (stateProperty == null) {
+			stateProperty = new SimpleObjectProperty<>(this, "State", null);
+			stateProperty.setValue(new HashSet<State>());
 		}
-		return state;
+		return stateProperty;
 	}
 	
-	private Property<Boolean> _is_handling_active() {
-		if (is_handling_active == null) {
-			is_handling_active = new SimpleObjectProperty<>(this, "IsHandlingActive", false);
+	private Property<Boolean> _isHandlingActiveProperty() {
+		if (isHandlingActiveProperty == null) {
+			isHandlingActiveProperty = new SimpleObjectProperty<>(this, "IsHandlingActive", false);
 		}
-		return is_handling_active;
+		return isHandlingActiveProperty;
 	}
 
 	/* Private Fields  */
@@ -227,10 +227,10 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	public BusinessObject(BusinessObject owner, String name) {
 		children = new HashMap<>();
 		listeners = new Vector<>();
-		Name().setValue(name);
-		_owner().setValue(owner);
-		AllowNotifications().setValue(true);
-		Active().addListener(new ChangeListener<Boolean>() {
+		nameProperty().setValue(name);
+		_ownerProperty().setValue(owner);
+		allowNotificationsProperty().setValue(true);
+		activeProperty().addListener(new ChangeListener<Boolean>() {
 			public void changed(ObservableValue<? extends Boolean> value,
 					Boolean oldValue, Boolean newValue) {
 				handleActive(newValue);
@@ -243,7 +243,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	protected void initialise() {
 		createAttributes();
 		// Ensures active state is false to begin with. This will also ensure all children are inactive as well.
-		Active().setValue(false);
+		activeProperty().setValue(false);
 		clear();
 	}
 	
@@ -289,11 +289,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	
 	public BusinessObject getOwner() {
-		return Owner().getValue();
+		return ownerProperty().getValue();
 	}
 
 	public String getName() {
-		return Name().getValue();
+		return nameProperty().getValue();
 	}
 	
 	/**
@@ -384,7 +384,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		for (BusinessObject child : children.values()) {
 			// Not going to bother comparing if callback returns true
 			if (ignoreFields != null && ignoreFields.call(child)) continue;	
-			String name = child.Name().getValue();
+			String name = child.nameProperty().getValue();
 			BusinessObject otherChild = other.findChildByName(name);
 			if(otherChild == null || !child.equivalentTo(otherChild, ignoreFields)) return false;
 		}
@@ -402,8 +402,8 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	public <T extends BusinessObject> T findOwnerByClass(Class<T> parentClass) {
 		if (ClassUtil.isSuperclassOf(parentClass, getClass())) {
 			return (T)this;
-		} else if (Owner().getValue() != null) {
-			return Owner().getValue().findOwnerByClass(parentClass);
+		} else if (ownerProperty().getValue() != null) {
+			return ownerProperty().getValue().findOwnerByClass(parentClass);
 		} else {
 			return null;
 		}
@@ -418,24 +418,24 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param isActive
 	 */
 	protected void handleActive(Boolean isActive) {
-		_is_handling_active().setValue(true);
+		_isHandlingActiveProperty().setValue(true);
 		try {
 			if (isActive) {
 				// Any modifications occurring while populating from dataset should be ignored
-				AllowNotifications().setValue(false);
-				_is_populating().setValue(true);
+				allowNotificationsProperty().setValue(false);
+				_isPopulatingProperty().setValue(true);
 				try {
-					State().getValue().clear();	// Reset all states upon setting active.
+					stateProperty().getValue().clear();	// Reset all states upon setting active.
 					if (populateAttributes()) {
-						State().getValue().add(State.Dataset);
+						stateProperty().getValue().add(State.Dataset);
 					} else {
 						// If its new, then set attributes to defaults and modified is automatically triggered
 						clearAttributes();
-						State().getValue().add(State.Modified);
+						stateProperty().getValue().add(State.Modified);
 					}
 				} finally {
-					_is_populating().setValue(false);
-					AllowNotifications().setValue(true);
+					_isPopulatingProperty().setValue(false);
+					allowNotificationsProperty().setValue(true);
 				}
 	
 			}
@@ -444,11 +444,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 			setActiveChildren(isActive);
 			
 			// If the owner is currently handling its active state, let the parent throw the event
-			if (getOwner() == null || !getOwner().IsHandlingActive().getValue()) {
+			if (getOwner() == null || !getOwner().isHandlingActiveProperty().getValue()) {
 				fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_ACTIVE));
 			}
 		} finally {
-			_is_handling_active().setValue(false);	
+			_isHandlingActiveProperty().setValue(false);	
 		}
 	}
 	
@@ -457,7 +457,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		for (BusinessObject child : children.values()) {
 			// Active state is meaningless to BOAttributes
 			if (!(child.isAttribute())) {
-				child.Active().setValue(isActive);
+				child.activeProperty().setValue(isActive);
 			}
 		}
 	}
@@ -468,8 +468,8 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 */
 	public void ensureActive() {
-		if (!Active().getValue()) {
-			Active().setValue(true);
+		if (!activeProperty().getValue()) {
+			activeProperty().setValue(true);
 		}
 	}
 	
@@ -481,18 +481,18 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param source
 	 */
 	public final void fireModified(ModifiedEvent event) {
-		if (AllowNotifications().getValue()) { 
-			State().getValue().add(State.Modified);
+		if (allowNotificationsProperty().getValue()) { 
+			stateProperty().getValue().add(State.Modified);
 			
 			// Don't handle event if this was the object which fired it last
 			if (event.getDirectChild() != this) {
 				handleModified(event);
 			}
 			
-			BusinessObject owner = Owner().getValue();
+			BusinessObject owner = ownerProperty().getValue();
 			ModifiedEvent modEvent = new ModifiedEvent(event, this);
 			if (owner != null) {
-				Owner().getValue().fireModified(modEvent);
+				ownerProperty().getValue().fireModified(modEvent);
 			}
 			for(ModifiedEventListener listener : listeners) {
 				listener.handleModified(modEvent);
@@ -520,7 +520,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param object
 	 */
 	protected <T extends BusinessObject> T addAsChild(T object) {
-		children.put(object.Name().getValue().toLowerCase(), object);		
+		children.put(object.nameProperty().getValue().toLowerCase(), object);		
 		return object;
 	}
 	
@@ -548,7 +548,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	
 	public void setNotifications(boolean allow) {
-		AllowNotifications().setValue(allow);
+		allowNotificationsProperty().setValue(allow);
 	}
 	
 	/**
@@ -594,7 +594,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		// No need to validate inactive objects
 		if (isActive()) {
 			for (BusinessObject child : children.values()) {
-				if (child.Independent().getValue()) {
+				if (child.independentProperty().getValue()) {
 					child.verifyState();
 				}
 			}
@@ -603,7 +603,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 				throw new BOException("Failed to verfy child with message '" + err + "'", this);
 			}
 			for(BusinessObject child : children.values()) {
-				if (!child.Independent().getValue()) {
+				if (!child.independentProperty().getValue()) {
 					child.verifyState();
 				}
 			}
@@ -622,21 +622,21 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	protected boolean save() {
 		// if modified... then do save
-		if (State().getValue().contains(State.Modified) || 
+		if (stateProperty().getValue().contains(State.Modified) || 
 				// or if loaded from a dataset but was set inactive afterwards
-				(State().getValue().contains(State.Dataset) && !Active().getValue())) {
+				(stateProperty().getValue().contains(State.Dataset) && !activeProperty().getValue())) {
 			// Save all the independent children first
 			for (BusinessObject child : children.values()) {
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
 				if(!(child.isAttribute()) &&
 						// either independent and active, or dependent and inactive
-						child.Independent().getValue() == isActive()) {
+						child.independentProperty().getValue() == isActive()) {
 					child.save();
 				}
 			}
 			
 			// We want to call doSave if the value is active, otherwise doDelete should be called
-			if (Active().getValue()) {
+			if (activeProperty().getValue()) {
 				doSave();
 			} else {
 				doDelete();
@@ -647,16 +647,16 @@ public abstract class BusinessObject implements ModifiedEventListener{
 				// Attributes should be managed by the owner, and shouldn't need to manage themselves
 				if (!(child.isAttribute()) &&
 						// either independent and inactive, or dependent and active
-						child.Independent().getValue() != isActive()) {
+						child.independentProperty().getValue() != isActive()) {
 					child.save();
 				}
 			}			
 			// Should be safe to assume the following state after successful saving
-			State().getValue().remove(State.Modified);
+			stateProperty().getValue().remove(State.Modified);
 			if (isActive()) {
-				State().getValue().add(State.Dataset);
+				stateProperty().getValue().add(State.Dataset);
 			} else {
-				State().getValue().remove(State.Dataset);
+				stateProperty().getValue().remove(State.Dataset);
 			}
 			return true;
 		} else {
@@ -679,7 +679,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	public boolean isActive() {
-		return Active().getValue();
+		return activeProperty().getValue();
 	}
 	
 	/**
@@ -688,7 +688,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param active
 	 */
 	public void setActive(boolean active) {
-		Active().setValue(active);
+		activeProperty().setValue(active);
 	}
 	
 	/**
@@ -697,7 +697,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	public boolean isIndependent() {
-		return Independent().getValue();
+		return independentProperty().getValue();
 	}
 	
 	/**
@@ -706,7 +706,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param independent
 	 */
 	public void setIndependent(boolean independent) {
-		Independent().setValue(independent);
+		independentProperty().setValue(independent);
 	}
 	
 	/**
@@ -744,7 +744,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	protected String toString(int spaces, int expansion) {
 		StringBuilder sb = new StringBuilder();
 		// first line: Name:ClassName
-		sb.append(StringUtil.getRepeatedString(" ", spaces)).append(Name().getValue()).append(':').append(getClass().getSimpleName()).
+		sb.append(StringUtil.getRepeatedString(" ", spaces)).append(nameProperty().getValue()).append(':').append(getClass().getSimpleName()).
 				append(' ').append(getPropertyStrings()).append('\n');
 		
 		// call toString on all children with spaces += 4
@@ -772,7 +772,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	protected String getPropertyStrings() {
-		return "Active:" + Active().getValue();
+		return "Active:" + activeProperty().getValue();
 	}
 	
 	/**

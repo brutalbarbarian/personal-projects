@@ -9,17 +9,17 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.AttributeType;
 
 public class BODbAttribute <T> extends BOAttribute<T> {
-	private Property<String> field_name;
+	private Property<String> fieldNameProperty;
 	
-	public ReadOnlyProperty<String> FieldName() {
-		return _field_name();
+	public ReadOnlyProperty<String> fieldNameProperty() {
+		return _fieldNameProperty();
 	}
 	
-	private Property<String> _field_name() {
-		if (field_name == null) {
-			field_name = new SimpleObjectProperty<String>(this, "FieldName");
+	private Property<String> _fieldNameProperty() {
+		if (fieldNameProperty == null) {
+			fieldNameProperty = new SimpleObjectProperty<String>(this, "FieldName");
 		}
-		return field_name;
+		return fieldNameProperty;
 	}
 
 	public BODbAttribute(BusinessObject parent, String name, String field, AttributeType type) {
@@ -30,7 +30,7 @@ public class BODbAttribute <T> extends BOAttribute<T> {
 			boolean allowNulls, boolean allowUserModify) {
 		super(parent, name, type, allowNulls, allowUserModify);
 		
-		_field_name().setValue(field);
+		_fieldNameProperty().setValue(field);
 	}
 
 }

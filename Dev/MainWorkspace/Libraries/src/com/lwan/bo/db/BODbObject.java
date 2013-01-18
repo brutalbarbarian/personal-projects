@@ -114,7 +114,7 @@ public abstract class BODbObject extends BusinessObject{
 		super.addAsChild(object);
 		if (object instanceof BODbAttribute) {
 			BODbAttribute<?> attr = (BODbAttribute<?>)object;
-			fields.put(attr.FieldName().getValue(), attr);
+			fields.put(attr.fieldNameProperty().getValue(), attr);
 		}
 		return object;
 	}
@@ -157,7 +157,7 @@ public abstract class BODbObject extends BusinessObject{
 	@Override
 	protected void doSave() {
 		int type;
-		if (State().getValue().contains(State.Dataset)) {
+		if (stateProperty().getValue().contains(State.Dataset)) {
 			type = SP_UPDATE;
 		} else {
 			type = SP_INSERT;

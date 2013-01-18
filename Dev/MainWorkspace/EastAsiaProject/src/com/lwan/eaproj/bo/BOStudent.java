@@ -3,12 +3,16 @@ package com.lwan.eaproj.bo;
 import com.lwan.bo.BusinessObject;
 
 public class BOStudent extends BOCustomer{
-	public BOStudentRecordSet students;
+	private BOStudentRecordSet students;
+	
+	public BOStudentRecordSet students() {
+		return students;
+	}
 	
 	public BOStudent(BusinessObject owner) {
 		super(owner);
 		// Override the name
-		Name().setValue("Student");
+		nameProperty().setValue("Student");
 	}
 	
 	protected void createAttributes() {

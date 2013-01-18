@@ -15,13 +15,13 @@ public class GSchools extends BODbSet<BOSchool> {
 
 	private GSchools() {
 		super(null, "SchoolCache", "SchoolName", "sch_id");
-		LoadMode().setValue(LOADMODE_CACHE);
+		loadModeProperty().setValue(LOADMODE_CACHE);
 		
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		ExistsStoredProc().setValue(new PS_SCH());
+		existsStoredProcProperty().setValue(new PS_SCH());
 	}
 
 	@Override

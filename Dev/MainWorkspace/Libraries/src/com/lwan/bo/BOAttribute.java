@@ -13,17 +13,17 @@ import javafx.util.Callback;
 
 public class BOAttribute <T> extends BusinessObject {
 	/* Properties Declarations */
-	private Property<Boolean> allow_nulls;
-	private Property<Boolean> allow_user_modify;
-	private Property<Boolean> user_set;
-	private Property<Object> user_set_source;
-	private Property<AttributeType> attribute_type;
+	private Property<Boolean> allowNullsProperty;
+	private Property<Boolean> allowUserModifyProperty;
+	private Property<Boolean> userSetProperty;
+	private Property<Object> userSetSourceProperty;
+	private Property<AttributeType> attributeTypeProperty;
 	
-	private ValidatedProperty<T> value;
+	private ValidatedProperty<T> valueProperty;
 	
 	// Specific for numerics... note these only impact UI input validation
-	private Property<Boolean> allow_negative;
-	private Property<Integer> percision;
+	private Property<Boolean> allowNegativeProperty;
+	private Property<Integer> percisionProperty;
 	
 	
 	/* Property accessors */
@@ -32,11 +32,11 @@ public class BOAttribute <T> extends BusinessObject {
 	 * 
 	 * @return
 	 */
-	public ValidatedProperty<T> Value() {
-		if (value == null) {
-			value = new ValidatedProperty<>(this, "Value");
+	public ValidatedProperty<T> valueProperty() {
+		if (valueProperty == null) {
+			valueProperty = new ValidatedProperty<>(this, "Value");
 		}
-		return value;
+		return valueProperty;
 	}
 	
 	/**
@@ -44,35 +44,35 @@ public class BOAttribute <T> extends BusinessObject {
 	 * 
 	 * @return
 	 */
-	public Property<Boolean> AllowNegative() {
-		if (allow_negative == null) {
-			allow_negative = new SimpleObjectProperty<Boolean>(this, "AllowNegative", true);
+	public Property<Boolean> allowNegativeProperty() {
+		if (allowNegativeProperty == null) {
+			allowNegativeProperty = new SimpleObjectProperty<Boolean>(this, "AllowNegative", true);
 		}
-		return allow_negative;
+		return allowNegativeProperty;
 	}
 	
-	public Property<Integer> Percision() {
-		if (percision == null) {
-			percision = new SimpleObjectProperty<Integer>(this, "Percision", 
+	public Property<Integer> percisionProperty() {
+		if (percisionProperty == null) {
+			percisionProperty = new SimpleObjectProperty<Integer>(this, "Percision", 
 					// Default to 2 if is currency
 					getAttributeType() == AttributeType.Currency? 2 : 10);
 		}
-		return percision;
+		return percisionProperty;
 	}
 	
-	public ReadOnlyProperty<AttributeType> AttributeType () {
-		return _attribute_type();
+	public ReadOnlyProperty<AttributeType> attributeTypeProperty () {
+		return _attributeTypeProperty();
 	}
 	
-	public Property<Boolean> AllowUserModify() {
-		if (allow_user_modify == null) {
-			allow_user_modify = new SimpleObjectProperty<Boolean>(this, "AllowUserModify", true);
+	public Property<Boolean> allowUserModifyProperty() {
+		if (allowUserModifyProperty == null) {
+			allowUserModifyProperty = new SimpleObjectProperty<Boolean>(this, "AllowUserModify", true);
 		}
-		return allow_user_modify;
+		return allowUserModifyProperty;
 	}
 	
-	public ReadOnlyProperty<Object> UserSetSource() {
-		return _user_set_source();
+	public ReadOnlyProperty<Object> userSetSourceProperty() {
+		return _userSetSourceProperty();
 	}
 	
 	/**
@@ -84,30 +84,30 @@ public class BOAttribute <T> extends BusinessObject {
 	 * 
 	 * @return
 	 */
-	public ReadOnlyProperty<Boolean> UserSet() {
-		return _user_set();
+	public ReadOnlyProperty<Boolean> userSetProperty() {
+		return _userSetProperty();
 	}
 	
 	/* Private properties */
-	private Property<Boolean> _user_set() {
-		if (user_set == null) {
-			user_set = new SimpleObjectProperty<Boolean>(this, "UserSet", false);
+	private Property<Boolean> _userSetProperty() {
+		if (userSetProperty == null) {
+			userSetProperty = new SimpleObjectProperty<Boolean>(this, "UserSet", false);
 		}
-		return user_set;
+		return userSetProperty;
 	}
 	
-	private Property<AttributeType> _attribute_type() {
-		if (attribute_type == null) {
-			attribute_type = new SimpleObjectProperty<AttributeType>(this, "AttributeType", AttributeType.Unknown);
+	private Property<AttributeType> _attributeTypeProperty() {
+		if (attributeTypeProperty == null) {
+			attributeTypeProperty = new SimpleObjectProperty<AttributeType>(this, "AttributeType", AttributeType.Unknown);
 		}
-		return attribute_type;
+		return attributeTypeProperty;
 	}
 	
-	private Property<Object> _user_set_source() {
-		if (user_set_source == null) {
-			user_set_source = new SimpleObjectProperty<Object>(this, "UserSetSource", null);
+	private Property<Object> _userSetSourceProperty() {
+		if (userSetSourceProperty == null) {
+			userSetSourceProperty = new SimpleObjectProperty<Object>(this, "UserSetSource", null);
 		}
-		return user_set_source;
+		return userSetSourceProperty;
 	}
 	
 	protected String doVerifyState() {
@@ -117,7 +117,7 @@ public class BOAttribute <T> extends BusinessObject {
 		if ((isNull() || AllowNulls().getValue())) {
 			return null;
 		} else {
-			return "Attribute '" + Name().getValue() + "' is invalid";
+			return "Attribute '" + nameProperty().getValue() + "' is invalid";
 		}
 	}
 	
@@ -128,10 +128,10 @@ public class BOAttribute <T> extends BusinessObject {
 	 * @return
 	 */
 	public Property<Boolean> AllowNulls() {
-		if (allow_nulls == null) {
-			allow_nulls = new SimpleObjectProperty<>(this, "AllowNulls");
+		if (allowNullsProperty == null) {
+			allowNullsProperty = new SimpleObjectProperty<>(this, "AllowNulls");
 		}
-		return allow_nulls;
+		return allowNullsProperty;
 	}
 	
 	/**
@@ -225,11 +225,11 @@ public class BOAttribute <T> extends BusinessObject {
 	public BOAttribute(BusinessObject parent, String name, AttributeType type, boolean allowNulls, boolean allowUserModify) {
 		super(parent, name);
 		
-		_attribute_type().setValue(type);
+		_attributeTypeProperty().setValue(type);
 		AllowNulls().setValue(allowNulls);
-		AllowUserModify().setValue(allowUserModify);
+		allowUserModifyProperty().setValue(allowUserModify);
 		
-		Value().addListener(new ChangeListener<T>(){
+		valueProperty().addListener(new ChangeListener<T>(){
 			public void changed(ObservableValue<? extends T> observable,
 					T oldValue, T newValue) {
 				doChanged(oldValue, newValue);
@@ -238,15 +238,15 @@ public class BOAttribute <T> extends BusinessObject {
 	}
 	
 	public void addValidationListener(ValidationListener<T> listener) {
-		Value().addListener(listener);
+		valueProperty().addListener(listener);
 	}
 	
 	public void addChangeListener(ChangeListener<T> listener) {
-		Value().addListener(listener);
+		valueProperty().addListener(listener);
 	}
 	
 	public void setBeforeChangeListener(Callback<T, T> callback) {
-		Value().setBeforeSetValue(callback);
+		valueProperty().setBeforeSetValue(callback);
 	}
 	
 	
@@ -267,7 +267,7 @@ public class BOAttribute <T> extends BusinessObject {
 	 * @return
 	 */
 	public T getValue() {
-		return Value().getValue();
+		return valueProperty().getValue();
 	}
 	
 
@@ -278,7 +278,7 @@ public class BOAttribute <T> extends BusinessObject {
 	 * @param val
 	 */
 	public void setValue(T val) {
-		Value().setValue(val);
+		valueProperty().setValue(val);
 	}
 	
 	/**
@@ -291,12 +291,12 @@ public class BOAttribute <T> extends BusinessObject {
 	 * @param val
 	 */
 	public void userSetValue(T val, Object source) {
-		if (AllowUserModify().getValue()) {
-			_user_set().setValue(true);
-			_user_set_source().setValue(source);
+		if (allowUserModifyProperty().getValue()) {
+			_userSetProperty().setValue(true);
+			_userSetSourceProperty().setValue(source);
 			setValue(val);
-			_user_set_source().setValue(null);
-			_user_set().setValue(false);
+			_userSetSourceProperty().setValue(null);
+			_userSetProperty().setValue(false);
 		} else {
 			throw new RuntimeException("Attempted user modification of value in " +
 					getClass().getName() + " from source: " + source.toString());
@@ -326,7 +326,7 @@ public class BOAttribute <T> extends BusinessObject {
 	 * @return
 	 */
 	public boolean isUserSet() {
-		return UserSet().getValue();
+		return userSetProperty().getValue();
 	}
 	
 	/**
@@ -353,7 +353,7 @@ public class BOAttribute <T> extends BusinessObject {
 	}
 	
 	public AttributeType getAttributeType() {
-		return AttributeType().getValue();
+		return attributeTypeProperty().getValue();
 	}
 	
 	/**

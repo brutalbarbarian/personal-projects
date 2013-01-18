@@ -37,7 +37,7 @@ public class BOCompany extends BODbObject {
 		companyName = addAsChild(new BODbAttribute<String>(this, "CompanyName", "com_name", AttributeType.String));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
-		contactDetails.Independent().setValue(true);
+		contactDetails.independentProperty().setValue(true);
 		
 		employees = addAsChild(new BOEmployeeSet(this));
 	}
@@ -45,9 +45,9 @@ public class BOCompany extends BODbObject {
 	protected boolean populateAttributes() {
 		boolean result = super.populateAttributes();
 		if (result) {
-			contactDetails.contactDetailsID.assign(contactDetailsID);
+			contactDetails.contactDetailsID().assign(contactDetailsID);
 		} else {
-			contactDetails.contactDetailsID.clear();
+			contactDetails.contactDetailsID().clear();
 		}
 		return result;
 	}
@@ -66,7 +66,7 @@ public class BOCompany extends BODbObject {
 		if (companyID.asInteger() == 0) {
 			companyID.setValue(DbUtil.getNextID("com_id"));
 		}
-		contactDetailsID.assign(contactDetails.contactDetailsID);
+		contactDetailsID.assign(contactDetails.contactDetailsID());
 	}
 
 }

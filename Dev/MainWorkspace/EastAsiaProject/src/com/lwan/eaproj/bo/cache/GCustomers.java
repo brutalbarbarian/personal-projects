@@ -29,7 +29,7 @@ public class GCustomers extends BODbSet<BOCustomer> {
 	
 	public GCustomers() {
 		super(null, "CustomerCache", "CustomerID", "cus_id");
-		LoadMode().setValue(LOADMODE_CACHE);
+		loadModeProperty().setValue(LOADMODE_CACHE);
 		
 	}
 
@@ -37,7 +37,7 @@ public class GCustomers extends BODbSet<BOCustomer> {
 	protected void createStoredProcs() {
 		// inefficent???
 		childType = new PS_CUS();
-		ExistsStoredProc().setValue(new PS_CUS());
+		existsStoredProcProperty().setValue(new PS_CUS());
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class GCustomers extends BODbSet<BOCustomer> {
 		// Needs to dynamically create the child instance depending on what the
 		// type is.
 		
-		childType.getParamByName("@" + ChildIDFieldName().getValue()).set(id);
+		childType.getParamByName("@" + childIDFieldNameProperty().getValue()).set(id);
 		ResultSet res = null;
 		try {
 			childType.execute(GConnection.getConnection());

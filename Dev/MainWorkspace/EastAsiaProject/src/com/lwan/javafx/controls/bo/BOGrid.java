@@ -144,7 +144,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 								}
 							}
 						}
-						if (newValue.State().getValue().contains(State.Modified)) {
+						if (newValue.stateProperty().getValue().contains(State.Modified)) {
 							isEditingProperty().setValue(true);
 						}
 					}
@@ -465,7 +465,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			if (root.getColumns().isEmpty()) {
 				// Only add if editable
 				if (root.isEditable() && 
-						getRecord().findAttributeByPath(root.getField()).AllowUserModify().getValue()) {
+						getRecord().findAttributeByPath(root.getField()).allowUserModifyProperty().getValue()) {
 					columns.add(root);
 				}
 			} else {

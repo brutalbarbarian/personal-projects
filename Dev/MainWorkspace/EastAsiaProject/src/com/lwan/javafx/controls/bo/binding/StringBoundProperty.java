@@ -90,9 +90,9 @@ public class StringBoundProperty extends BoundProperty<String>{
 				if (value.length() == 0) {
 					return true;
 				} else if (value.equals("-")) {
-					return attr.AllowNegative().getValue();
+					return attr.allowNegativeProperty().getValue();
 				} else {
-					int percision = attr.Percision().getValue();
+					int percision = attr.percisionProperty().getValue();
 					if (value.equals(".")) {
 						return percision > 0;
 					} else if (StringUtil.endsWith(value, ".")) {
@@ -100,7 +100,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 						value = value.substring(0, value.length() - 1);
 					}
 					return StringUtil.validateDouble(value, percision) && 
-							attr.Value().validateAsObject(Double.parseDouble(value));
+							attr.valueProperty().validateAsObject(Double.parseDouble(value));
 				}
 			case Date:
 				// Not particularly restrictive validating... otherwise will choke user input
@@ -125,15 +125,15 @@ public class StringBoundProperty extends BoundProperty<String>{
 					return true;	// always accept empty
 				} else if (value.equals("-")) {
 					// No actual value set at this point...
-					return attr.AllowNegative().getValue();
+					return attr.allowNegativeProperty().getValue();
 				} else if (StringUtil.validateInt(value, 10)) {
 					// Do a proper validation...as this is a proper integer
-					return attr.Value().validateAsObject(Integer.parseInt(value)); 
+					return attr.valueProperty().validateAsObject(Integer.parseInt(value)); 
 				} else {
 					return false;
 				}
 			case String:
-				return attr.Value().validateAsObject(value);
+				return attr.valueProperty().validateAsObject(value);
 			case Time:
 				// TODO
 				break;
@@ -199,7 +199,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 			// Majority of text fields don't require validation. Attempting to validate
 			// will just slow things down. Especially with larger textfields such as 
 			// memos.
-			return attr.Value().requiresValidation();
+			return attr.valueProperty().requiresValidation();
 		} else {
 			return true;
 		}

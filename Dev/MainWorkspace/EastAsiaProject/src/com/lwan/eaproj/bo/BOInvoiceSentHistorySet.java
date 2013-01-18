@@ -12,7 +12,7 @@ public class BOInvoiceSentHistorySet extends BODbSet<BOInvoiceSentHistory>{
 
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_ISH_for_invoice());
+		selectStoredProcProperty().setValue(new PS_ISH_for_invoice());
 	}
 
 	@Override

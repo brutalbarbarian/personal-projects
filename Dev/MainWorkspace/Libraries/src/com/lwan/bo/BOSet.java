@@ -18,11 +18,11 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	// Will need to be implemented inside implementation of this in populate attribute
 	public static final int LOADMODE_CACHE = 2;		
 	
-	Property<Integer> load_mode;
+	Property<Integer> loadModeProperty;
 	
 	// name of the BOattribute which is a direct descendant of the child BOobject
 	// if this is empty, calling 'findByID' will always return with null
-	private Property<String> child_id_name;
+	private Property<String> childIdNameProperty;
 	
 	
 	/**
@@ -51,23 +51,23 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * 
 	 * @return
 	 */
-	public Property<Integer> LoadMode() {
-		if (load_mode == null) {
-			load_mode = new SimpleObjectProperty<Integer>(this, "LoadMode", LOADMODE_ACTIVE);
+	public Property<Integer> loadModeProperty() {
+		if (loadModeProperty == null) {
+			loadModeProperty = new SimpleObjectProperty<Integer>(this, "LoadMode", LOADMODE_ACTIVE);
 		}
-		return load_mode;
+		return loadModeProperty;
 	}
 	/* public property accessors */
-	public ReadOnlyProperty<String> ChildIDName() {
-		return _child_id_name();
+	public ReadOnlyProperty<String> childIDNameProperty() {
+		return _childIdNameProperty();
 	}
 	
 	/* private property accessors */
-	private Property<String> _child_id_name() {
-		if (child_id_name == null) {
-			child_id_name = new SimpleObjectProperty<String>(this, "ChildIDName");
+	private Property<String> _childIdNameProperty() {
+		if (childIdNameProperty == null) {
+			childIdNameProperty = new SimpleObjectProperty<String>(this, "ChildIDName");
 		}
-		return child_id_name;
+		return childIdNameProperty;
 	}
 	
 	// private fields
@@ -94,7 +94,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		super(owner, name);
 		
 		children = new Vector<Entry>();
-		_child_id_name().setValue(childIdName);
+		_childIdNameProperty().setValue(childIdName);
 	}
 
 	/**
@@ -208,7 +208,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	}
 	
 	protected T findChildByID (Object id, boolean ensureActive, boolean datasetOnly) {
-		String childAttr = ChildIDName().getValue();
+		String childAttr = childIDNameProperty().getValue();
 		if (!StringUtil.isNullOrBlank(childAttr)) {
 			for (Entry e : children) {
 				T child = e.child;
@@ -229,7 +229,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 			// Dosen't exist in current set... but in cache mode so might still exist in
 			// the actual dataset...
-			if (!datasetOnly && LoadMode().getValue() == LOADMODE_CACHE && childExists(id)) {
+			if (!datasetOnly && loadModeProperty().getValue() == LOADMODE_CACHE && childExists(id)) {
 				return populateChild(id, ensureActive);
 			}
 		}
@@ -249,7 +249,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		int count = 0;
 		for (Entry e : children) {
 			// Assume not loaded means its technically active
-			if (!e.loaded || e.child.Active().getValue()) {
+			if (!e.loaded || e.child.activeProperty().getValue()) {
 				count++;
 			}
 		}
@@ -270,7 +270,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	public T getActive(int index) {
 		int active = -1;
 		for (T child : childIterable()) {
-			if (child.Active().getValue()) {
+			if (child.activeProperty().getValue()) {
 				active++;
 			}
 			if (active == index) {
@@ -330,7 +330,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			if (getActiveCount() != otherSet.getActiveCount()) return false;
 			for (T child : this) {
 				if (ignoreFields.call(child)) continue;	// seems a little silly...
-				BOAttribute<?> attr = (BOAttribute<?>)child.findChildByName(ChildIDName().getName());
+				BOAttribute<?> attr = (BOAttribute<?>)child.findChildByName(childIDNameProperty().getName());
 				BusinessObject otherChild = otherSet.findChildByID(attr.getValue());
 				if (otherChild == null || !child.equivalentTo(otherChild, ignoreFields)) return false;
 			}
@@ -373,11 +373,11 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		}
 		if (child == null) {
 			child = createChildInstance(id);
-			BusinessObject idAttr = child.findChildByName(ChildIDName().getValue());
+			BusinessObject idAttr = child.findChildByName(childIDNameProperty().getValue());
 			if (idAttr != null) {
 				((BOAttribute<?>)idAttr).setAsObject(id);
 			} else {
-				throw new RuntimeException("Cannot find child id property by name '" + ChildIDName().getValue() + "'");
+				throw new RuntimeException("Cannot find child id property by name '" + childIDNameProperty().getValue() + "'");
 			}
 			Entry e = new Entry(child);
 			children.add(e);
@@ -421,7 +421,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		public T next() {
 			while(iterator.hasNext()) {
 				T object = iterator.next();
-				if (object.Active().getValue()) {
+				if (object.activeProperty().getValue()) {
 					activePassed++;
 					return object;
 				}
@@ -467,7 +467,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			for (Entry e : children) {
 				// Only actively load upon setActive() if loadmode is active
 				if (isActive) {
-					if (LoadMode().getValue() == LOADMODE_ACTIVE) {
+					if (loadModeProperty().getValue() == LOADMODE_ACTIVE) {
 						e.child.ensureActive();
 						e.loaded = true;
 					}
@@ -480,7 +480,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 						e.child.ensureActive();
 						e.loaded = true;
 					}
-					e.child.Active().setValue(false);
+					e.child.activeProperty().setValue(false);
 				}
 			}
 		}
@@ -539,7 +539,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 				if (!e.loaded) {
 					e.child.ensureActive();
 				}
-				e.child.Active().setValue(false);
+				e.child.activeProperty().setValue(false);
 			}
 		}
 	}

@@ -27,7 +27,7 @@ public class TestJFXGrid extends App{
 		// TODO create grid here
 		// 18
 		final BOEmployee emp = new BOEmployee(null);
-		emp.employeeID.setValue(18);
+		emp.employeeID().setValue(18);
 		emp.ensureActive();
 		
 //		System.out.println(emp.toStringAll());

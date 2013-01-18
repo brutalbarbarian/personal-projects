@@ -16,11 +16,34 @@ import com.lwan.eaproj.sp.PU_STU;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOStudentRecord extends BODbObject {
-	public BODbAttribute<Integer> customerID, studentID, schoolID;
-	public BODbAttribute<Date> startDate, endDate;
-	public BODbAttribute<String> notes;
+	private BODbAttribute<Integer> customerID, studentID, schoolID;
+	private BODbAttribute<Date> startDate, endDate;
+	private BODbAttribute<String> notes;
 	
 	private BOLink<BOSchool> school;
+	
+	public BODbAttribute<Integer> customerID() {
+		return customerID;
+	}
+	public BODbAttribute<Integer> studentID() {
+		return studentID;
+	}
+	public BODbAttribute<Integer> schoolID() {
+		return schoolID;
+	}
+	public BODbAttribute<Date> startDate() {
+		return startDate;
+	}
+	public BODbAttribute<Date> endDate() {
+		return endDate;
+	}
+	public BODbAttribute<String> notes() {
+		return notes;
+	}
+	public BOSchool school() {
+		return school.getReferencedObject();
+	}
+
 
 	public BOStudentRecord(BusinessObject owner) {
 		super(owner, "StudentRecord");
@@ -28,10 +51,6 @@ public class BOStudentRecord extends BODbObject {
 	
 	public BOCustomer getCustomer() {
 		return findOwnerByClass(BOCustomer.class);
-	}
-	
-	public BOSchool getSchool() {
-		return school.getReferencedObject();
 	}
 	
 	protected void createAttributes() {
@@ -73,7 +92,7 @@ public class BOStudentRecord extends BODbObject {
 		if (studentID.asInteger() == 0) {
 			studentID.setValue(DbUtil.getNextID("stu_id"));
 		}
-		customerID.assign(getCustomer().customerID);
+		customerID.assign(getCustomer().customerID());
 	}
 
 	@Override

@@ -103,7 +103,7 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		// Bind new attribute
 		if (getLinkedAttribute() != null) {
 			// Only one way bindings.
-			bind((Property<T>) getLinkedAttribute().Value());
+			bind((Property<T>) getLinkedAttribute().valueProperty());
 		} else {
 			setValue(null);
 		}
@@ -124,7 +124,7 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		
 		// bind editable
 		if (getLinkedAttribute() != null) {
-			_editableProperty().bind(getLinkedAttribute().AllowUserModify());
+			_editableProperty().bind(getLinkedAttribute().allowUserModifyProperty());
 		} else {
 			_editableProperty().setValue(false);
 		}

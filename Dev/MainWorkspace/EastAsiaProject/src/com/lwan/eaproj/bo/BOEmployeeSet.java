@@ -18,7 +18,7 @@ public class BOEmployeeSet extends BODbSet<BOEmployee>{
 
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_EMP_for_company()); 
+		selectStoredProcProperty().setValue(new PS_EMP_for_company()); 
 	}
 
 }

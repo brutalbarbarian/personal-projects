@@ -129,7 +129,7 @@ public class BOInvoice extends BODbObject{
 		if (!result) {
 			// This is a new invoice... populate these here
 			dateCreated.setValue(DateUtil.getCurrentDate());
-			userCreatedID.assign(GUsers.getActiveUser().userID);
+			userCreatedID.assign(GUsers.getActiveUser().userID());
 		}
 		return result;
 	}

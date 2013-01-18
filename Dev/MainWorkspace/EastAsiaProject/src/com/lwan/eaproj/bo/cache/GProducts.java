@@ -20,12 +20,12 @@ public class GProducts extends BODbSet<BOProduct>{
 	private GProducts() {
 		super(null, "ProductsCache", "ProductID", "prd_id");
 		
-		LoadMode().setValue(LOADMODE_CACHE);
+		loadModeProperty().setValue(LOADMODE_CACHE);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		ExistsStoredProc().setValue(new PS_PRD());
+		existsStoredProcProperty().setValue(new PS_PRD());
 	}
 
 	@Override

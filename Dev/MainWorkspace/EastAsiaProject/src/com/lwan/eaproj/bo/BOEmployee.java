@@ -1,7 +1,5 @@
 package com.lwan.eaproj.bo;
 
-import java.util.Date;
-
 import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
@@ -14,11 +12,29 @@ import com.lwan.eaproj.sp.PU_EMP;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOEmployee extends BODbObject {
-	public BODbAttribute<Integer> employeeID, companyID, contactDetailsID;
-	public BODbAttribute<String> nameFirst, nameLast, taxCode;
-	public BODbAttribute<Double> payMonthly;
-	public BODbAttribute<Date> employmentStart;
-	public BODbAttribute<Boolean> isActive;
+	private BODbAttribute<Integer> employeeID, companyID, contactDetailsID;
+	private BODbAttribute<String> nameFirst, nameLast;
+	private BODbAttribute<Boolean> employeeIsActive;
+	
+	public BODbAttribute<Integer> employeeID() {
+		return employeeID;
+	}
+	public BODbAttribute<Integer> companyID() {
+		return companyID;
+	}
+	public BODbAttribute<Integer> contactDetailsID() {
+		return contactDetailsID;
+	}
+	public BODbAttribute<String> nameFirst() {
+		return nameFirst;
+	}
+	public BODbAttribute<String> nameLast() {
+		return nameLast;
+	}
+	public BODbAttribute<Boolean> employeeIsActive() {
+		return employeeIsActive;
+	}
+
 	
 	public BOContactDetails contactDetails;
 	
@@ -43,7 +59,7 @@ public class BOEmployee extends BODbObject {
 		if (employeeID.asInteger() == 0) {
 			employeeID.setValue(DbUtil.getNextID("emp_id"));
 		}
-		contactDetailsID.assign(contactDetails.contactDetailsID);
+		contactDetailsID.assign(contactDetails.contactDetailsID());
 		companyID.assign(findOwnerByClass(BOCompany.class).companyID);
 	}
 
@@ -56,14 +72,11 @@ public class BOEmployee extends BODbObject {
 		nameFirst = addAsChild(new BODbAttribute<String>(this, "NameFirst", "emp_name_first", AttributeType.String));
 		nameLast = addAsChild(new BODbAttribute<String>(this, "NameLast", "emp_name_last", AttributeType.String));
 		
-		payMonthly = addAsChild(new BODbAttribute<Double>(this, "PayMonthly", "emp_payment_monthly", AttributeType.Currency));
-		taxCode = addAsChild(new BODbAttribute<String>(this, "TaxCode", "emp_tax_code", AttributeType.String));
-		
-		employmentStart = addAsChild(new BODbAttribute<Date>(this, "EmploymentStart", "emp_employment_start", AttributeType.Date));
-		isActive = addAsChild(new BODbAttribute<Boolean>(this, "IsActive", "emp_is_active", AttributeType.Boolean, false, true));
+		// Calculated. Means if this employee currently has a work history which is not expired. 
+		employeeIsActive = addAsChild(new BODbAttribute<Boolean>(this, "IsActive", "emp_is_active", AttributeType.Boolean, false, false));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
-		contactDetails.Independent().setValue(true);
+		contactDetails.independentProperty().setValue(true);
 		
 		employeePayments = addAsChild(new BOEmployeePaymentSet(this));
 	}
@@ -71,9 +84,9 @@ public class BOEmployee extends BODbObject {
 	protected boolean populateAttributes() {
 		boolean result = super.populateAttributes();
 		if (result) {
-			contactDetails.contactDetailsID.assign(contactDetailsID);
+			contactDetails.contactDetailsID().assign(contactDetailsID);
 		} else {
-			contactDetails.contactDetailsID.clear();
+			contactDetails.contactDetailsID().clear();
 		}
 		return result;
 	}
@@ -82,11 +95,8 @@ public class BOEmployee extends BODbObject {
 	public void clearAttributes() {
 		nameFirst.clear();
 		nameLast.clear();
-		payMonthly.clear();
-		taxCode.clear();
-		employmentStart.clear();
 		
-		isActive.setValue(false);
+		employeeIsActive.setValue(false);
 		
 		contactDetails.clear();
 		

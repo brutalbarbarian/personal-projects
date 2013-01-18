@@ -125,12 +125,12 @@ public class GUsers extends BODbSet<BOUser>{
 
 	private GUsers() {
 		super(null, "UserCache", "UserID", "usr_id");
-		LoadMode().setValue(LOADMODE_CACHE);
+		loadModeProperty().setValue(LOADMODE_CACHE);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		ExistsStoredProc().setValue(new PS_USR());
+		existsStoredProcProperty().setValue(new PS_USR());
 	}
 
 	@Override

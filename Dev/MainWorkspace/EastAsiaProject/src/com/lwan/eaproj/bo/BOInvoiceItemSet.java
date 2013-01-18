@@ -2,6 +2,7 @@ package com.lwan.eaproj.bo;
 
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.db.BODbSet;
+import com.lwan.eaproj.sp.PS_INI_for_invoice;
 
 public class BOInvoiceItemSet extends BODbSet<BOInvoiceItem>{
 
@@ -11,7 +12,7 @@ public class BOInvoiceItemSet extends BODbSet<BOInvoiceItem>{
 
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_INI_for_invoice());
+		selectStoredProcProperty().setValue(new PS_INI_for_invoice());
 	}
 
 	@Override

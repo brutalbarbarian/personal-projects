@@ -22,10 +22,10 @@ public class BOLink<T extends BusinessObject> extends BusinessObject{
 	}
 	
 	public T getReferencedObject() {
-		if (Owner().getValue() == null) {
+		if (ownerProperty().getValue() == null) {
 			return null;
 		} else {
-			return Owner().getValue().getLinkedChild(this);
+			return ownerProperty().getValue().getLinkedChild(this);
 		}
 	}
 

@@ -80,7 +80,7 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 	}
 	
 	protected BOSetRef(BOSet<T> source, Callback<?, ?> filter, int mode) {
-		super(null, source.getName(), source.ChildIDName().getValue());
+		super(null, source.getName(), source.childIDNameProperty().getValue());
 		
 		_source_set().setValue(source);
 	}

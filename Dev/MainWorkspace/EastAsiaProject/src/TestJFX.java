@@ -93,7 +93,7 @@ public class TestJFX extends App{
 //		cus.customerID.setValue(4);
 //		cus.ensureActive();
 		final BOEmployee emp = new BOEmployee(null);
-		emp.employeeID.setValue(20);
+		emp.employeeID().setValue(20);
 		emp.ensureActive();
 		
 		

@@ -12,10 +12,23 @@ import com.lwan.eaproj.sp.PU_SCH;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOSchool extends BODbObject{
-	public BODbAttribute<Integer> schoolID, contactDetailsID;
-	public BODbAttribute<String> schoolName;
+	private BODbAttribute<Integer> schoolID, contactDetailsID;
+	private BODbAttribute<String> schoolName;
 	
-	public BOContactDetails contactDetails;
+	private BOContactDetails contactDetails;
+	
+	public BODbAttribute<Integer> schoolID() {
+		return schoolID;
+	}
+	public BODbAttribute<Integer> contactDetailsID() {
+		return contactDetailsID;
+	}
+	public BODbAttribute<String> schoolName() {
+		return schoolName;
+	}
+	public BOContactDetails contactDetails() {
+		return contactDetails;
+	}
 
 	public BOSchool(BusinessObject owner) {
 		super(owner, "School");
@@ -26,7 +39,7 @@ public class BOSchool extends BODbObject{
 		if (schoolID.asInteger() == 0) {
 			schoolID.setValue(DbUtil.getNextID("sch_id"));
 		}
-		contactDetailsID.assign(contactDetails.contactDetailsID);
+		contactDetailsID.assign(contactDetails.contactDetailsID());
 	}
 
 	@Override
@@ -44,7 +57,7 @@ public class BOSchool extends BODbObject{
 		schoolName = addAsChild(new BODbAttribute<String>(this, "SchoolName", "sch_name", AttributeType.String));
 		
 		contactDetails = addAsChild(new BOContactDetails(this));
-		contactDetails.Independent().setValue(true);
+		contactDetails.independentProperty().setValue(true);
 	}
 
 	@Override

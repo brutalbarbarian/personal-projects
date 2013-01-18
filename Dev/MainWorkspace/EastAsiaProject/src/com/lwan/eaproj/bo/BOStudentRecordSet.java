@@ -12,7 +12,7 @@ public class BOStudentRecordSet extends BODbSet<BOStudentRecord>{
 
 	@Override
 	protected void createStoredProcs() {
-		SelectStoredProc().setValue(new PS_STU_for_customer());
+		selectStoredProcProperty().setValue(new PS_STU_for_customer());
 	}
 
 	@Override

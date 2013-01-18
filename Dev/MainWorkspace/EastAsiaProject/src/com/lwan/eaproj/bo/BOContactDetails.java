@@ -12,9 +12,42 @@ import com.lwan.eaproj.sp.PU_CDT;
 import com.lwan.eaproj.util.DbUtil;
 
 public class BOContactDetails extends BODbObject {
-	public BODbAttribute<Integer> contactDetailsID;
-	public BODbAttribute<String> address1, address2, address3, city, country,
+	private BODbAttribute<Integer> contactDetailsID;
+	private BODbAttribute<String> address1, address2, address3, city, country,
 			postCode, phone, mobile, fax, site;
+	public BODbAttribute<Integer> contactDetailsID() {
+		return contactDetailsID;
+	}
+	public BODbAttribute<String> address1() {
+		return address1;
+	}
+	public BODbAttribute<String> address2() {
+		return address2;
+	}
+	public BODbAttribute<String> address3() {
+		return address3;
+	}
+	public BODbAttribute<String> city() {
+		return city;
+	}
+	public BODbAttribute<String> country() {
+		return country;
+	}
+	public BODbAttribute<String> postCode() {
+		return postCode;
+	}
+	public BODbAttribute<String> phone() {
+		return phone;
+	}
+	public BODbAttribute<String> mobile() {
+		return mobile;
+	}
+	public BODbAttribute<String> fax() {
+		return fax;
+	}
+	public BODbAttribute<String> site() {
+		return site;
+	}
 	
 	public BOContactDetails(BusinessObject owner) {
 		super(owner, "ContactDetails");

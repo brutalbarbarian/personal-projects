@@ -13,42 +13,42 @@ import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
 
 public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
-	Property<StoredProc> select_stored_proc;
-	Property<StoredProc> exists_stored_proc;
-	Property<String> child_id_field_name;
+	Property<StoredProc> selectStoredProcProperty;
+	Property<StoredProc> existsStoredProcProperty;
+	Property<String> childIdFieldNameProperty;
 	
 	// Exists and select stored procs are mutually exclusive.
 	// Select is used upon populateAttributes with LoadMode = Active or Passive
 	// Exists is used upon findChildByID with LoadMode = Cache
-	public Property<StoredProc> ExistsStoredProc() {
-		if (exists_stored_proc == null) {
-			exists_stored_proc = new SimpleObjectProperty<StoredProc>(this, "ExistsStoredProc");
+	public Property<StoredProc> existsStoredProcProperty() {
+		if (existsStoredProcProperty == null) {
+			existsStoredProcProperty = new SimpleObjectProperty<StoredProc>(this, "ExistsStoredProc");
 		}
-		return exists_stored_proc;
+		return existsStoredProcProperty;
 	}
 	
-	public Property<StoredProc> SelectStoredProc() {
-		if (select_stored_proc == null) {
-			select_stored_proc = new SimpleObjectProperty<StoredProc>(this, "SelectStoredProc");
+	public Property<StoredProc> selectStoredProcProperty() {
+		if (selectStoredProcProperty == null) {
+			selectStoredProcProperty = new SimpleObjectProperty<StoredProc>(this, "SelectStoredProc");
 		}
-		return select_stored_proc;
+		return selectStoredProcProperty;
 	}
 	
-	public ReadOnlyProperty<String> ChildIDFieldName () {
-		return _child_id_field_name();
+	public ReadOnlyProperty<String> childIDFieldNameProperty () {
+		return _childIdFieldNameProperty();
 	}
 	
-	private Property<String> _child_id_field_name() {
-		if (child_id_field_name == null) {
-			child_id_field_name = new SimpleObjectProperty<String>(this, "ChildIDFieldName");
+	private Property<String> _childIdFieldNameProperty() {
+		if (childIdFieldNameProperty == null) {
+			childIdFieldNameProperty = new SimpleObjectProperty<String>(this, "ChildIDFieldName");
 		}
-		return child_id_field_name;
+		return childIdFieldNameProperty;
 	}
 	
 
 	public BODbSet(BusinessObject owner, String name, String childIdName, String childIdFieldName) {
 		super(owner, name, childIdName);
-		_child_id_field_name().setValue(childIdFieldName);
+		_childIdFieldNameProperty().setValue(childIdFieldName);
 		createStoredProcs();
 	}
 	
@@ -62,10 +62,10 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 
 	@Override
 	protected boolean populateAttributes() {
-		if (LoadMode().getValue() != LOADMODE_CACHE) {
+		if (loadModeProperty().getValue() != LOADMODE_CACHE) {
 			// if the SelectStoredProc requires any parameters...
 			// go looking in the direct parent's attributes
-			StoredProc sp = SelectStoredProc().getValue();
+			StoredProc sp = selectStoredProcProperty().getValue();
 			if (sp != null) {
 				try {
 					populateParameters(sp);
@@ -76,7 +76,7 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 						throw new SQLException("No resultset found found from populate Attributes");
 					}
 					// look for column with same name as childID property?
-					int col = rs.findColumn(ChildIDFieldName().getValue());
+					int col = rs.findColumn(childIDFieldNameProperty().getValue());
 					while (rs.next()) {
 						// The child will be set active straight after this anyway.
 						populateChild(rs.getObject(col));
@@ -110,9 +110,9 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 			if (attr == null) {
 				throw new IllegalArgumentException("Cannot find attribute of child with fieldname '" + fieldName + "'");
 			}
-			result = findChildByAttribute(attr.Name().getValue(), value, childNum, false);
+			result = findChildByAttribute(attr.nameProperty().getValue(), value, childNum, false);
 		}
-		if (result == null && LoadMode().getValue() == LOADMODE_CACHE) {
+		if (result == null && loadModeProperty().getValue() == LOADMODE_CACHE) {
 			//... how would this work... is this a good idea?...will need a special stored
 			// proc to be able to find a field like this... one that can take any
 			// param..eww.. and what if we want to go 
@@ -148,7 +148,7 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 	 * @throws SQLException 
 	 */
 	protected void populateParameters(StoredProc storedProc) throws SQLException {
-		BODbObject owner = (BODbObject)Owner().getValue(); 
+		BODbObject owner = (BODbObject)ownerProperty().getValue(); 
 		for (Parameter param : storedProc.getAllParameters()) {
 			String name = param.name().substring(1);
 			BODbAttribute<?> attr = null;
@@ -166,13 +166,13 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 	}
 	
 	protected boolean childExists(Object id) {
-		StoredProc sp = ExistsStoredProc().getValue();
-		BODbObject owner = (BODbObject)Owner().getValue();
+		StoredProc sp = existsStoredProcProperty().getValue();
+		BODbObject owner = (BODbObject)ownerProperty().getValue();
 		BODbAttribute<?> attr = null;
 		if (sp != null) {
 			for (Parameter p : sp.getAllParameters()) {
 				String paramName = p.name().substring(1);
-				if (paramName.equals(ChildIDFieldName().getValue())) {
+				if (paramName.equals(childIDFieldNameProperty().getValue())) {
 					p.set(id);
 				} else if (owner != null && 
 						(attr = owner.findAttributeByFieldName("paramName")) != null) {

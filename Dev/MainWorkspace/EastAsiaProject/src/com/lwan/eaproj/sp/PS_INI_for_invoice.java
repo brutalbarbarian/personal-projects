@@ -1,4 +1,4 @@
-package com.lwan.eaproj.bo;
+package com.lwan.eaproj.sp;
 
 import java.sql.Types;
 
