@@ -12,12 +12,15 @@ import java.util.Locale;
 import java.util.Map;
 import com.lwan.jdbc.GConnection;
 import com.lwan.util.IOUtil;
-
-
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public abstract class App extends Application{
+	// Application messages
+	public static final int TERMINATE_REQUEST = 0;
+	
 	// File names
 	public static final String KEY_FILENAME = "keys.ini";
 	
@@ -31,6 +34,7 @@ public abstract class App extends Application{
 	
 	private Map<String, String> keyMap;
 	private static App app;
+	private Stage mainStage;
 	
 	public static App getApp() {
 		if (app == null) {
@@ -54,14 +58,54 @@ public abstract class App extends Application{
 		// uninitialise database
 		GConnection.uninitialise();
 	}
-	
-	public static void requestRestart() {
-		// TODO
-		// make sure no windows are in edit state...
-		// 
-		// close the application
 		
-		// start application
+	@Override
+	public void start(Stage s) throws Exception {
+		mainStage = s;
+		
+		initialiseStage(s);
+	}
+	
+	public static Stage getMainStage() {
+		return getApp().mainStage;
+	}
+	
+	protected void initialiseStage(Stage stage) {
+		// Override for anything to happen...
+	}
+	
+	public static void notifyState(final int state) {
+		// Run in a seperate thread.
+		new NotifyTask(state).run();
+	}
+
+	// Used for notifyState only.
+	private static class NotifyTask extends Task<Void> {
+		int state;
+		
+		NotifyTask(int state) {
+			this.state = state;
+		}
+		
+		protected Void call() throws Exception {
+			getApp().processState(state);
+			
+			return null;
+		}
+	}
+	
+	protected void processState(int state) throws Exception {
+		switch (state) {
+		case TERMINATE_REQUEST :
+			if (allowTerminate()) {
+				getMainStage().close();
+			}
+			break;
+		}
+	}
+	
+	protected boolean allowTerminate() {
+		return true;
 	}
 
 	/**
@@ -147,5 +191,13 @@ public abstract class App extends Application{
 	
 	public static String getKey(String key) {
 		return getApp().keyMap.get(key);
+	}
+	
+	public static void terminate() {
+		notifyState(TERMINATE_REQUEST);
+	}
+
+	public static void requestRestart() {
+		// TODO
 	}
 }

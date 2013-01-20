@@ -83,4 +83,10 @@ public class TestJFXGrid extends App{
 	public static void main(String[] args) {
 		launch(args);
 	}
+
+	@Override
+	protected void initialiseStage(Stage stage) {
+		// TODO Auto-generated method stub
+		
+	}
 }

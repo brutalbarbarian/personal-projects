@@ -1,19 +1,18 @@
 package com.lwan.eaproj.app;
 
 import com.lwan.eaproj.app.scenes.Login;
-
+import com.lwan.eaproj.app.scenes.MainApp;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class AppMain extends App {
-	public static final int STATE_LOGIN_SUCCESS = 0;
-	public static final int STATE_LOGIN_CANCEL = 1;
-	
-	protected Stage mainStage;
+	public static final int STATE_LOGIN_SUCCESS = 1;
+	public static final int STATE_LOGIN_CANCEL = 2;
+
 
 	@Override
 	public void start(Stage s) throws Exception {
-		mainStage = s;
+		super.start(s);
 		
 		Login login = new Login();
 		Scene mainScene = new Scene(login);
@@ -22,22 +21,23 @@ public class AppMain extends App {
 		s.show();		
 	}
 	
-	public static void NotifyState(int state) {
-		AppMain app = (AppMain)getApp();
+	protected void initialiseStage(Stage s) {
+		s.setTitle("East Asia Management System");
+	}
+	
+	
+	protected void processState(int state) throws Exception {
+//		AppMain app = (AppMain)getApp();
+		super.processState(state);
 
-		try {
-			switch (state) {
-			case STATE_LOGIN_SUCCESS :
-				// Change to main view
-//				app.mainStage.
-				
-			case STATE_LOGIN_CANCEL :
-				app.stop();
-			}
+		switch (state) {
+		case STATE_LOGIN_SUCCESS :
+			// Change to main view
+			getMainStage().setScene(new Scene(new MainApp()));				
 			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			break;				
+		case STATE_LOGIN_CANCEL :
+			terminate();
 		}
 	}
 

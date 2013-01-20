@@ -145,4 +145,10 @@ public class TestJFX extends App{
 		
 		super.stop();
 	}
+
+	@Override
+	protected void initialiseStage(Stage stage) {
+		// TODO Auto-generated method stub
+		
+	}
 }
