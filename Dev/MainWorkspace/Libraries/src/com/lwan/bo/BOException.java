@@ -1,7 +1,7 @@
 package com.lwan.bo;
 
 
-public class BOException extends Exception{
+public class BOException extends RuntimeException{
 	
 	BusinessObject source;
 

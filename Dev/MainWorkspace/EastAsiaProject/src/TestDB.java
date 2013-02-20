@@ -6,9 +6,9 @@ import com.lwan.bo.BOException;
 import com.lwan.bo.BOSet;
 import com.lwan.eaproj.app.Constants;
 import com.lwan.eaproj.bo.*;
-import com.lwan.eaproj.bo.cache.GCompany;
-import com.lwan.eaproj.bo.cache.GCustomers;
-import com.lwan.eaproj.bo.cache.GUsers;
+import com.lwan.eaproj.bo.cache.BOCompanySet;
+import com.lwan.eaproj.bo.cache.BOCustomerSet;
+import com.lwan.eaproj.bo.cache.BOUserSet;
 import com.lwan.jdbc.GConnection;
 
 
@@ -286,7 +286,7 @@ public class TestDB {
 		
 //		System.out.println(prd.toString());
 		
-		if (GUsers.setActiveUser("sa", "password")) {
+		if (BOUserSet.setActiveUser("sa", "password")) {
 			System.out.println("Login success");
 			
 //			BOInvoice inv = new BOInvoice(null);
@@ -316,7 +316,7 @@ public class TestDB {
 		
 		
 		
-		GUsers.clearActiveUser();
+		BOUserSet.clearActiveUser();
 		GConnection.uninitialise();
 	}
 	

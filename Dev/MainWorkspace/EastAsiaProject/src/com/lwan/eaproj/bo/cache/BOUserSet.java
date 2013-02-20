@@ -12,8 +12,8 @@ import com.lwan.eaproj.sp.PS_USR;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.StoredProc;
 
-public class GUsers extends BODbSet<BOUser>{
-	private static GUsers cache;
+public class BOUserSet extends BODbSet<BOUser>{
+	private static BOUserSet cache;
 	private static StoredProc spUsername;
 	private Property<BOUser> activeUser;
 	
@@ -24,9 +24,9 @@ public class GUsers extends BODbSet<BOUser>{
 		return activeUser;
 	}
 	
-	public static GUsers get() {
+	public static BOUserSet get() {
 		if (cache == null) {
-			cache = new GUsers();
+			cache = new BOUserSet();
 		}
 		return cache;
 	} 
@@ -123,7 +123,7 @@ public class GUsers extends BODbSet<BOUser>{
 		return null;
 	}
 
-	private GUsers() {
+	private BOUserSet() {
 		super(null, "UserCache", "UserID", "usr_id");
 		loadModeProperty().setValue(LOADMODE_CACHE);
 	}

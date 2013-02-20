@@ -71,13 +71,13 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	}
 	
 	// private fields
-	private List<Entry> children;
+	protected List<Entry> children;
 	
-	private class Entry {
-		T child;
-		boolean loaded;
+	protected class Entry {
+		protected T child;
+		protected boolean loaded;
 		
-		Entry (T child) {
+		protected Entry (T child) {
 			this.child = child;
 			loaded = false;
 		}
@@ -97,6 +97,23 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		_childIdNameProperty().setValue(childIdName);
 	}
 
+	/**
+	 * Reinitialises this set as the type specified.
+	 * 
+	 * @param loadMode
+	 */
+	public void initialiseAs(int loadMode) {
+		allowNotificationsProperty().setValue(false);
+		try {
+			children.clear();
+			setActive(false);
+			loadModeProperty().setValue(loadMode);
+			ensureActive();
+		} finally {
+			allowNotificationsProperty().setValue(true);
+		}
+	}
+	
 	/**
 	 * Find a child of this set, where the child contains an attribute with the specified name,
 	 * and the attribute has the same value as the passed in value.

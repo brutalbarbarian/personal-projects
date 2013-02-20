@@ -13,6 +13,7 @@ import java.util.Map;
 import com.lwan.jdbc.GConnection;
 import com.lwan.util.IOUtil;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -75,8 +76,10 @@ public abstract class App extends Application{
 	}
 	
 	public static void notifyState(final int state) {
+		System.out.println("notified:" + state);
+		
 		// Run in a seperate thread.
-		new NotifyTask(state).run();
+		Platform.runLater(new NotifyTask(state));
 	}
 
 	// Used for notifyState only.
@@ -87,7 +90,7 @@ public abstract class App extends Application{
 			this.state = state;
 		}
 		
-		protected Void call() throws Exception {
+		protected Void call() throws Exception {			
 			getApp().processState(state);
 			
 			return null;
@@ -193,7 +196,7 @@ public abstract class App extends Application{
 		return getApp().keyMap.get(key);
 	}
 	
-	public static void terminate() {
+	public static void requestTerminate() {
 		notifyState(TERMINATE_REQUEST);
 	}
 

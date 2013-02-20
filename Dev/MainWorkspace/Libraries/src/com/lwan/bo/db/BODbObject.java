@@ -11,7 +11,7 @@ import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
 
-public abstract class BODbObject extends BusinessObject{
+public abstract class BODbObject extends BusinessObject implements BODbCustomObject{
 	public static final int SP_SELECT = 0;
 	public static final int SP_INSERT = 1;
 	public static final int SP_UPDATE = 2;

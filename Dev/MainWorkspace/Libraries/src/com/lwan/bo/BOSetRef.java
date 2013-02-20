@@ -1,7 +1,6 @@
 package com.lwan.bo;
 
-import com.lwan.jdbc.StoredProc;
-import com.lwan.util.wrappers.ResultCallback;
+import com.lwan.bo.BOSet.Entry;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
@@ -81,8 +80,10 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 	
 	protected BOSetRef(BOSet<T> source, Callback<?, ?> filter, int mode) {
 		super(null, source.getName(), source.childIDNameProperty().getValue());
-		
+
+		modeType = mode;
 		_source_set().setValue(source);
+		this.filter = filter;
 	}
 
 	protected boolean childExists(Object id) {
@@ -92,13 +93,56 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 	protected T createChildInstance(Object id) {
 		return getSource().createChildInstance(id);
 	}
+	
+	protected void addChild(T child) {
+		Entry e = new Entry(child);
+		e.loaded = true;
+		children.add(e);
+	}
+	
+	protected T ensureChildActive(int id) {
+		T result = getSource().ensureChildActive(id);
+		if (result != null) {
+			boolean containsChild = false;
+			for (T child : this) {
+				if (child == result) {
+					containsChild = true;
+					break;
+				}
+			}
+			if (!containsChild) {
+				addChild(result);				
+			}
+		}
+		return result;		
+	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected boolean populateAttributes() {
-		// TODO populate from source and either filter or the storedproc.
-		
-		
-		return false;
+		if (modeType == MODE_FILTER) {
+			Callback<T, Boolean> filter = (Callback<T, Boolean>)this.filter;
+			for (T child : getSource()) {
+				if (filter.call(child)) {
+					addChild(child);
+				}
+			}
+		} else { // MOD_SUBSET..
+			BOSet<T> set = getSource();
+			boolean ownerIsCache = set.loadModeProperty().getValue() == LOADMODE_CACHE; 
+			for (int i : getSubset()) {
+				T child;
+				if (ownerIsCache) {
+					child = set.ensureChildActive(i);
+				} else {
+					child = set.findChildByID(i);
+				}
+				if (child != null) {
+					addChild(child);
+				}
+			}
+		}	
+		return true;
 	}
 
 }

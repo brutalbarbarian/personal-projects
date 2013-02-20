@@ -4,7 +4,7 @@ import com.lwan.bo.BOLinkEx;
 import com.lwan.eaproj.app.App;
 import com.lwan.eaproj.app.Lng;
 import com.lwan.eaproj.bo.BOEmployee;
-import com.lwan.eaproj.bo.cache.GUsers;
+import com.lwan.eaproj.bo.cache.BOUserSet;
 import com.lwan.eaproj.util.LngUtil;
 import com.lwan.javafx.controls.CheckBox;
 import com.lwan.javafx.controls.ComboBox;
@@ -140,7 +140,7 @@ public class TestJFX extends App{
 	}
 	
 	public void stop() throws Exception {
-		GUsers.clearActiveUser();
+		BOUserSet.clearActiveUser();
 //		GConnection.uninitialise();
 		
 		super.stop();

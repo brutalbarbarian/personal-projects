@@ -4,16 +4,11 @@ import java.security.InvalidParameterException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.lwan.bo.db.BODbObject;
 import com.lwan.eaproj.sp.PA_PKC_new_id;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.StoredProc;
 
 public class DbUtil {
-	
-	public void assignParamsFromBO (StoredProc sp, BODbObject obj, boolean allowMissingParam) {
-		
-	}
 	
 	private static StoredProc idProc;
 	public static int getNextID(String fieldName) {

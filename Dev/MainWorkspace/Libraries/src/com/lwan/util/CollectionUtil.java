@@ -430,4 +430,13 @@ public class CollectionUtil {
 	public static <T> Collection<T> getAllDistinct(Collection<T> selectedIndices) {
 		return new HashSet<T>(selectedIndices);
 	}
+
+	public static <T> int indexOf(T item, T[] items) {
+		for (int i = 0; i < items.length; i++) {
+			if (GenericsUtil.Equals(item, items[i])) {
+				return i;
+			}
+		}
+		return -1;	// Not found
+	}
 }

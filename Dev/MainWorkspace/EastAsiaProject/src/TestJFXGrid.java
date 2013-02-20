@@ -12,7 +12,7 @@ import com.lwan.bo.BOSet;
 import com.lwan.eaproj.app.App;
 import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.eaproj.bo.BOEmployeePayment;
-import com.lwan.eaproj.bo.cache.GUsers;
+import com.lwan.eaproj.bo.cache.BOUserSet;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOTextField;
 
@@ -21,7 +21,7 @@ public class TestJFXGrid extends App{
 	
 	@Override
 	public void start(Stage stage) throws Exception {
-		GUsers.setActiveUser("sa", "password");
+		BOUserSet.setActiveUser("sa", "password");
 		stage.setTitle("TestJFXGrid");
 		
 		// TODO create grid here

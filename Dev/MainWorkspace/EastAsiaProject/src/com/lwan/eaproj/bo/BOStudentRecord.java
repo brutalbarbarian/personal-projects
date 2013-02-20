@@ -8,7 +8,6 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
-import com.lwan.eaproj.bo.cache.GSchools;
 import com.lwan.eaproj.sp.PD_STU;
 import com.lwan.eaproj.sp.PI_STU;
 import com.lwan.eaproj.sp.PS_STU;
@@ -74,11 +73,12 @@ public class BOStudentRecord extends BODbObject {
 	
 	@SuppressWarnings("unchecked")
 	protected <T extends BusinessObject> T getLinkedChild(BOLink<T> link) {
-		if (link == school) {
-			return (T) GSchools.findSchoolByID(schoolID.getValue());
-		} else {
+//		if (link == school) {
+//			return (T) BOSchoolSet.findSchoolByID(schoolID.getValue());
+//		} else {
+		// TODO
 			return super.getLinkedChild(link);
-		}
+//		}
 	}
 	
 	public void clearAttributes() {
