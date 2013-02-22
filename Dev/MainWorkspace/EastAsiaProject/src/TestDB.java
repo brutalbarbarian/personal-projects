@@ -6,8 +6,8 @@ import com.lwan.bo.BOException;
 import com.lwan.bo.BOSet;
 import com.lwan.eaproj.app.Constants;
 import com.lwan.eaproj.bo.*;
-import com.lwan.eaproj.bo.cache.BOCompanySet;
-import com.lwan.eaproj.bo.cache.BOCustomerSet;
+//import com.lwan.eaproj.bo.cache.BOCompanySet;
+//import com.lwan.eaproj.bo.cache.BOCustomerSet;
 import com.lwan.eaproj.bo.cache.BOUserSet;
 import com.lwan.jdbc.GConnection;
 

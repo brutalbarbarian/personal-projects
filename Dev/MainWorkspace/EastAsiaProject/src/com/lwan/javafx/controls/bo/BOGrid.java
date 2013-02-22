@@ -210,6 +210,8 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		
 		R item = getSelectionModel().getSelectedItem();
 		
+		// Need to force reload the grid or no?
+		
 		List<R> aItems = new Vector<R>(source.getActiveCount());
 		for (R record : source) {
 			aItems.add(record);
