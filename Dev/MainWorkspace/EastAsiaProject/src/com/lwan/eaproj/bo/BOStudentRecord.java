@@ -12,7 +12,7 @@ import com.lwan.eaproj.sp.PD_STU;
 import com.lwan.eaproj.sp.PI_STU;
 import com.lwan.eaproj.sp.PS_STU;
 import com.lwan.eaproj.sp.PU_STU;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOStudentRecord extends BODbObject {
 	private BODbAttribute<Integer> customerID, studentID, schoolID;

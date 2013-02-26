@@ -9,7 +9,7 @@ import com.lwan.eaproj.sp.PD_SCH;
 import com.lwan.eaproj.sp.PI_SCH;
 import com.lwan.eaproj.sp.PS_SCH;
 import com.lwan.eaproj.sp.PU_SCH;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOSchool extends BODbObject{
 	private BODbAttribute<Integer> schoolID, contactDetailsID;

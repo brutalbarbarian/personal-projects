@@ -2,6 +2,8 @@ package com.lwan.eaproj.app;
 
 import com.lwan.eaproj.app.scenes.LoginScene;
 import com.lwan.eaproj.app.scenes.MainScene;
+import com.lwan.javafx.app.App;
+import com.lwan.javafx.app.Lng;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;

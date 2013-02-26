@@ -9,10 +9,10 @@ import javafx.stage.Stage;
 
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
-import com.lwan.eaproj.app.App;
 import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.eaproj.bo.BOEmployeePayment;
 import com.lwan.eaproj.bo.cache.BOUserSet;
+import com.lwan.javafx.app.App;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOTextField;
 

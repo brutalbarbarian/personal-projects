@@ -12,7 +12,7 @@ import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
-import com.lwan.eaproj.app.Lng;
+import com.lwan.javafx.app.Lng;
 import com.lwan.util.StringUtil;
 import com.sun.javafx.binding.StringFormatter;
 

@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import com.lwan.eaproj.app.AppMain;
 import com.lwan.eaproj.app.Constants;
-import com.lwan.eaproj.app.Lng;
+import com.lwan.javafx.app.Lng;
 import com.lwan.util.CollectionUtil;
 
 import javafx.animation.FadeTransition;

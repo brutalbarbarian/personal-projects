@@ -1,4 +1,4 @@
-package com.lwan.eaproj.app;
+package com.lwan.javafx.app;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

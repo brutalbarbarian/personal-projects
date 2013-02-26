@@ -1,8 +1,8 @@
-package com.lwan.eaproj.util;
+package com.lwan.javafx.app.util;
 
 import java.util.Iterator;
 
-import com.lwan.eaproj.app.Lng;
+import com.lwan.javafx.app.Lng;
 import com.lwan.util.CollectionUtil;
 
 public class LngUtil {

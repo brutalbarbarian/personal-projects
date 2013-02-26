@@ -11,7 +11,7 @@ import com.lwan.eaproj.sp.PI_TAX;
 import com.lwan.eaproj.sp.PS_TAX;
 import com.lwan.eaproj.sp.PS_TAX_for_set;
 import com.lwan.eaproj.sp.PU_TAX;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOTax extends BODbObject {
 	public static BOTax getCustomerType(int taxID) {

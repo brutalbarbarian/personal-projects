@@ -2,7 +2,10 @@ package com.lwan.javafx.controls.bo.binding;
 
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;
+import com.lwan.bo.ModifiedEvent;
+import com.lwan.bo.ModifiedEventListener;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
@@ -13,11 +16,13 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
 
-public class BoundProperty <T> extends SimpleObjectProperty<T>{
+public class BoundProperty <T> extends SimpleObjectProperty<T> implements ModifiedEventListener{
 	private Property<BOLinkEx<?>> attributeLinkProperty;
 	private Property<String> pathProperty;
 	private Property<BOAttribute<?>> linkedAttributeProperty;
 	private BooleanProperty editableProperty;
+	
+	boolean handlingModified;
 	
 	// This should be binded by the control
 	public ObservableBooleanValue editableProperty() {
@@ -72,6 +77,7 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 	public BoundProperty(Object owner, BOLinkEx<?> link, String path) {
 		super(owner, "DataBinding");
 		
+		handlingModified = false;
 		attributeLinkproperty().setValue(link);
 		pathProperty().setValue(path);
 		buildBindings();
@@ -85,7 +91,7 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		addListener(new ChangeListener<T>() {
 			public void changed(ObservableValue<? extends T> arg0, T oldValue,
 					T newValue) {
-				if (getLinkedAttribute() != null) {
+				if (!handlingModified && getLinkedAttribute() != null) {
 					getLinkedAttribute().userSetValueAsObject(newValue, getBean());
 				}
 			}
@@ -95,7 +101,9 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 	@SuppressWarnings("unchecked")
 	public void buildAttributeLinks () {
 		// Unbind previous attribute if exists
-		unbind();
+		if (getLinkedAttribute() != null) {
+			getLinkedAttribute().removeListener(this);
+		}
 		
 		// Build the attributelink
 		doBuildAttributeLinks();
@@ -103,7 +111,8 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		// Bind new attribute
 		if (getLinkedAttribute() != null) {
 			// Only one way bindings.
-			bind((Property<T>) getLinkedAttribute().valueProperty());
+			getLinkedAttribute().addListener(this);
+			setModifiedValue((T) getLinkedAttribute().getValue());
 		} else {
 			setValue(null);
 		}
@@ -128,5 +137,17 @@ public class BoundProperty <T> extends SimpleObjectProperty<T>{
 		} else {
 			_editableProperty().setValue(false);
 		}
+	}
+
+	
+	@SuppressWarnings("unchecked")
+	public void handleModified(ModifiedEvent event) {
+		setModifiedValue((T) event.asAttribute().getValue());
+	}
+	
+	protected void setModifiedValue(T value) {
+		handlingModified = true;
+		set(value);
+		handlingModified = false;		
 	}
 }

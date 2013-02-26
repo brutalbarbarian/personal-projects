@@ -9,7 +9,7 @@ import com.lwan.eaproj.sp.PD_EMP;
 import com.lwan.eaproj.sp.PI_EMP;
 import com.lwan.eaproj.sp.PS_EMP;
 import com.lwan.eaproj.sp.PU_EMP;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOEmployee extends BODbObject {
 	private BODbAttribute<Integer> employeeID, companyID, contactDetailsID;

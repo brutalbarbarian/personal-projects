@@ -9,7 +9,7 @@ import com.lwan.eaproj.sp.PD_CDT;
 import com.lwan.eaproj.sp.PI_CDT;
 import com.lwan.eaproj.sp.PS_CDT;
 import com.lwan.eaproj.sp.PU_CDT;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOContactDetails extends BODbObject {
 	private BODbAttribute<Integer> contactDetailsID;

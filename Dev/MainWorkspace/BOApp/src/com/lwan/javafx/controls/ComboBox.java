@@ -155,6 +155,7 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 							}
 						}
 					} else {
+						System.out.println(newValue.getValue());
 						setSelected(newValue.getValue());
 					}
 					invalidating = false;

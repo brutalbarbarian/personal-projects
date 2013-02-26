@@ -9,7 +9,7 @@ import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
 import com.lwan.eaproj.bo.ref.BOTax;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOEmployeeHistory extends BODbObject {
 	private BODbAttribute<Integer> employeeHistoryID, employeeID, taxID;

@@ -12,7 +12,7 @@ import com.lwan.eaproj.sp.PD_CUS;
 import com.lwan.eaproj.sp.PI_CUS;
 import com.lwan.eaproj.sp.PS_CUS;
 import com.lwan.eaproj.sp.PU_CUS;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOCustomer extends BODbObject {
 	private BODbAttribute<Integer> customerID, customerTypeID, contactDetailsID;

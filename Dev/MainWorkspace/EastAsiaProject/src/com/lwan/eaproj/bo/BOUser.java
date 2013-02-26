@@ -11,7 +11,7 @@ import com.lwan.eaproj.sp.PD_USR;
 import com.lwan.eaproj.sp.PI_USR;
 import com.lwan.eaproj.sp.PS_USR;
 import com.lwan.eaproj.sp.PU_USR;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.property.Validation;
 
 public class BOUser extends BODbObject{

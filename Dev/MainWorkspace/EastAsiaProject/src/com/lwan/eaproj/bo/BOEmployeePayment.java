@@ -11,7 +11,7 @@ import com.lwan.eaproj.sp.PD_EPP;
 import com.lwan.eaproj.sp.PI_EPP;
 import com.lwan.eaproj.sp.PS_EPP;
 import com.lwan.eaproj.sp.PU_EPP;
-import com.lwan.eaproj.util.DbUtil;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOEmployeePayment extends BODbObject{
 	private BODbAttribute<Integer> employeePaymentID, employeeID;

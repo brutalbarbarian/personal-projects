@@ -16,6 +16,12 @@ public class BoundCellValue <T, B extends BusinessObject> implements Callback<Ce
 	
 	@SuppressWarnings("unchecked")
 	public ObservableValue<T> call(CellDataFeatures<B, T> p) {
-		return ((BOAttribute<T>)p.getValue().findChildByPath(path)).valueProperty();
+		System.out.println(path);
+		BOAttribute<T> attr = (BOAttribute<T>)p.getValue().findChildByPath(path);
+		if (attr != null) {
+			return attr.valueProperty();
+		} else {
+			return null;
+		}
 	}	
 }
