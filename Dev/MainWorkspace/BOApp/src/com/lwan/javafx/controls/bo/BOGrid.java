@@ -1,7 +1,9 @@
 package com.lwan.javafx.controls.bo;
 
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import com.lwan.bo.BOAttribute;
@@ -21,6 +23,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -240,18 +243,41 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	
 	public class GridColumn extends TableColumn<R, Object> {
 		private String fieldPath;
+		private Map<String, Object> params;	// Extra params for the cellFactory
 		
 		GridColumn(String caption, String fieldPath, boolean editable) {
 			super(caption);
 			
 			this.fieldPath = fieldPath;
+			params = new Hashtable<>();
 			
 			setEditable(editable);
 			
 			setCellValueFactory(new BoundCellValue<Object, R>(fieldPath));
-			setCellFactory(getDefaultCellFactory());
+			setAsTextField();	// Default
 			
 			setPrefWidth(100);	// Minimum?
+		}
+		
+		@SuppressWarnings("unchecked")
+		protected <T> T getParam(String paramName) {
+			// Just assume T is already of correct type...
+			return (T)params.get(paramName);
+		}
+		
+		public void setAsTextField() {
+			params.clear();
+			setCellFactory(getTextfieldCellFactory());
+		}
+		
+		public <B extends BusinessObject> void setAsCombobox(BOSet<B> set, String keyPath, String attributePath) {
+			params.clear();
+			
+			params.put("keyPath", keyPath);
+			params.put("attributePath", attributePath);
+			params.put("set", set);
+			
+			setCellFactory(getComboboxCellFactory());
 		}
 		
 		public String getField() {
@@ -259,80 +285,73 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		}
 	}
 
-	private Callback<TableColumn<R, Object>, TableCell<R, Object>> defaultCellFactory;
-	private Callback<TableColumn<R, Object>, TableCell<R, Object>> getDefaultCellFactory() {
-		if (defaultCellFactory == null) {
-			defaultCellFactory = new Callback<TableColumn<R, Object>, TableCell<R, Object>>(){
-				public GridCell call(TableColumn<R, Object> arg0) {
-					return new GridCell();
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> textfieldCellFactory;
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> getTextfieldCellFactory() {
+		if (textfieldCellFactory == null) {
+			textfieldCellFactory = new Callback<TableColumn<R, Object>, TableCell<R, Object>>(){
+				public TextfieldGridCell call(TableColumn<R, Object> arg0) {
+					return new TextfieldGridCell();
 				}
 			};
 		}
-		return defaultCellFactory;
+		return textfieldCellFactory;
+	}
+	
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> comboboxCellFactory;
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> getComboboxCellFactory() {
+		if (comboboxCellFactory == null) {
+			comboboxCellFactory = new Callback<TableColumn<R, Object>, TableCell<R, Object>>(){
+				public ComboboxGridCell call(TableColumn<R, Object> arg0) {
+					return new ComboboxGridCell();
+				}
+			};
+		}
+		return comboboxCellFactory;
 	}
 	
 	
-	public class GridCell extends CustomGridCell {
+	
+	public class TextfieldGridCell extends CustomGridCell {
 		private StringBoundProperty bindingProperty;
 		private BOLinkEx<R> link;
+		private boolean linkIsActive;
 		
-		private GridCell() {
-			
+		private TextfieldGridCell() {
+			linkIsActive = false;
 		}
 		
 		protected void initBinding() {
-			if(link == null) {
-				link = new BOLinkEx<>();
+			if (!linkIsActive) {
+			
+				if(link == null) {
+					link = new BOLinkEx<>();
+				}
+				if (bindingProperty == null) {
+					bindingProperty = new StringBoundProperty(getTableView(), link, null);
+				}
+				bindingProperty.pathProperty().setValue(getColumn().getField());
+				link.setLinkedObject(getRecord());
+				bindingProperty.buildAttributeLinks();
+				
+				linkIsActive = true;
 			}
-			if (bindingProperty == null) {
-				bindingProperty = new StringBoundProperty(getTableView(), link, null);
-			}
-			bindingProperty.pathProperty().setValue(getColumn().getField());
-			link.setLinkedObject(getRecord());
-			bindingProperty.buildAttributeLinks();
 		}
 		
 		protected void releaseBinding() {
-			if (link != null && bindingProperty != null) {
+			if (linkIsActive && link != null && bindingProperty != null) {
 				link.setLinkedObject(null);
 				bindingProperty.pathProperty().setValue(null);
 				bindingProperty.buildAttributeLinks();
+				
+				// free up memory?
+				bindingProperty = null;
+				link = null;
+				
+				linkIsActive = false;
 			}
 		}
 				
 		private BOTextField textField;
-		
-		public void startEdit() {
-			if (!getColumn().isEditable()) {
-				return;	// Not sure how it even got here...
-			}
-			
-			initBinding();
-			
-			if (!bindingProperty.editableProperty().get()) {
-				releaseBinding();
-				return;	// The bound attribute has final say on editable
-			}
-			
-			super.startEdit();
-			
-			if (textField == null || link == null) {
-				createTextField();
-			}
-			
-			setText(null);
-			setGraphic(textField);
-			
-			Application.invokeLater(new Runnable() {
-				public void run() {
-					if (isEditing()) {
-						bindingProperty.beginEdit();
-						textField.requestFocus();	// This should be selecting all..
-					}
-				}
-			});
-			
-		}
 		
 		public void commitEdit(Object value) {
 			try {
@@ -355,46 +374,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			}
 		}
 		
-		public void updateItem(Object item, boolean empty) {
-			// Always call false for empty
-			super.updateItem(item, false);
-			
-			if (empty) {
-				setText(null);
-				setGraphic(null);
-			} else {
-				if (isEditing()) {
-					setText(null);
-					setGraphic(textField);
-				} else {
-					initBinding();
-					String displayText = bindingProperty.getValue();
-					releaseBinding();
-					
-					setText(displayText);
-				}
-			}
-		}
-
-		public void cancelEdit() {
-			super.cancelEdit();
-			String displayValue = null;
-			try {
-				// Forcibly cancel
-				bindingProperty.endEdit(false);
-				displayValue = bindingProperty.getValue();
-				
-				releaseBinding();
-				textField = null;	// remove to save memory.
-			} catch (BOException e) {
-				e.printStackTrace();
-			}
-			setText(displayValue);
-			setGraphic(null);
-		}
-		
 		private void createTextField() {
-			link = new BOLinkEx<>();
+			if (!linkIsActive) {
+				throw new RuntimeException("Inactive link on createTextField()");
+			}
+			
 			textField = new BOTextField(bindingProperty);
 			textField.selectAllOnEditProperty().setValue(true);
 			textField.setMinWidth(getWidth() - getGraphicTextGap() * 2);
@@ -432,9 +416,117 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				}
 			});
 		}
+		
+		@Override
+		protected String getDisplayValue() {
+			boolean release = !linkIsActive;
+			try {
+				initBinding();	// Will do nothing if linkIsActive is already true
+				
+				return bindingProperty.getValue();
+			} finally {
+				if (release) {
+					releaseBinding();
+				}
+			}
+		}
+
+		@Override
+		protected Node getEditControl() {
+			if (textField == null) {
+				createTextField();
+			}
+			return textField;
+		}
+
+		@Override
+		protected void doCancelEdit() {
+			try {
+				// Force cancel
+				bindingProperty.endEdit(false);
+				
+				releaseBinding();
+				textField = null;
+			} catch (BOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		protected boolean initStartEdit() {
+			initBinding();
+			
+			if (!bindingProperty.editableProperty().get()) {
+				releaseBinding();
+				return false;
+			}
+			
+			return true;
+		}
+
+		@Override
+		protected void doStartEdit() {
+			Application.invokeLater(new Runnable() {
+				public void run() {
+					if (isEditing()) {
+						bindingProperty.beginEdit();
+						textField.requestFocus();	// This should be selecting all..
+					}
+				}
+			});
+		}
 	}
 	
-	protected class CustomGridCell extends TableCell<R, Object>{
+	protected abstract class CustomGridCell extends TableCell<R, Object>{
+		protected abstract String getDisplayValue();
+		protected abstract Node getEditControl();
+		protected abstract void doCancelEdit();
+		
+		protected abstract boolean initStartEdit();
+		protected abstract void doStartEdit();
+		
+		public void startEdit() {
+			if (!getColumn().isEditable()) {
+				return;	// Not sure how it event got here...
+			}
+			
+			if (!initStartEdit()) {
+				return;
+			}
+			
+			super.startEdit();
+
+			setText(null);
+			setGraphic(getEditControl());
+			
+			doStartEdit();			
+		}
+		
+		public void updateItem(Object item, boolean empty) {
+			// Always call false for empty
+			super.updateItem(item,  false);
+			
+			if (empty) {
+				setText(null);
+				setGraphic(null);
+			} else {
+				if (isEditing()) {
+					setText(null);
+					setGraphic(getGraphic());
+				} else {
+					setText(getDisplayValue());
+				}
+			}
+		}
+		
+		public void cancelEdit() {
+			super.cancelEdit();
+			doCancelEdit();
+			
+			setText(getDisplayValue());
+			setGraphic(null);
+		}
+		
 		/**
 		 * Same as (BOGrid<T>.GridColumn)getTableColumn();
 		 * 
@@ -485,14 +577,41 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		}
 	}
 
-
-	public <T extends BusinessObject> Callback<TableColumn<T, Object>, TableCell<T, Object>> 
-			getComboBoxCellFactory(BOSet<T> set) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
-	private class ComboGridCell extends GridCell {
+	private class ComboboxGridCell extends CustomGridCell {
+		
+		
+		
+		@Override
+		protected String getDisplayValue() {
+			BOSet<?> set = getColumn().getParam("set");
+			
+			return null;
+		}
+
+		@Override
+		protected Node getEditControl() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		protected void doCancelEdit() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		protected boolean initStartEdit() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected void doStartEdit() {
+			// TODO Auto-generated method stub
+			
+		}
 		
 	}
 }

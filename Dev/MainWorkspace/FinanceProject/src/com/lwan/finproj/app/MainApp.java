@@ -38,7 +38,7 @@ public class MainApp extends App{
 				"SourceID"}, new boolean[]{true, true, true, true});
 		tranGrid.setEditable(true);
 		
-		tranGrid.getColumnByField("SourceID").setCellFactory(BOGrid.getComboBoxCellFactory(BOSource.getSourceSet()));
+//		tranGrid.getColumnByField("SourceID").setCellFactory(tranGrid.getComboBoxCellFactory(BOSource.getSourceSet()));
 		
 		link.setLinkedObject(BOTransaction.getTransactionSet());
 		

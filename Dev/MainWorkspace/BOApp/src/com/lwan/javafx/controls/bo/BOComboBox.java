@@ -27,6 +27,7 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 		
 		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
 		selectedProperty().bindBidirectional(dataBindingProperty);
+
 	}
 	
 	private BOSet<?> set;
