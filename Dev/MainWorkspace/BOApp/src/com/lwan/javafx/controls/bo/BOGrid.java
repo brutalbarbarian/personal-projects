@@ -200,36 +200,41 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	
 
 	public void refresh() {
-		BOSet<R> source = link.getLinkedObject();
-		if (source == null) {
-			// Make sure there aren't any items in the list.
-			getItems().clear();
-			return;
-		}
-		
-		R item = getSelectionModel().getSelectedItem();
-		
-		// Need to force reload the grid or no?
-		
-		List<R> aItems = new Vector<R>(source.getActiveCount());
-		for (R record : source) {
-			aItems.add(record);
-		}
-		Iterator<R> existing = getItems().iterator();
-		while(existing.hasNext()) {
-			R record = existing.next();
-			if(aItems.contains(record)) {
-				aItems.remove(record);
-			} else {
-				existing.remove();
+		revertingSelection = true;
+		try {
+			BOSet<R> source = link.getLinkedObject();
+			if (source == null) {
+				// Make sure there aren't any items in the list.
+				getItems().clear();
+				return;
 			}
-		}
-		// Any remaining items, add them all
-		getItems().addAll(aItems);
-		
-		// Attempt to reselect what was previously selected
-		if (item != null) {
-			getSelectionModel().select(item);
+			
+			R item = getSelectionModel().getSelectedItem();
+			
+			// Need to force reload the grid or no?
+			
+			List<R> aItems = new Vector<R>(source.getActiveCount());
+			for (R record : source) {
+				aItems.add(record);
+			}
+			Iterator<R> existing = getItems().iterator();
+			while(existing.hasNext()) {
+				R record = existing.next();
+				if(aItems.contains(record)) {
+					aItems.remove(record);
+				} else {
+					existing.remove();
+				}
+			}
+			// Any remaining items, add them all
+			getItems().addAll(aItems);
+			
+			// Attempt to reselect what was previously selected
+			if (item != null) {
+				getSelectionModel().select(item);
+			}
+		} finally {
+			revertingSelection = false;
 		}
 	}
 	
@@ -267,12 +272,12 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	}
 	
 	
-	public class GridCell extends TableCell<R, Object> {
+	public class GridCell extends CustomGridCell {
 		private StringBoundProperty bindingProperty;
 		private BOLinkEx<R> link;
 		
 		private GridCell() {
-
+			
 		}
 		
 		protected void initBinding() {
@@ -294,22 +299,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				bindingProperty.buildAttributeLinks();
 			}
 		}
-		
-		/**
-		 * Same as (BOGrid<T>.GridColumn)getTableColumn();
-		 * 
-		 * @return
-		 */
-		public GridColumn getColumn() {
-			return (GridColumn)super.getTableColumn();
-		}
-		
-		@SuppressWarnings("unchecked")
-		public R getRecord() {
-			TableRow<R> row = getTableRow();
-			return row == null? null : (R)row.getItem();
-		}
-		
+				
 		private BOTextField textField;
 		
 		public void startEdit() {
@@ -442,7 +432,24 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				}
 			});
 		}
+	}
+	
+	protected class CustomGridCell extends TableCell<R, Object>{
+		/**
+		 * Same as (BOGrid<T>.GridColumn)getTableColumn();
+		 * 
+		 * @return
+		 */
+		public GridColumn getColumn() {
+			return (GridColumn)super.getTableColumn();
+		}
 		
+		@SuppressWarnings("unchecked")
+		public R getRecord() {
+			TableRow<R> row = getTableRow();
+			return row == null? null : (R)row.getItem();
+		}
+	
 		@SuppressWarnings("unchecked")
 		protected GridColumn getNextColumn(boolean foward) {
 			List<GridColumn> columns = new Vector<>();
@@ -476,5 +483,16 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				}
 			}
 		}
+	}
+
+
+	public <T extends BusinessObject> Callback<TableColumn<T, Object>, TableCell<T, Object>> 
+			getComboBoxCellFactory(BOSet<T> set) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private class ComboGridCell extends GridCell {
+		
 	}
 }

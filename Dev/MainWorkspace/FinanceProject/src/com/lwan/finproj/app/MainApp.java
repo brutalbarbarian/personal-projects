@@ -8,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -33,10 +32,13 @@ public class MainApp extends App{
 		VBox pane = new VBox(2);
 		
 		BOLinkEx<BOSet<BOTransaction>> link = new BOLinkEx<>();
-		BOGrid<BOTransaction> tranGrid = new BOGrid<>(link, new String[]{"TransactionAmount",
+		final BOGrid<BOTransaction> tranGrid = new BOGrid<>(link, new String[]{"TransactionAmount",
 				"TransactionNotes", "TransactionDate", "SourceName"}, 
 				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate", 
-				"Source/SourceName"}, new boolean[]{false, false, false, false});
+				"SourceID"}, new boolean[]{true, true, true, true});
+		tranGrid.setEditable(true);
+		
+		tranGrid.getColumnByField("SourceID").setCellFactory(BOGrid.getComboBoxCellFactory(BOSource.getSourceSet()));
 		
 		link.setLinkedObject(BOTransaction.getTransactionSet());
 		
@@ -56,9 +58,6 @@ public class MainApp extends App{
 		
 		// set dynamic source
 		name.setSource(BOSource.getSourceSet(), "SourceID", "SourceName");
-		
-//		name.addAllItems(new Integer[]{1, 2, 3}, 
-//				new String[]{"1", "2", "3"});
 		
 		grid.add(new Label("Date"), 0, 0);
 		grid.add(new Label("Source"), 0, 1);
@@ -95,6 +94,12 @@ public class MainApp extends App{
 		something.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				record.getLinkedObject().sourceID().setValue(1);
+			}			
+		});
+		
+		refresh.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent arg0) {
+				tranGrid.refresh();
 			}			
 		});
 		

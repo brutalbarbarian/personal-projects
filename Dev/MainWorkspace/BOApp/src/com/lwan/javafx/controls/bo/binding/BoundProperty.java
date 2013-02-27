@@ -5,7 +5,6 @@ import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;

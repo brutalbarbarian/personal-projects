@@ -14,7 +14,7 @@ public class PU_TRN extends StoredProc{
 		"set trn_amount = @trn_amount, " +
 		"	src_id = @src_id, " +
 		"	trn_notes = @trn_notes, " +
-		"	trn_date = @trn_date, " +
+		"	trn_date = @trn_date " +
 		"where trn_id = @trn_id"
 	};
 
