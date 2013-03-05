@@ -1,5 +1,7 @@
 package com.lwan.javafx.controls.bo;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -14,10 +16,14 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.bo.State;
+import com.lwan.javafx.app.App;
 import com.lwan.javafx.controls.bo.binding.BoundCellValue;
+import com.lwan.javafx.controls.bo.binding.BoundControl;
+import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
-import com.sun.glass.ui.Application;
-
+import com.lwan.util.JavaFXUtil;
+import com.lwan.util.wrappers.ResultCallback;
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -146,7 +152,8 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 								}
 							}
 						}
-						if (newValue.stateProperty().getValue().contains(State.Modified)) {
+						if (newValue != null && 
+								newValue.stateProperty().getValue().contains(State.Modified)) {
 							isEditingProperty().setValue(true);
 						}
 					}
@@ -162,7 +169,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		// No point continuing if not in edit mode...
 		if (isEditingProperty().getValue()) {
 			if (gridModeProperty().getValue() == MODE_RECORD) {
-				if (selected != null) {
+				if (selected != null && selected.isActive()) {
 					selected.trySave();
 				}
 			} else if (gridModeProperty().getValue() == MODE_SET) {
@@ -244,6 +251,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	public class GridColumn extends TableColumn<R, Object> {
 		private String fieldPath;
 		private Map<String, Object> params;	// Extra params for the cellFactory
+		private ResultCallback<BoundControl<?>> ctrlPropertySetter;
 		
 		GridColumn(String caption, String fieldPath, boolean editable) {
 			super(caption);
@@ -257,6 +265,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			setAsTextField();	// Default
 			
 			setPrefWidth(100);	// Minimum?
+		}
+		
+		public ResultCallback<BoundControl<?>> getCtrlPropertySetter() {
+			return ctrlPropertySetter;
+		}
+		
+		public void setCtrlPropertySetter(ResultCallback<BoundControl<?>> setter) {
+			ctrlPropertySetter = setter;
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -278,6 +294,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			params.put("set", set);
 			
 			setCellFactory(getComboboxCellFactory());
+		}
+		
+		public void setAsDatePicker() {
+			params.clear();
+			setCellFactory(getDatePickerCellFactory());
 		}
 		
 		public String getField() {
@@ -309,60 +330,35 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		return comboboxCellFactory;
 	}
 	
-	
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> datePickerCellFactory;
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> getDatePickerCellFactory() {
+		if (datePickerCellFactory == null) {
+			datePickerCellFactory = new Callback<TableColumn<R, Object>, TableCell<R, Object>>(){
+				public DatePickerGridCell call(TableColumn<R, Object> arg0) {
+					return new DatePickerGridCell();
+				}
+			};
+		}
+		return datePickerCellFactory;
+	}
 	
 	public class TextfieldGridCell extends CustomGridCell {
-		private StringBoundProperty bindingProperty;
-		private BOLinkEx<R> link;
-		private boolean linkIsActive;
-		
-		private TextfieldGridCell() {
-			linkIsActive = false;
-		}
-		
-		protected void initBinding() {
-			if (!linkIsActive) {
-			
-				if(link == null) {
-					link = new BOLinkEx<>();
-				}
-				if (bindingProperty == null) {
-					bindingProperty = new StringBoundProperty(getTableView(), link, null);
-				}
-				bindingProperty.pathProperty().setValue(getColumn().getField());
-				link.setLinkedObject(getRecord());
-				bindingProperty.buildAttributeLinks();
-				
-				linkIsActive = true;
-			}
-		}
-		
-		protected void releaseBinding() {
-			if (linkIsActive && link != null && bindingProperty != null) {
-				link.setLinkedObject(null);
-				bindingProperty.pathProperty().setValue(null);
-				bindingProperty.buildAttributeLinks();
-				
-				// free up memory?
-				bindingProperty = null;
-				link = null;
-				
-				linkIsActive = false;
-			}
-		}
-				
 		private BOTextField textField;
+		
+		protected StringBoundProperty getBindingProperty() {
+			return (StringBoundProperty) super.getBindingProperty();
+		}
 		
 		public void commitEdit(Object value) {
 			try {
-				bindingProperty.endEdit(true);
+				getBindingProperty().endEdit(true);
 			} catch (BOException e) {
 				// This is fine... don't force user. This will revert if the user was attempting
 				// to move away. 
 				return;	
 //				JavaFXUtil.ShowErrorDialog(getScene().getWindow(), e.getMessage());  
 			}
-			BOAttribute<?> attr = bindingProperty.linkedAttributeProperty().getValue();
+			BOAttribute<?> attr = getBindingProperty().linkedAttributeProperty().getValue();
 			attr.setNotifications(false);
 			try {
 				// This will safely trigger all necessary events without modifying
@@ -375,11 +371,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		}
 		
 		private void createTextField() {
-			if (!linkIsActive) {
+			if (!linkIsActive()) {
 				throw new RuntimeException("Inactive link on createTextField()");
 			}
 			
-			textField = new BOTextField(bindingProperty);
+			textField = new BOTextField(getBindingProperty());
 			textField.selectAllOnEditProperty().setValue(true);
 			textField.setMinWidth(getWidth() - getGraphicTextGap() * 2);
 			textField.focusTraversableProperty().set(false);
@@ -397,10 +393,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				public void handle(KeyEvent t) {
 					if (t.getCode() == KeyCode.TAB) {
 						commitEdit(null);
-						GridColumn nextColumn = getNextColumn(!t.isShiftDown());
-						if (nextColumn != null) {
-							getTableView().edit(getTableRow().getIndex(), nextColumn);
-						}
+						gotoNextColumn(!t.isShiftDown());
 					}
 				}
 				
@@ -419,11 +412,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		
 		@Override
 		protected String getDisplayValue() {
-			boolean release = !linkIsActive;
+			boolean release = !linkIsActive();
 			try {
 				initBinding();	// Will do nothing if linkIsActive is already true
 				
-				return bindingProperty.getValue();
+				return getBindingProperty().getValue();
 			} finally {
 				if (release) {
 					releaseBinding();
@@ -443,9 +436,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		protected void doCancelEdit() {
 			try {
 				// Force cancel
-				bindingProperty.endEdit(false);
+				if (getBindingProperty() != null) {
+					getBindingProperty().endEdit(false);
+				}
 				
-				releaseBinding();
 				textField = null;
 			} catch (BOException e) {
 				e.printStackTrace();
@@ -453,66 +447,127 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		}
 
 		@Override
-		protected boolean initStartEdit() {
-			initBinding();
-			
-			if (!bindingProperty.editableProperty().get()) {
-				releaseBinding();
-				return false;
-			}
-			
-			return true;
-		}
-
-		@Override
 		protected void doStartEdit() {
-			Application.invokeLater(new Runnable() {
+			Platform.runLater(new Runnable() {
 				public void run() {
 					if (isEditing()) {
-						bindingProperty.beginEdit();
+						getBindingProperty().beginEdit();
 						textField.requestFocus();	// This should be selecting all..
 					}
 				}
 			});
 		}
+
+		@Override
+		protected BoundProperty<?> createBindingProperty(Object owner, BOLinkEx<R> link) {
+			return new StringBoundProperty(owner, link, null);
+		}
 	}
 	
 	protected abstract class CustomGridCell extends TableCell<R, Object>{
+		private BoundProperty<?> bindingProperty;
+		private BOLinkEx<R> link;
+		private boolean linkIsActive;
+		
 		protected abstract String getDisplayValue();
 		protected abstract Node getEditControl();
 		protected abstract void doCancelEdit();
 		
-		protected abstract boolean initStartEdit();
 		protected abstract void doStartEdit();
 		
+		protected abstract BoundProperty<?> createBindingProperty(Object owner,
+				BOLinkEx<R> link);
+		
+		protected CustomGridCell() {
+			linkIsActive = false;
+		}
+		
+		protected BoundProperty<?> getBindingProperty () {
+			return bindingProperty;
+		}
+		
+		protected boolean linkIsActive() {
+			return linkIsActive;
+		}
+		
+		protected void initBinding() {
+			if (!linkIsActive) {
+				if (link == null) {
+					link = new BOLinkEx<>();
+				}
+				if (bindingProperty == null) {
+					bindingProperty = createBindingProperty(getTableView(), link);
+				}
+				bindingProperty.pathProperty().setValue(getColumn().getField());
+				link.setLinkedObject(getRecord());
+				bindingProperty.buildAttributeLinks();
+				
+				linkIsActive = true;
+			}
+		}
+		
+		protected void releaseBinding() {
+			if(linkIsActive) {
+				link.setLinkedObject(null);
+				bindingProperty.pathProperty().setValue(null);
+				bindingProperty.buildAttributeLinks();
+				
+				// free up memory?
+				bindingProperty = null;
+				link = null;
+				
+				linkIsActive = false;
+			}
+		}
+		
 		public void startEdit() {
-			if (!getColumn().isEditable()) {
+			GridColumn column = getColumn();
+			
+			if (!column.isEditable()) {
 				return;	// Not sure how it event got here...
 			}
 			
-			if (!initStartEdit()) {
+			initBinding();
+			
+			if (!getBindingProperty().editableProperty().get()) {
+				releaseBinding();
 				return;
 			}
 			
 			super.startEdit();
+			
+			Node editControl = getEditControl();
+			if ((editControl instanceof BoundControl) && 
+					column.getCtrlPropertySetter() != null) {
+				column.getCtrlPropertySetter().call((BoundControl<?>)editControl);
+			}
 
 			setText(null);
-			setGraphic(getEditControl());
+			setGraphic(editControl);
 			
 			doStartEdit();			
 		}
 		
+		public void commitEdit(Object item) {
+			super.commitEdit(item);
+			
+			cancelEdit();
+		}
+		
 		public void updateItem(Object item, boolean empty) {
 			// Always call false for empty
-			super.updateItem(item,  false);
+//			super.updateItem(item,  false);
 			
-			if (empty) {
+			if (!isEditing()) {
+				super.updateItem(item,  false);
+			}
+			
+			if (empty && !isEditing()) {
 				setText(null);
 				setGraphic(null);
 			} else {
 				if (isEditing()) {
-					setText(null);
-					setGraphic(getGraphic());
+					// do nothing
 				} else {
 					setText(getDisplayValue());
 				}
@@ -522,6 +577,8 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		public void cancelEdit() {
 			super.cancelEdit();
 			doCancelEdit();
+			
+			releaseBinding();
 			
 			setText(getDisplayValue());
 			setGraphic(null);
@@ -540,6 +597,13 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		public R getRecord() {
 			TableRow<R> row = getTableRow();
 			return row == null? null : (R)row.getItem();
+		}
+		
+		protected void gotoNextColumn(boolean foward) {
+			GridColumn nextColumn = getNextColumn(foward);
+			if (nextColumn != null) {
+				getTableView().edit(getTableRow().getIndex(), nextColumn);
+			}
 		}
 	
 		@SuppressWarnings("unchecked")
@@ -579,38 +643,235 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 
 	
 	private class ComboboxGridCell extends CustomGridCell {
-		
-		
+		private BOComboBox<?> combobox;
 		
 		@Override
 		protected String getDisplayValue() {
-			BOSet<?> set = getColumn().getParam("set");
+			GridColumn col = getColumn();
 			
-			return null;
+			BOSet<?> set = col.getParam("set");
+			boolean release = !linkIsActive();
+			try {
+				initBinding();
+				BusinessObject bo = set.findChildByAttribute(
+						(String)col.getParam("keyPath"), getBindingProperty().get());
+				if (bo == null) {
+					return "";
+				}
+				BOAttribute<?> attr = bo.findAttributeByPath(
+						(String)col.getParam("attributePath"));
+				if (attr == null) {
+					return "";
+				}
+				
+				return attr.asString();
+			} finally {
+				if (release) {
+					releaseBinding();
+				}
+			}
 		}
 
 		@Override
 		protected Node getEditControl() {
-			// TODO Auto-generated method stub
-			return null;
+			if (combobox == null) {
+				createCombobox();
+			}
+			
+			return combobox;
+		}
+
+		private void createCombobox() {
+			if (!linkIsActive()) {
+				throw new RuntimeException("Inactive link on createCombobox()");
+			}
+			
+			combobox = new BOComboBox<>(getBindingProperty());
+			combobox.setMinWidth(getWidth() - getGraphicTextGap() * 2);
+			combobox.setFocusTraversable(false);
+//			combobox.
+			
+			GridColumn column = getColumn();
+			BOSet<R> set = column.getParam("set");
+			combobox.setSource(set, (String)column.getParam("keyPath"), 
+					(String)column.getParam("attributePath"));
+			
+//			combobox.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//				public void changed(ObservableValue<? extends Boolean> arg0,
+//						Boolean arg1, Boolean arg2) {
+//					
+//				}
+//			});
+			
+
+			combobox.setOnKeyPressed(new EventHandler<KeyEvent>() {
+				public void handle(KeyEvent t) {
+					if (t.getCode() == KeyCode.TAB) {
+						cancelEdit();
+						
+						gotoNextColumn(!t.isShiftDown());
+					}
+				}				
+			});
+			
+//			combobox.setOnKeyReleased(new EventHandler<KeyEvent>() {
+//				public void handle(KeyEvent t) {
+//					if (t.getCode() == KeyCode.ENTER ||
+//							t.getCode() == KeyCode.ESCAPE) {
+//						commitEdit(null);
+//					}
+//				}
+//			});
+			
+//			combobox.get
+			
+			combobox.showingProperty().addListener(new ChangeListener<Boolean>() {
+				public void changed(ObservableValue<? extends Boolean> arg0,
+						Boolean arg1, Boolean arg2) {
+					if (arg2) {
+//						combobox.get
+						JavaFXUtil.printNodeTree(combobox);
+						
+					} else {
+						cancelEdit();
+					}
+				}				
+			});
 		}
 
 		@Override
 		protected void doCancelEdit() {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		protected boolean initStartEdit() {
-			// TODO Auto-generated method stub
-			return false;
+			combobox = null;
 		}
 
 		@Override
 		protected void doStartEdit() {
-			// TODO Auto-generated method stub
+			Platform.runLater(new Runnable() {
+				public void run() {
+					if (isEditing()) {
+						combobox.show();
+					}
+				}
+			});
+		}
+
+		@Override
+		protected BoundProperty<?> createBindingProperty(Object owner,
+				BOLinkEx<R> link) {
+			return new BoundProperty<>(owner, link, null);
+		}
+	}
+	
+	public class DatePickerGridCell extends CustomGridCell {
+		private BODatePicker datePicker;
+		
+		@SuppressWarnings("unchecked")
+		protected BoundProperty<Date> getBindingProperty() {
+			return (BoundProperty<Date>)super.getBindingProperty();
+		}
+		
+		@Override
+		protected String getDisplayValue() {
+			boolean release = !linkIsActive();
+			try {
+				initBinding();				
+				return DateFormat.getDateInstance(DateFormat.SHORT, App.getLocale()).format(
+						getBindingProperty().get());
+			} finally {
+				if (release) {
+					releaseBinding();
+				}
+			}
+		}
+
+		@Override
+		protected Node getEditControl() {
+			if (datePicker == null) {
+				createDatePicker();
+			}
+			return datePicker;
+		}
+		
+		public void commitEdit(Object item) {
+			if (linkIsActive()) {
+				super.commitEdit(getBindingProperty().get());
+			}
 			
+			cancelEdit();
+		}
+		
+		protected void createDatePicker() {
+			datePicker = new BODatePicker(getBindingProperty());
+			
+//			datePicker.getTextField().focusedProperty().addListener(new ChangeListener<Boolean>() {
+//				public void changed(ObservableValue<? extends Boolean> arg0,
+//						Boolean arg1, Boolean arg2) {
+//					System.out.println("focused change: " + arg2);
+//					if (!arg2) {
+//						commitEdit(null);
+//					}
+//				}				
+//			});
+//			
+//			datePicker.showingProperty().addListener(new ChangeListener<Boolean>() {
+//				public void changed(ObservableValue<? extends Boolean> arg0,
+//						Boolean arg1, Boolean arg2) {
+//					System.out.println("showingProperty changed: " + arg2);
+//					if (!arg2) {
+//						commitEdit(null);
+//					} else {
+//						datePicker.getCalendarView().setOnKeyPressed(new EventHandler<KeyEvent>() {
+//							public void handle(KeyEvent arg0) {
+//								// TODO Auto-generated method stub
+//								
+//							}							
+//						});
+//					}
+//				}				
+//			});
+			
+//			datePicker.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//				public void changed(ObservableValue<? extends Boolean> arg0,
+//						Boolean arg1, Boolean arg2) {
+//					System.out.println("focused");
+//					if (!arg2) {
+//						commitEdit(null);
+//					}
+//				}				
+//			});
+			
+//			datePicker.
+			
+//			datePicker.get
+//			datePicker.setOnKeyPressed(new EventHandler<KeyEvent>() {
+//				public void handle(KeyEvent arg0) {
+//					System.out.println("key pressed: " + arg0.getText());
+//				}				
+//			});
+//			datePicker.pop
+			// TODO
+		}
+
+		@Override
+		protected void doCancelEdit() {
+			datePicker = null;
+		}
+
+		@Override
+		protected void doStartEdit() {
+			Platform.runLater(new Runnable() {
+				public void run() {
+					if (isEditing()) {
+						datePicker.showPopup();
+					}
+				}
+			});
+		}
+
+		@Override
+		protected BoundProperty<?> createBindingProperty(Object owner,
+				BOLinkEx<R> link) {
+			return new BoundProperty<Date>(owner, link, null);
 		}
 		
 	}

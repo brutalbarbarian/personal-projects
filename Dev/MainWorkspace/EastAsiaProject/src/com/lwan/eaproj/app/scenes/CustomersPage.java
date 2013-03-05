@@ -1,6 +1,5 @@
 package com.lwan.eaproj.app.scenes;
 
-import com.lwan.bo.BOLink;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.db.BODbSetRef;
@@ -9,7 +8,6 @@ import com.lwan.eaproj.bo.cache.BOCustomersSet;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.jdbc.StoredProc;
 
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 
 class CustomersPage extends AppPage{

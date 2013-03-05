@@ -27,7 +27,13 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 		
 		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
 		selectedProperty().bindBidirectional(dataBindingProperty);
-
+	}
+	
+	public BOComboBox(BoundProperty<T> boundProperty) {
+		dataBindingProperty = boundProperty;
+		
+		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
+		selectedProperty().bindBidirectional(dataBindingProperty);
 	}
 	
 	private BOSet<?> set;
@@ -43,24 +49,46 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 			public void handleModified(ModifiedEvent event) {
 				populateFromSet();
 			}			
-		});
+		});	
+	}
 	
+	/**
+	 * Call this instead of setEditable()
+	 * 
+	 * @param editable
+	 */
+	public void setEditableEx(boolean editable) {
+		selectedProperty().unbindBidirectional(dataBindingProperty);
+		try {
+			setEditable(editable);
+		} finally {
+			selectedProperty().bindBidirectional(dataBindingProperty);
+		}
+		
 	}
 	
 	@SuppressWarnings("unchecked")
 	protected void populateFromSet() {
-		if (set != null && !StringUtil.isNullOrBlank(attrPath) && !StringUtil.isNullOrBlank(keyPath)) {
-			Map<T, String> values = new HashMap<>();
+		if (set != null && !StringUtil.isNullOrBlank(attrPath) && !StringUtil.isNullOrBlank(keyPath)) {Map<T, String> values = new HashMap<>();
 			for (BusinessObject bo : set) {
 				BOAttribute<?> attr = bo.findAttributeByPath(attrPath);
 				BOAttribute<T> key = (BOAttribute<T>) bo.findAttributeByPath(keyPath);
 				if (attr!= null && key != null) {
-//					System.out.println(key,getValu)
 					values.put(key.getValue(), attr.asString());
 				}
 			}
 			
 			addAllItems(values);
 		}
+	}
+	
+	public void beginBulkUpdate() {
+		super.beginBulkUpdate();
+	}
+	
+	public void endBulkUpdate() {
+		super.endBulkUpdate();
+		
+		
 	}
 }

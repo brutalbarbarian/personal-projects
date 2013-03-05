@@ -97,27 +97,12 @@ public class BoundProperty <T> extends SimpleObjectProperty<T> implements Modifi
 		});
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void buildAttributeLinks () {
 		// Unbind previous attribute if exists
 		if (getLinkedAttribute() != null) {
 			getLinkedAttribute().removeListener(this);
 		}
 		
-		// Build the attributelink
-		doBuildAttributeLinks();
-		
-		// Bind new attribute
-		if (getLinkedAttribute() != null) {
-			// Only one way bindings.
-			getLinkedAttribute().addListener(this);
-			setModifiedValue((T) getLinkedAttribute().getValue());
-		} else {
-			setValue(null);
-		}
-	}
-	
-	protected void doBuildAttributeLinks() {
 		// remove previous links
 		_editableProperty().unbind();
 		
@@ -136,12 +121,27 @@ public class BoundProperty <T> extends SimpleObjectProperty<T> implements Modifi
 		} else {
 			_editableProperty().setValue(false);
 		}
+				
+		// Bind new attribute
+		if (getLinkedAttribute() != null) {
+			// Only one way bindings.
+			getLinkedAttribute().addListener(this);
+			setModifiedValue(getEffectiveValue());
+		} else {
+			setValue(null);
+		}
 	}
 
+	public void handleModified(ModifiedEvent event) {
+		setModifiedValue(getEffectiveValue());
+	}
 	
 	@SuppressWarnings("unchecked")
-	public void handleModified(ModifiedEvent event) {
-		setModifiedValue((T) event.asAttribute().getValue());
+	protected T getEffectiveValue() {
+		if (getLinkedAttribute() != null) {
+			return ((T)getLinkedAttribute().getValue());
+		}
+		return null;
 	}
 	
 	protected void setModifiedValue(T value) {

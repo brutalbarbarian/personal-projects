@@ -9,7 +9,6 @@ import javafx.util.Callback;
 
 import com.lwan.bo.BOSet;
 import com.lwan.bo.BOSetRef;
-import com.lwan.bo.BusinessObject;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.StoredProc;
 

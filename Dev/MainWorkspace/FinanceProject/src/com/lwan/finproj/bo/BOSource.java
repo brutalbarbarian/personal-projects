@@ -64,7 +64,7 @@ public class BOSource extends BODbObject{
 		return sourceSet;
 	}
 	
-	protected static class BOSourceSet extends BODbSet<BOSource> {
+	public static class BOSourceSet extends BODbSet<BOSource> {
 
 		private BOSourceSet() {
 			super(null, "SourceCache", "SourceID", "src_id");

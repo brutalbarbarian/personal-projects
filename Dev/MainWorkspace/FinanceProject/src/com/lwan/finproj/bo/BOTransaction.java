@@ -10,6 +10,7 @@ import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
 import com.lwan.bo.db.BODbSet;
 import com.lwan.javafx.app.util.DbUtil;
+import com.lwan.util.DateUtil;
 
 public class BOTransaction extends BODbObject{
 	private BODbAttribute<Integer> transactionID, sourceID;
@@ -85,7 +86,7 @@ public class BOTransaction extends BODbObject{
 	public void clearAttributes() {
 		transactionAmount.clear();
 		transactionNotes.clear();
-		transactionDate.clear();
+		transactionDate.setValue(DateUtil.getCurrentDate());
 	}
 
 	@Override
@@ -102,7 +103,7 @@ public class BOTransaction extends BODbObject{
 		return transactionSet;
 	}
 	
-	protected static class BOTransactionSet extends BODbSet<BOTransaction> {
+	public static class BOTransactionSet extends BODbSet<BOTransaction> {
 
 		public BOTransactionSet() {
 			super(null, "TransactionCache", "TransactionID", "trn_id");

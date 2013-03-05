@@ -61,16 +61,21 @@ public class StringBoundProperty extends BoundProperty<String>{
 	
 	
 	public void buildAttributeLinks () {
-		doBuildAttributeLinks();
+		super.buildAttributeLinks();
 		
-		// if linkedAttribute is null, isEditable() will always be false
-		if (getEditMode() && isEditable()) {
-			setValue(getEditValue());
-		} else {
+		if (!(getEditMode() && isEditable())) {
 			// Make sure we're out of edit mode
 			try {
 				endEdit(false);
 			} catch (BOException e) {}
+		}
+	}
+	
+	protected String getEffectiveValue() {
+		if (getEditMode()) {
+			return getEditValue();
+		} else {
+			return getDisplayValue();
 		}
 	}
 	

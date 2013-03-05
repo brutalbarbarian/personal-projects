@@ -1,7 +1,5 @@
 package com.lwan.bo;
 
-import com.lwan.bo.BOSet.Entry;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;

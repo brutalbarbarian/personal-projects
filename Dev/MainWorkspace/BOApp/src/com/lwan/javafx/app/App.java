@@ -36,6 +36,7 @@ public abstract class App extends Application{
 	private Map<String, String> keyMap;
 	private static App app;
 	private Stage mainStage;
+	private Locale locale;
 	
 	public static App getApp() {
 		if (app == null) {
@@ -65,6 +66,10 @@ public abstract class App extends Application{
 		mainStage = s;
 		
 		initialiseStage(s);
+	}
+	
+	public static Locale getLocale() {
+		return getApp().locale;
 	}
 	
 	public static Stage getMainStage() {
@@ -145,6 +150,7 @@ public abstract class App extends Application{
 			keyMap.put(KEY_LANGUAGE, loc.toLanguageTag());
 			System.out.println("Unknown language. Using system default");
 		}
+		locale = loc;
 		System.out.println("Using language: " + loc.getDisplayName());
 		
 		Lng.initialise(loc);

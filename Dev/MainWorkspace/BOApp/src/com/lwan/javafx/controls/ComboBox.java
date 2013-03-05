@@ -75,6 +75,14 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		return uniqueStringConverterProperty;
 	}
 	
+	public Callback<String, T> getUniqueStringConverter() {
+		return uniqueStringConverterProperty().getValue();
+	}
+	
+	public void setUniqueStringConverter(Callback<String, T> converter) {
+		uniqueStringConverterProperty().setValue(converter);
+	}
+	
 	public ComboBox() {
 //		editableProperty().set(true);		// Shouldn't be editable by default..
 		converterProperty().setValue(new StringConverter<ComboBoxItem<T>>() {
@@ -155,7 +163,6 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 							}
 						}
 					} else {
-						System.out.println(newValue.getValue());
 						setSelected(newValue.getValue());
 					}
 					invalidating = false;
@@ -167,8 +174,8 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 	
 	@SuppressWarnings("unchecked")
 	protected ComboBoxItem<T> createFromUniqueString(String s) {
-		if (uniqueStringConverterProperty().getValue() != null) {
-			T item = uniqueStringConverterProperty().getValue().call(s);
+		if (getUniqueStringConverter() != null) {
+			T item = getUniqueStringConverter().call(s);
 			return addItem(item, s);
 		} else {
 			// Assume T is of type string... since user didn't provide details...
@@ -212,7 +219,7 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 	 * 
 	 */
 	public void beginBulkUpdate() {
-		bulkUpdateState++;
+		bulkUpdateState++;		
 	}
 	
 	/**
