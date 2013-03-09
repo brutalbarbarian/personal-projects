@@ -135,6 +135,7 @@ public class CalendarView extends VBox {
             }
         });
         showTodayButton.set(true);
+        isResetting = false;
 
     }
 
@@ -180,6 +181,15 @@ public class CalendarView extends VBox {
         this.calendar.set(calendar);
     }
 
+    protected boolean isResetting;
+    public void reset() {    	
+    	isResetting = true;
+    	try {
+    		currentlyViewing.set(Calendar.MONTH);
+    	} finally {
+    		isResetting = false;
+    	}
+    }
 
     /**
      * Gets the list of disabled week days.

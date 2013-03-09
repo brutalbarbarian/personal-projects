@@ -65,6 +65,22 @@ public class BOTransaction extends BODbObject{
 		setSP(DbUtil.getStoredProc("PU_TRN"), BOTransaction.class, SP_UPDATE);
 		setSP(DbUtil.getStoredProc("PD_TRN"), BOTransaction.class, SP_DELETE);
 	}
+	
+	protected boolean verifyState() {
+		boolean result = super.verifyState();
+		BOSource src = null;
+		if (result) {
+			// check that the source actually exists
+			src = BOSource.getSourceSet().findChildByID(sourceID().getValue());
+			result = src != null;
+		}
+		if (result && src.isModified()) {
+			// Make sure the src is saved prior to attempting to save this.
+			src.trySave();
+		}
+		
+		return result;
+	}
 
 	@Override
 	protected void createAttributes() {

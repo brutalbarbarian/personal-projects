@@ -29,6 +29,16 @@ public class JavaFXUtil {
 		printNodeTree(sb, 0, n);
 		System.out.println(sb.toString());
 	}
+
+	public static void setNodeTreeFocusable(Node n, boolean focusable) {
+		n.setFocusTraversable(focusable);
+		if (n instanceof Parent) {
+			Parent p = (Parent)n;
+			for (Node nn : p.getChildrenUnmodifiable()) {
+				setNodeTreeFocusable(nn, focusable);
+			}
+		}
+	}
 	
 	protected static void printNodeTree(StringBuilder sb, int level, Node n) {
 		if (level > 0) {

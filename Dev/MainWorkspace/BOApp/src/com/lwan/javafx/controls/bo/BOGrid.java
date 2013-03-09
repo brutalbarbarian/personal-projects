@@ -17,6 +17,7 @@ import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.bo.State;
 import com.lwan.javafx.app.App;
+import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.controls.bo.binding.BoundCellValue;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
@@ -85,6 +86,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		return isEditingProperty;
 	}
 	
+	public BOSet<R> getSourceSet() {
+		return link.getLinkedObject();
+	}
+	
 	public BOGrid(BOLinkEx<BOSet<R>> link, 
 			String [] columnNames, String[] fieldPaths, boolean[] editable) {
 		// initialize the grid columns?
@@ -93,8 +98,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			throw new RuntimeException("Invalid arguments for column details.");
 		}
 		
-		// TODO need to create a generic te cell... how to specify custom columns???
-		// don't care about custom columns for now...we just want a working grid.
 		int cols = columnNames.length;
 		List<GridColumn> columns = new Vector<>();
 		for (int i = 0; i < cols; i++) {
@@ -242,6 +245,17 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			// Attempt to reselect what was previously selected
 			if (item != null) {
 				getSelectionModel().select(item);
+			}
+			
+			// make sure editing is still in sync
+			if (gridModeProperty().getValue() == MODE_RECORD) {
+				if (item == null) {
+					isEditingProperty().setValue(false);
+				} else {
+					isEditingProperty().setValue(item.isModified());
+				}
+			} else {
+				isEditingProperty().setValue(source.isModified());
 			}
 		} finally {
 			revertingSelection = false;
@@ -688,7 +702,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			
 			combobox = new BOComboBox<>(getBindingProperty());
 			combobox.setMinWidth(getWidth() - getGraphicTextGap() * 2);
-			combobox.setFocusTraversable(false);
+//			combobox.setFocusTraversable(false);
 //			combobox.
 			
 			GridColumn column = getColumn();
@@ -696,12 +710,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			combobox.setSource(set, (String)column.getParam("keyPath"), 
 					(String)column.getParam("attributePath"));
 			
-//			combobox.focusedProperty().addListener(new ChangeListener<Boolean>() {
-//				public void changed(ObservableValue<? extends Boolean> arg0,
-//						Boolean arg1, Boolean arg2) {
-//					
-//				}
-//			});
+			combobox.focusedProperty().addListener(new ChangeListener<Boolean>() {
+				public void changed(ObservableValue<? extends Boolean> arg0,
+						Boolean arg1, Boolean arg2) {
+					if (!arg2) {
+						commitEdit(null);
+					}
+				}
+			});
 			
 
 			combobox.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -714,14 +730,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				}				
 			});
 			
-//			combobox.setOnKeyReleased(new EventHandler<KeyEvent>() {
-//				public void handle(KeyEvent t) {
-//					if (t.getCode() == KeyCode.ENTER ||
-//							t.getCode() == KeyCode.ESCAPE) {
-//						commitEdit(null);
-//					}
-//				}
-//			});
+			combobox.setOnKeyReleased(new EventHandler<KeyEvent>() {
+				public void handle(KeyEvent t) {
+					if (t.getCode() == KeyCode.ENTER ||
+							t.getCode() == KeyCode.ESCAPE) {
+						commitEdit(null);
+					}
+				}
+			});
 			
 //			combobox.get
 			
@@ -729,9 +745,8 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				public void changed(ObservableValue<? extends Boolean> arg0,
 						Boolean arg1, Boolean arg2) {
 					if (arg2) {
-//						combobox.get
-						JavaFXUtil.printNodeTree(combobox);
-						
+						JavaFXUtil.setNodeTreeFocusable(combobox, false);
+						combobox.setFocusTraversable(true);
 					} else {
 						cancelEdit();
 					}
@@ -748,9 +763,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		protected void doStartEdit() {
 			Platform.runLater(new Runnable() {
 				public void run() {
-					if (isEditing()) {
-						combobox.show();
-					}
+					combobox.requestFocus();
+//					System.out.println(combobox.isVisible());
+//					System.
+//					if (isEditing()) {
+//					combobox.show();
+//					combobox.setV
+//						combobox.show
+//					}
 				}
 			});
 		}
@@ -794,6 +814,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		
 		public void commitEdit(Object item) {
 			if (linkIsActive()) {
+				datePicker.endEdit(true, true);
 				super.commitEdit(getBindingProperty().get());
 			}
 			
@@ -803,53 +824,27 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		protected void createDatePicker() {
 			datePicker = new BODatePicker(getBindingProperty());
 			
-//			datePicker.getTextField().focusedProperty().addListener(new ChangeListener<Boolean>() {
-//				public void changed(ObservableValue<? extends Boolean> arg0,
-//						Boolean arg1, Boolean arg2) {
-//					System.out.println("focused change: " + arg2);
-//					if (!arg2) {
-//						commitEdit(null);
-//					}
-//				}				
-//			});
-//			
-//			datePicker.showingProperty().addListener(new ChangeListener<Boolean>() {
-//				public void changed(ObservableValue<? extends Boolean> arg0,
-//						Boolean arg1, Boolean arg2) {
-//					System.out.println("showingProperty changed: " + arg2);
-//					if (!arg2) {
-//						commitEdit(null);
-//					} else {
-//						datePicker.getCalendarView().setOnKeyPressed(new EventHandler<KeyEvent>() {
-//							public void handle(KeyEvent arg0) {
-//								// TODO Auto-generated method stub
-//								
-//							}							
-//						});
-//					}
-//				}				
-//			});
-			
-//			datePicker.focusedProperty().addListener(new ChangeListener<Boolean>() {
-//				public void changed(ObservableValue<? extends Boolean> arg0,
-//						Boolean arg1, Boolean arg2) {
-//					System.out.println("focused");
-//					if (!arg2) {
-//						commitEdit(null);
-//					}
-//				}				
-//			});
-			
-//			datePicker.
-			
-//			datePicker.get
-//			datePicker.setOnKeyPressed(new EventHandler<KeyEvent>() {
-//				public void handle(KeyEvent arg0) {
-//					System.out.println("key pressed: " + arg0.getText());
-//				}				
-//			});
-//			datePicker.pop
-			// TODO
+			datePicker.getTextField().focusedProperty().addListener(new ChangeListener<Boolean>() {
+				public void changed(ObservableValue<? extends Boolean> arg0,
+						Boolean arg1, Boolean arg2) {
+					if (!arg2) {
+						commitEdit(null);
+					}
+				}				
+			});
+
+			datePicker.getTextField().setOnKeyPressed(new EventHandler<KeyEvent>() {
+				public void handle(KeyEvent e) {
+					if (e.getCode() == KeyCode.TAB) {
+						commitEdit(null);
+						gotoNextColumn(!e.isControlDown());
+					} else if (e.getCode() == KeyCode.ENTER) {
+						commitEdit(null);
+					} else if (e.getCode() == KeyCode.ESCAPE) {
+						cancelEdit();
+					}
+				}				
+			});
 		}
 
 		@Override
@@ -862,7 +857,8 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			Platform.runLater(new Runnable() {
 				public void run() {
 					if (isEditing()) {
-						datePicker.showPopup();
+						datePicker.getTextField().requestFocus();
+//						datePicker.showPopup();
 					}
 				}
 			});

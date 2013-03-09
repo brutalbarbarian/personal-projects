@@ -409,6 +409,14 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		}
 	}
 	
+	public boolean isModified() {
+		return stateProperty().getValue().contains(State.Modified);
+	}
+	
+	public boolean isFromDataset() {
+		return stateProperty().getValue().contains(State.Dataset);
+	}
+	
 	/**
 	 * Handle active by default will do nothing if passed in false for isActive.
 	 * Otherwise will proceed to call populateAttributes.
@@ -482,7 +490,10 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	public final void fireModified(ModifiedEvent event) {
 		if (allowNotificationsProperty().getValue()) { 
-			stateProperty().getValue().add(State.Modified);
+			if (!(isHandlingActiveProperty().getValue() &&
+					event.getType() == ModifiedEvent.TYPE_ACTIVE)) {
+				stateProperty().getValue().add(State.Modified);
+			}
 			
 			// Don't handle event if this was the object which fired it last
 			if (event.getDirectChild() != this) {

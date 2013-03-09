@@ -4,12 +4,6 @@
     /*-fx-base: dodgerblue; */
 }
 
-.datepicker-editbutton
-{
-	-fx-background-color: null;
-	-fx-padding: 2px;
-}
-
 .datepicker-invalid
 {
     -fx-border-color: red;

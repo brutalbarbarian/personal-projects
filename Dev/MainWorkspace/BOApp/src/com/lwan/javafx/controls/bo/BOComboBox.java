@@ -3,6 +3,9 @@ package com.lwan.javafx.controls.bo;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.beans.binding.Bindings;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
@@ -49,7 +52,12 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 			public void handleModified(ModifiedEvent event) {
 				populateFromSet();
 			}			
-		});	
+		});
+		setOnShowing(new EventHandler<Event>() {
+			public void handle(Event arg0) {
+				populateFromSet();
+			}			
+		});
 	}
 	
 	/**
@@ -77,18 +85,13 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 					values.put(key.getValue(), attr.asString());
 				}
 			}
-			
-			addAllItems(values);
+			beginBulkUpdate();
+			try {
+				clearItems();
+				addAllItems(values);
+			} finally {
+				endBulkUpdate();
+			}
 		}
-	}
-	
-	public void beginBulkUpdate() {
-		super.beginBulkUpdate();
-	}
-	
-	public void endBulkUpdate() {
-		super.endBulkUpdate();
-		
-		
 	}
 }
