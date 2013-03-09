@@ -1,7 +1,0 @@
-package com.lwan.musicsync.main;
-
-public class CustomRowFactory {
-	public static CallBack<TableView<AudioInfo>, TableRow<AudioInfo>>> () {
-		
-	}
-}

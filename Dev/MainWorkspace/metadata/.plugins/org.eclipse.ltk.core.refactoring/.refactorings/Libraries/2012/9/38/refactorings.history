@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename type &apos;com.lwan.bo.BusinssObject&apos; to &apos;BOObject&apos;&#x0D;&#x0A;- Original project: &apos;Libraries&apos;&#x0D;&#x0A;- Original element: &apos;com.lwan.bo.BusinssObject&apos;&#x0D;&#x0A;- Renamed element: &apos;com.lwan.bo.BOObject&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;BusinssObject&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;com.lwan.bo{BusinssObject.java[BusinssObject" matchStrategy="1" name="BOObject" qualified="false" references="true" similarDeclarations="false" stamp="1348208929270" textual="false" version="1.0"/>
-</session>

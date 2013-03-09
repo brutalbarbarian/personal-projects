@@ -1,9 +1,0 @@
-package com.lwan.jdbc;
-
-public class Parameter {
-	private Object value;
-	
-	protected Parameter(String name) {
-		
-	}
-}
