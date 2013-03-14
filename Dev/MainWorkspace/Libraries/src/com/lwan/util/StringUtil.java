@@ -144,6 +144,29 @@ public class StringUtil {
 	public static boolean isNullOrBlank(Object o) {
 		return o == null || (o instanceof String && o.toString().length() == 0);
 	}
+	
+	public static int indexOfFirstDifference(String s1, String s2, boolean ignoreCase) {
+		int length = Math.min(s1.length(), s2.length());
+		int result;
+		for (result = 0; result < length; result++) {
+			if (!characterEquals(s1.charAt(result),
+					s2.charAt(result), ignoreCase)) {
+				break;	// => found first point of difference
+			}
+			
+		}
+		return result;
+	}
+	
+	public static boolean characterEquals(char c1, char c2, boolean ignoreCase) {
+		if (ignoreCase) {
+			// need to check both upper and lower case, just like string.equalsIgnoreCase
+			return Character.toUpperCase(c1) == Character.toUpperCase(c2)
+					|| Character.toLowerCase(c1) == Character.toLowerCase(c2);
+		} else {
+			return c1 == c2;
+		}
+	}
 
 	public static boolean endsWith (String s, String suffix) {
 		int index = s.length() - suffix.length();
@@ -159,6 +182,10 @@ public class StringUtil {
 		}
 		return ignoreCase? s.substring(0, prefix.length()).equalsIgnoreCase(prefix) :
 			s.substring(0, prefix.length()).equals(prefix);
+	}
+	
+	public static boolean equals(String s, String other, boolean ignoreCase) {
+		return ignoreCase? s.equalsIgnoreCase(other) : s.equals(other);
 	}
 	
 	public static String getFileExtension(String s) {

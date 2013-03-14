@@ -53,6 +53,7 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 				populateFromSet();
 			}			
 		});
+		// Refresh on showing...not sure if this is a good idea or not but eh.
 		setOnShowing(new EventHandler<Event>() {
 			public void handle(Event arg0) {
 				populateFromSet();
@@ -92,6 +93,20 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 			} finally {
 				endBulkUpdate();
 			}
+		}
+	}
+	
+	public void beginBulkUpdate() {
+		if (!isBulkUpdating()) {
+			selectedProperty().unbindBidirectional(dataBindingProperty);
+		}
+		super.beginBulkUpdate();
+	}
+	
+	public void endBulkUpdate() {
+		super.endBulkUpdate();
+		if (!isBulkUpdating()) {
+			selectedProperty().bindBidirectional(dataBindingProperty);
 		}
 	}
 }

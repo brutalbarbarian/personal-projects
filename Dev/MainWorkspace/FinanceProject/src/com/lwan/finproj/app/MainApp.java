@@ -111,7 +111,7 @@ public class MainApp extends App{
 		pane.getChildren().addAll(tranGrid, grid, tb);
 		
 		Scene scene = new Scene(pane);
-		scene.getStylesheets().add("resource/calendarstyle.css");
+//		scene.getStylesheets().add("resource/calendarstyle.css");
 		
 		stage.setScene(scene);
 		

@@ -222,6 +222,10 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		bulkUpdateState++;		
 	}
 	
+	protected boolean isBulkUpdating() {
+		return bulkUpdateState > 0;
+	}
+	
 	/**
 	 * Call to end the bulk update process. 
 	 * 

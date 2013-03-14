@@ -17,7 +17,6 @@ import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.bo.State;
 import com.lwan.javafx.app.App;
-import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.controls.bo.binding.BoundCellValue;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
@@ -31,6 +30,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -63,7 +63,8 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	 * on the set as opposed to the individual record. The edit state of this grid depends
 	 * on the state of the set as opposed to any individual record.
 	 * 
-	 * Effectively, this is means theres nothing internal controlling the save. 
+	 * Effectively, this is means theres nothing internal controlling the save.
+	 * It is recommended to use this mode if the set is displaying reference data.
 	 */
 	public static final int MODE_SET = 1;
 	
@@ -114,7 +115,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 					refresh();
 				} else if (event.getType() == ModifiedEvent.TYPE_ATTRIBUTE) {
 					if (event.isUserModified()) {
-						// TODO check if the attribute is actually one of the fields??
 						isEditingProperty().setValue(true);
 					}
 				}
@@ -393,13 +393,16 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			textField.selectAllOnEditProperty().setValue(true);
 			textField.setMinWidth(getWidth() - getGraphicTextGap() * 2);
 			textField.focusTraversableProperty().set(false);
+			textField.externalControlledProperty().set(true);
 			
-			// TODO
 			textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
 				public void changed(ObservableValue<? extends Boolean> arg0, 
 						Boolean arg1, Boolean arg2) {
-					if (!arg2 && textField != null) {
-						commitEdit(textField.getText());
+					if (!arg2 && textField != null) { 
+						Scene sc = getScene();
+						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
+							commitEdit(textField.getText());
+						}
 					}
 				}
 			});
@@ -563,7 +566,9 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		}
 		
 		public void commitEdit(Object item) {
-			super.commitEdit(item);
+			if (linkIsActive()) {
+				super.commitEdit(bindingProperty.get());
+			}
 			
 			cancelEdit();
 		}
@@ -702,8 +707,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			
 			combobox = new BOComboBox<>(getBindingProperty());
 			combobox.setMinWidth(getWidth() - getGraphicTextGap() * 2);
-//			combobox.setFocusTraversable(false);
-//			combobox.
 			
 			GridColumn column = getColumn();
 			BOSet<R> set = column.getParam("set");
@@ -714,7 +717,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				public void changed(ObservableValue<? extends Boolean> arg0,
 						Boolean arg1, Boolean arg2) {
 					if (!arg2) {
-						commitEdit(null);
+						Scene sc = getScene();
+						
+						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
+							commitEdit(null);
+						}
 					}
 				}
 			});
@@ -738,20 +745,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 					}
 				}
 			});
-			
-//			combobox.get
-			
-			combobox.showingProperty().addListener(new ChangeListener<Boolean>() {
-				public void changed(ObservableValue<? extends Boolean> arg0,
-						Boolean arg1, Boolean arg2) {
-					if (arg2) {
-						JavaFXUtil.setNodeTreeFocusable(combobox, false);
-						combobox.setFocusTraversable(true);
-					} else {
-						cancelEdit();
-					}
-				}				
-			});
 		}
 
 		@Override
@@ -764,13 +757,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			Platform.runLater(new Runnable() {
 				public void run() {
 					combobox.requestFocus();
-//					System.out.println(combobox.isVisible());
-//					System.
-//					if (isEditing()) {
-//					combobox.show();
-//					combobox.setV
-//						combobox.show
-//					}
 				}
 			});
 		}
@@ -828,7 +814,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				public void changed(ObservableValue<? extends Boolean> arg0,
 						Boolean arg1, Boolean arg2) {
 					if (!arg2) {
-						commitEdit(null);
+						Scene sc = getScene();
+						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
+							commitEdit(null);
+						}
 					}
 				}				
 			});

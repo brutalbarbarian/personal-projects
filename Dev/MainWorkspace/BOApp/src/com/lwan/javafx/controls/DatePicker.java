@@ -23,17 +23,16 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
-import javafx.geometry.HPos;
-import javafx.geometry.VPos;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 import javafx.stage.WindowEvent;
 
-public class DatePicker extends Pane{
+public class DatePicker extends StackPane{
 	private IntegerProperty dateFormatProperty;
 	public IntegerProperty dateFormatProperty() {
 		if (dateFormatProperty == null) {
@@ -118,11 +117,16 @@ public class DatePicker extends Pane{
 		btnEdit.setFocusTraversable(false);
 		btnEdit.getStyleClass().add("datepicker-editbutton");
 		
+		StackPane.setAlignment(btnEdit, Pos.CENTER_RIGHT);
+		
 		calendarView = new CalendarView(getLocale());
 		// Don't want the calendar view to take any focus from the textfield
 		JavaFXUtil.setNodeTreeFocusable(calendarView, false);
 		
 		getChildren().addAll(textField, btnEdit);
+		
+//		getStylesheets().add("resource/calendarstyle.css");
+		setStyle("resource/calendarstyle.css");
 
 		textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
 			public void changed(ObservableValue<? extends Boolean> arg0,
@@ -231,18 +235,6 @@ public class DatePicker extends Pane{
 	protected Locale getLocale() {
 //		return Locale.forLanguageTag("en-NZ");
 		return App.getLocale();
-	}
-	
-	@Override
-	protected void layoutChildren() {
-		
-		double width = getWidth();
-		double height = getHeight();
-		
-		layoutInArea(textField, 0, 0, width, height,
-				0, HPos.LEFT, VPos.TOP);
-		layoutInArea(btnEdit, width - 24 + 1, 1, 22, 22,
-				0, HPos.RIGHT, VPos.TOP);
 	}
 	
 	public void hidePopup() {

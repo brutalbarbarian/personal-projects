@@ -40,6 +40,15 @@ public class JavaFXUtil {
 		}
 	}
 	
+	public static boolean isChildOf(Node child, Node parent) {
+		if (child == parent) {
+			return true;
+		} else {
+			Node p = child.getParent();
+			return p == null? false : isChildOf(p, parent);
+		}
+	}
+	
 	protected static void printNodeTree(StringBuilder sb, int level, Node n) {
 		if (level > 0) {
 			sb.append('\n');
