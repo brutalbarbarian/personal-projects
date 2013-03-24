@@ -1,0 +1,197 @@
+package com.lwan.finproj.app;
+
+import java.util.Date;
+
+import com.lwan.bo.AttributeType;
+import com.lwan.bo.BOLinkEx;
+import com.lwan.bo.BOSet;
+import com.lwan.bo.db.BODbAttribute;
+import com.lwan.bo.db.BODbSetRef;
+import com.lwan.finproj.bo.BOSource;
+import com.lwan.finproj.bo.BOTransaction;
+import com.lwan.javafx.app.util.BOCtrlUtil;
+import com.lwan.javafx.app.util.DbUtil;
+import com.lwan.javafx.controls.bo.BOComboBox;
+import com.lwan.javafx.controls.bo.BODatePicker;
+import com.lwan.javafx.controls.bo.BOGrid;
+import com.lwan.javafx.controls.bo.BOGridControl;
+import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.controls.bo.binding.BoundControl;
+import com.lwan.util.wrappers.ResultCallback;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.ToolBarBuilder;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.util.Callback;
+
+public class TransactionPage extends BorderPane{
+	BOGrid<BOTransaction> tranGrid;
+	BOGridControl<BOTransaction> gridCtrl;
+	BOLinkEx<BOTransaction> record; 
+	
+	BOComboBox<BOSource> param_src;
+	BODatePicker param_minDate, param_maxDate;
+	BOTextField param_minAmount, param_maxAmount;
+	ToolBar paramBar;
+	
+	GridPane grid;
+	BOTextField notes, amount;
+	BODatePicker date;
+	BOComboBox<Integer> name;
+	
+	ResultCallback<BoundControl<?>> initSource;
+	
+	ToolBar bottomBar;
+	
+	protected TransactionPage() {		
+		initControls();
+		
+		tranGrid.refresh();
+	}
+	
+	protected void initControls() {
+		// init grid
+		BOLinkEx<BOSet<BOTransaction>> link = new BOLinkEx<>();
+		tranGrid = new BOGrid<>(link, new String[]{"TransactionAmount",
+				"TransactionNotes", "TransactionDate", "SourceName"}, 
+				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate", 
+				"SourceID"}, new boolean[]{true, true, true, true});
+		tranGrid.setEditable(true);
+		
+		BOTransactionSetRef set = new BOTransactionSetRef();
+		link.setLinkedObject(set);
+		set.ensureActive();
+	
+		gridCtrl = new BOGridControl<>(tranGrid);		
+		record = gridCtrl.getSelectedLink();
+		
+		// init param fields
+		param_src = new BOComboBox<>(link, "SourceID");
+		param_src.setEditable(true);
+		param_src.setSource(BOSource.getSourceSet(), "SourceID", "SourceName", "");
+		param_src.setAppendUniqueStrings(false);
+		
+		param_minDate = new BODatePicker(link, "DateStart");
+		param_maxDate = new BODatePicker(link, "DateEnd");
+		
+		param_minAmount = new BOTextField(link, "AmountMin");
+		param_maxAmount = new BOTextField(link, "AmountMax");
+		
+		paramBar = ToolBarBuilder.create().items(
+				new Label("Source"), param_src,
+				new Separator(),
+				new Label("From"), param_minDate, new Label("To"), param_maxDate,
+				new Separator(),
+				new Label("Min"), param_minAmount, new Label("To"), param_maxAmount,
+				new Separator(),
+				gridCtrl.getClearButton()).build();
+		BOCtrlUtil.buildAttributeLinks(paramBar);
+		
+		// init record fields
+		grid = new GridPane();
+		
+		notes = new BOTextField(record, "TransactionNotes");
+		date = new BODatePicker(record, "TransactionDate");
+		amount = new BOTextField(record, "TransactionAmount");
+		name = new BOComboBox<>(record, "SourceID");
+		
+		initSource = new ResultCallback<BoundControl<?>>() {
+			@SuppressWarnings("unchecked")
+			public void call(BoundControl<?> result) {
+				final BOComboBox<Integer> cb = (BOComboBox<Integer>)result;
+				cb.setEditableEx(true);
+				cb.setAppendUniqueStrings(true);
+				
+				// Dynamically create sources on the fly
+				cb.setUniqueStringConverter(new Callback<String, Integer>() {
+					public Integer call(String name) {
+						if (name.length() > 0 && 
+								BOSource.getSourceSet().findChildByAttribute("SourceName", name) == null) {
+							BOSource src = BOSource.getSourceSet().createNewChild();
+							src.sourceName().setValue(name);
+							src.trySave();
+							return src.sourceID().getValue();
+						} else {
+							// just return whatever was already selected...
+							return cb.getSelected();
+						}
+					}					
+				});
+			}
+		};
+		
+		initSource.call(name);
+		
+		// set dynamic source		
+		name.setSource(BOSource.getSourceSet(), "SourceID", "SourceName", null);
+		
+		grid.add(new Label("Date"), 0, 0);
+		grid.add(new Label("Source"), 0, 1);
+		grid.add(new Label("Amount"), 0, 2);
+		grid.add(new Label("Notes"), 0, 3);
+		
+		grid.add(date, 1, 0);
+		grid.add(name, 1, 1);
+		grid.add(amount, 1, 2);
+		grid.add(notes, 1, 3);
+		
+		record.LinkedObjectProperty().addListener(new ChangeListener<BOTransaction>() {
+			public void changed(ObservableValue<? extends BOTransaction> arg0,
+					BOTransaction arg1, BOTransaction arg2) {
+				BOCtrlUtil.buildAttributeLinks(grid);
+			}			
+		});
+		
+		tranGrid.getColumnByField("SourceID").setAsCombobox(BOSource.getSourceSet(), "SourceID", "SourceName");
+		tranGrid.getColumnByField("SourceID").setCtrlPropertySetter(initSource);
+		tranGrid.getColumnByField("TransactionDate").setAsDatePicker();
+	
+		bottomBar = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton());
+		
+		setTop(paramBar);
+		setCenter(VBoxBuilder.create().children(tranGrid, grid).spacing(2).build());		
+		setBottom(bottomBar);
+	}
+	
+	protected class BOTransactionSetRef extends BODbSetRef<BOTransaction>{
+		private BODbAttribute<Integer> sourceID;	// do we really want to restrict by only ONE source?
+		private BODbAttribute<Date> dateStart;
+		private BODbAttribute<Date> dateEnd;
+		private BODbAttribute<Double> amountMin;
+		private BODbAttribute<Double> amountMax;
+		
+		public BODbAttribute<Integer> sourceID() {
+			return sourceID;
+		}
+		public BODbAttribute<Date> dateStart() {
+			return dateStart;
+		}
+		public BODbAttribute<Date> dateEnd() {
+			return dateEnd;
+		}
+		public BODbAttribute<Double> amountMin() {
+			return amountMin;
+		}
+		public BODbAttribute<Double> amountMax() {
+			return amountMax;
+		}
+		
+		protected BOTransactionSetRef() {
+			super(BOTransaction.getTransactionSet(), DbUtil.getStoredProc("PS_TRN_for_set"));
+		}
+		
+		protected void createAttributes() {
+			sourceID = addAsChild(new BODbAttribute<Integer>(this, "SourceID", "src_id", AttributeType.Integer));
+			dateStart = addAsChild(new BODbAttribute<Date>(this, "DateStart", "date_start", AttributeType.Date));
+			dateEnd = addAsChild(new BODbAttribute<Date>(this, "DateEnd", "date_end", AttributeType.Date));
+			amountMin = addAsChild(new BODbAttribute<Double>(this, "AmountMin", "trn_amount_min", AttributeType.Currency));
+			amountMax = addAsChild(new BODbAttribute<Double>(this, "AmountMax", "trn_amount_max", AttributeType.Currency));
+		}
+	}
+}

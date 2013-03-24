@@ -160,7 +160,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 	
 	protected String getDisplayValue() {
 		BOAttribute<?> attr = getLinkedAttribute();
-		if (attr == null) {
+		if (attr == null || attr.isNull()) {
 			return "";
 		}
 		AttributeType type = attr.getAttributeType();
@@ -215,7 +215,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 			throw new IllegalAccessError("getEditValue() is called on a non-editable link");
 		}
 		BOAttribute<?> attr = getLinkedAttribute();
-		if (attr == null) {
+		if (attr == null || attr.isNull()) {
 			return "";
 		}
 		AttributeType type = attr.getAttributeType();
@@ -272,13 +272,11 @@ public class StringBoundProperty extends BoundProperty<String>{
 			break;
 		}
 		case Double : case Currency: {
-			double effectiveValue;
 			if (editValue.length() == 0 || editValue.equals("-") || editValue.equals(".")) {
-				effectiveValue = 0;
+				attr.clear();
 			} else {
-				effectiveValue = Double.parseDouble(editValue);
+				attr.userSetValueAsObject(Double.parseDouble(editValue), getBean());
 			}
-			attr.userSetValueAsObject(effectiveValue, getBean());
 			break;
 		}
 		case Boolean: {

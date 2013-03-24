@@ -15,9 +15,12 @@ import javafx.collections.ObservableList;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
+import com.lwan.javafx.app.util.AutocompleteController;
 import com.lwan.util.CollectionUtil;
+import com.lwan.util.CollectionUtil.MapRunner;
 import com.lwan.util.GenericsUtil;
 import com.lwan.util.StringUtil;
+import com.lwan.util.containers.TrieMap;
 import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
@@ -29,9 +32,11 @@ import com.sun.javafx.collections.ObservableListWrapper;
  */
 public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>> {
 	protected List<ComboBoxItem<T>> items;
+	protected TrieMap<ComboBoxItem<T>> autocompleteList;	// String as this is for editing only
 	private Property<T> selectedProperty;
 	private Property<Boolean> appendUniqueStringsProperty;
 	private Property<Callback<String, T>> uniqueStringConverterProperty;
+	private AutocompleteController autoCompleteController;
 	 
 	private int bulkUpdateState; 	// To avoid unnecessary syncing while bulk adding
 	private boolean invalidating;	// To avoid infinite loops
@@ -170,6 +175,11 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 			}
 		
 		});
+		
+		autoCompleteController = new AutocompleteController(getEditor(), true);
+		autoCompleteController.allowUniqueProperty().bind(appendUniqueStringsProperty());
+		
+		autoCompleteController.editingProperty().bind(getEditor().focusedProperty());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -266,7 +276,7 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 	protected void ensureSyncSelection() {
 		if (bulkUpdateState == 0) {
 			refreshItems();
-			
+			// update the selection
 			ComboBoxItem<T> item = getValue();
 			T sel = getSelected();
 			if (item == null || !GenericsUtil.Equals(sel, item.getValue())) {
@@ -284,6 +294,16 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 					getSelectionModel().select(null);
 				}
 			}
+			// update the autocomplete controller			
+			autoCompleteController.setSource(CollectionUtil.Map(items,
+					new MapRunner<ComboBoxItem<T>, List<String>>(){
+						public void run(ComboBoxItem<T> item, List<String> result) {
+							result.add(item.toString());
+						}
+						public List<String> getBaseInstance() {
+							return new Vector<>();
+						}
+					}));
 		}
 	}
 	

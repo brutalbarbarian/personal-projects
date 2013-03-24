@@ -126,7 +126,7 @@ public class DatePicker extends StackPane{
 		getChildren().addAll(textField, btnEdit);
 		
 //		getStylesheets().add("resource/calendarstyle.css");
-		setStyle("resource/calendarstyle.css");
+//		setStyle("resource/calendarstyle.css");
 
 		textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
 			public void changed(ObservableValue<? extends Boolean> arg0,
@@ -281,6 +281,10 @@ public class DatePicker extends StackPane{
 	        popup.show(this, posX, posY);
 	        
 	        _showingProperty().set(true);
+	        
+	        if (!isEditing()) {
+	        	_editingProperty().set(true);
+	        }
 	        
 	        if (!textField.isFocused()) {
 	        	textField.requestFocus();	// this will trigger edit if not already in edit

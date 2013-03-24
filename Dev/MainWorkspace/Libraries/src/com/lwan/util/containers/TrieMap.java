@@ -13,14 +13,15 @@ import com.lwan.util.StringUtil;
 
 /**
  * Data structure for fast lookup of string keys with minimal storage space.
- * Its effectively an implementation of a trie.
+ * Its slightly slower and takes up bi more memory then the default hashmap,
+ * but has the capibility of doing nearest prefix search.
  * 
  * @author Lu
  *
  * @param <T>
  */
 public class TrieMap<T> implements Map<String, T>{
-	private static final int BUFFER_BULK = 5;
+	private static final int BUFFER_BULK = 10;
 	
 	private Node root;
 	private boolean ignoreCase;
@@ -144,6 +145,11 @@ public class TrieMap<T> implements Map<String, T>{
 				String nextRemainder = remainder.substring(n.remainder.length());
 				return get(nextChild, nextRemainder, isExact, acceptBreaks);
 			}
+		} else if (!StringUtil.beginsWith(n.remainder, remainder, ignoreCase)) {
+			// => dead end half way through when we're trying to find nearest...
+			if (!isExact && !acceptBreaks) {
+				return null;
+			}
 		} else {
 			// => dead end... continued at bottom
 		}
@@ -154,6 +160,10 @@ public class TrieMap<T> implements Map<String, T>{
 		} else if (isExact) {
 			return null;
 		} else if (n != root){
+			if (remainder.length() > n.remainder.length()) {
+				return null;	// the node's remainder is a prefix... defintly not a match
+			}
+			
 			int shortest = Integer.MAX_VALUE;
 			Node result = null;
 			
@@ -233,7 +243,9 @@ public class TrieMap<T> implements Map<String, T>{
 		
 		Node getChild(char nxtChar) {
 			if (hasChildren()) {
-				int index = Arrays.binarySearch(chars, 0, count, nxtChar);
+				int index = Arrays.binarySearch(chars, 0, count, 					
+						ignoreCase? Character.toLowerCase(nxtChar) : nxtChar);
+					
 				return index < 0? null : children[index];
 			} else {
 				return null;
@@ -261,7 +273,7 @@ public class TrieMap<T> implements Map<String, T>{
 			}
 			
 			// add the child in the correct position
-			chars[index] = c;
+			chars[index] = ignoreCase? Character.toLowerCase(c) : c;
 			children[index] = child;
 			
 			// finally increment the count

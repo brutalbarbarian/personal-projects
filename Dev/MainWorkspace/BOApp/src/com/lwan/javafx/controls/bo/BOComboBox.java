@@ -40,12 +40,13 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 	}
 	
 	private BOSet<?> set;
-	private String attrPath, keyPath;
+	private String attrPath, keyPath, nullDisplayValue;
 	
-	public <B extends BusinessObject> void setSource(BOSet<B> set, String keyPath, String attributePath) {
+	public <B extends BusinessObject> void setSource(BOSet<B> set, String keyPath, String attributePath, String nullDisplayValue) {
 		this.set = set;
 		this.attrPath = attributePath;
 		this.keyPath = keyPath;
+		this.nullDisplayValue = nullDisplayValue;
 		
 		populateFromSet();
 		set.addListener(new ModifiedEventListener() {
@@ -78,7 +79,8 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 	
 	@SuppressWarnings("unchecked")
 	protected void populateFromSet() {
-		if (set != null && !StringUtil.isNullOrBlank(attrPath) && !StringUtil.isNullOrBlank(keyPath)) {Map<T, String> values = new HashMap<>();
+		if (set != null && !StringUtil.isNullOrBlank(attrPath) && !StringUtil.isNullOrBlank(keyPath)) {
+			Map<T, String> values = new HashMap<>();
 			for (BusinessObject bo : set) {
 				BOAttribute<?> attr = bo.findAttributeByPath(attrPath);
 				BOAttribute<T> key = (BOAttribute<T>) bo.findAttributeByPath(keyPath);
@@ -89,6 +91,9 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 			beginBulkUpdate();
 			try {
 				clearItems();
+				if (nullDisplayValue != null) {
+					addItem(null, nullDisplayValue);
+				}
 				addAllItems(values);
 			} finally {
 				endBulkUpdate();

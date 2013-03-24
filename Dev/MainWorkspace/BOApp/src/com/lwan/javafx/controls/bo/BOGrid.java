@@ -114,7 +114,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				if (event.getType() == ModifiedEvent.TYPE_ACTIVE) {
 					refresh();
 				} else if (event.getType() == ModifiedEvent.TYPE_ATTRIBUTE) {
-					if (event.isUserModified()) {
+					if (event.isUserModified() && 
+							// If this is the case, likely the sourceset has params,
+							// as sets should never have any fields. Thus ignore.
+							event.getAttributeOwner() != getSourceSet()) {
 						isEditingProperty().setValue(true);
 					}
 				}
@@ -129,6 +132,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		});
 		refresh();
 		
+		columnResizePolicyProperty().set(CONSTRAINED_RESIZE_POLICY);		
 		selected = null;
 		revertingSelection = false;
 		getSelectionModel().selectedItemProperty().addListener(new ChangeListener<R>() {
@@ -168,6 +172,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	boolean revertingSelection;
 	private R selected;
 	
+//	protected void layoutChildren() {
+//		// set the width of each child
+//		for (Colum)
+//	}
+	
 	public void save() throws BOException {
 		// No point continuing if not in edit mode...
 		if (isEditingProperty().getValue()) {
@@ -190,6 +199,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		}
 	}
 	
+	protected BOLinkEx<BOSet<R>> getLink() {
+		return link;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public GridColumn getColumnByCaption(String title) {
 		for (TableColumn<?, ?> col : getColumns()) {
@@ -210,7 +223,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		}
 		return null;	// Can't find
 	}
-	
 
 	public void refresh() {
 		revertingSelection = true;
@@ -225,6 +237,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			R item = getSelectionModel().getSelectedItem();
 			
 			// Need to force reload the grid or no?
+			// don't...
 			
 			List<R> aItems = new Vector<R>(source.getActiveCount());
 			for (R record : source) {
@@ -278,7 +291,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			setCellValueFactory(new BoundCellValue<Object, R>(fieldPath));
 			setAsTextField();	// Default
 			
-			setPrefWidth(100);	// Minimum?
+			setPrefWidth(100);	// Minimum? 
 		}
 		
 		public ResultCallback<BoundControl<?>> getCtrlPropertySetter() {
@@ -374,14 +387,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			}
 			BOAttribute<?> attr = getBindingProperty().linkedAttributeProperty().getValue();
 			attr.setNotifications(false);
-			try {
+//			try {
 				// This will safely trigger all necessary events without modifying
 				// the attribute or throwing unnecessary notifications, as they would have
 				// already been thrown from the above endEdit()
-				super.commitEdit(attr.getValue());
-			} finally {
-				attr.setNotifications(true);	
-			}
+//				super.commitEdit(attr.getValue());
+//			} finally {
+//				attr.setNotifications(true);	
+//			}
 		}
 		
 		private void createTextField() {
@@ -711,7 +724,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			GridColumn column = getColumn();
 			BOSet<R> set = column.getParam("set");
 			combobox.setSource(set, (String)column.getParam("keyPath"), 
-					(String)column.getParam("attributePath"));
+					(String)column.getParam("attributePath"), null);
 			
 			combobox.focusedProperty().addListener(new ChangeListener<Boolean>() {
 				public void changed(ObservableValue<? extends Boolean> arg0,

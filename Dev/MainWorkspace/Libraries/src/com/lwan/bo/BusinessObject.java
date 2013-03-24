@@ -7,12 +7,14 @@ import java.util.Vector;
 
 import com.lwan.util.ClassUtil;
 import com.lwan.util.StringUtil;
+import com.sun.javafx.collections.ObservableListWrapper;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.util.Callback;
 
 /**
@@ -90,6 +92,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 			nameProperty = new SimpleObjectProperty<>(this, "Name", "");
 		}
 		return nameProperty;
+	}
+	
+	protected void finalize() throws Throwable {
+		System.out.println(getClass().getName() + ":" + getName());
+		super.finalize();
 	}
 	
 	public ReadOnlyProperty<Set<State>> stateProperty(){
@@ -294,6 +301,11 @@ public abstract class BusinessObject implements ModifiedEventListener{
 
 	public String getName() {
 		return nameProperty().getValue();
+	}
+	
+	public ObservableList<BusinessObject> getChildren() {
+		return new ObservableListWrapper<BusinessObject>(
+				new Vector<BusinessObject>(children.values()));
 	}
 	
 	/**

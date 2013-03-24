@@ -3,119 +3,75 @@ package com.lwan.finproj.app;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.ToolBarBuilder;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import com.lwan.bo.BOLinkEx;
-import com.lwan.bo.BOSet;
-import com.lwan.finproj.bo.BOSource;
-import com.lwan.finproj.bo.BOTransaction;
 import com.lwan.javafx.app.App;
-import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.app.util.DbUtil;
-import com.lwan.javafx.controls.bo.BOComboBox;
-import com.lwan.javafx.controls.bo.BODatePicker;
-import com.lwan.javafx.controls.bo.BOGrid;
-import com.lwan.javafx.controls.bo.BOGridControl;
-import com.lwan.javafx.controls.bo.BOTextField;
-import com.lwan.javafx.controls.bo.binding.BoundControl;
-import com.lwan.util.wrappers.ResultCallback;
 
 public class MainApp extends App{
-	protected void initialiseStage(Stage stage) {	
+	ToggleButton btnTrans, btnSource;
+	ToggleGroup toggleGroup;
+	boolean toggling;
+	BorderPane mainPane;
+	
+	protected void initialiseStage(Stage stage) {
+		btnTrans = new ToggleButton("Transactions");
+		btnSource = new ToggleButton("Source");
 		
+		toggleGroup = new ToggleGroup();
 		
-		VBox pane = new VBox(2);
+		ToolBar bar = ToolBarBuilder.create().items(btnTrans, btnSource).build();
 		
-		BOLinkEx<BOSet<BOTransaction>> link = new BOLinkEx<>();
-		final BOGrid<BOTransaction> tranGrid = new BOGrid<>(link, new String[]{"TransactionAmount",
-				"TransactionNotes", "TransactionDate", "SourceName"}, 
-				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate", 
-				"SourceID"}, new boolean[]{true, true, true, true});
-		tranGrid.setEditable(true);
+		mainPane = new BorderPane();
 		
-		link.setLinkedObject(BOTransaction.getTransactionSet());
-		
-		BOGridControl<BOTransaction> gridCtrl = new BOGridControl<>(tranGrid);
-		
-		final BOLinkEx<BOTransaction> record = gridCtrl.getSelectedLink();
+		BorderPane bp = new BorderPane();
+		bp.setTop(bar);
+		bp.setCenter(mainPane);
 
+		btnTrans.setToggleGroup(toggleGroup);
+		btnSource.setToggleGroup(toggleGroup);
 		
-		final  GridPane grid = new GridPane();
-		
-		final BOTextField notes = new BOTextField(record, "TransactionNotes");
-		final BODatePicker date = new BODatePicker(record, "TransactionDate");
-		final BOTextField amount = new BOTextField(record, "TransactionAmount");
-		final BOComboBox<Integer> name = new BOComboBox<>(record, "SourceID");
-		final BOTextField txtSource = new BOTextField(record, "SourceID");
-		
-		ResultCallback<BoundControl<?>> initSource = new ResultCallback<BoundControl<?>>() {
-			@SuppressWarnings("unchecked")
-			public void call(BoundControl<?> result) {
-				final BOComboBox<Integer> cb = (BOComboBox<Integer>)result;
-				cb.setEditableEx(true);
-				cb.setAppendUniqueStrings(true);
-				
-				// Dynamically create sources on the fly
-				cb.setUniqueStringConverter(new Callback<String, Integer>() {
-					public Integer call(String name) {
-						if (name.length() > 0 && 
-								BOSource.getSourceSet().findChildByAttribute("SourceName", name) == null) {
-							BOSource src = BOSource.getSourceSet().createNewChild();
-							src.sourceName().setValue(name);
-							src.trySave();
-							return src.sourceID().getValue();
+		toggling = false;
+		toggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
+
+			@Override
+			public void changed(ObservableValue<? extends Toggle> arg0,
+					Toggle arg1, Toggle arg2) {
+				if (!toggling) {
+					toggling = true;
+					try {
+						if (arg2 == null) {
+							toggleGroup.selectToggle(arg1);
+						} else if (arg2 != arg1) {
+							// change page
+							if (arg2 == btnSource) {
+								mainPane.setCenter(new SourcePage());
+							} else if (arg2 == btnTrans) {
+								mainPane.setCenter(new TransactionPage());
+							}							
 						} else {
-							// just return whatever was already selected...
-							return cb.getSelected();
+							// ignore...
 						}
-					}					
-				});
+					} finally {
+						toggling = false;
+					}
+				}
 			}
-		};
-		
-		initSource.call(name);
-		
-		// set dynamic source
-		name.setSource(BOSource.getSourceSet(), "SourceID", "SourceName");
-		
-		grid.add(new Label("Date"), 0, 0);
-		grid.add(new Label("Source"), 0, 1);
-		grid.add(new Label("Amount"), 0, 2);
-		grid.add(new Label("Notes"), 0, 3);
-		grid.add(new Label("SourceID"), 0, 4);
-		
-		grid.add(date, 1, 0);
-		grid.add(name, 1, 1);
-		grid.add(amount, 1, 2);
-		grid.add(notes, 1, 3);
-		grid.add(txtSource, 1, 4);
-
-		
-		record.LinkedObjectProperty().addListener(new ChangeListener<BOTransaction>() {
-			public void changed(ObservableValue<? extends BOTransaction> arg0,
-					BOTransaction arg1, BOTransaction arg2) {
-				BOCtrlUtil.buildAttributeLinks(grid);
-			}			
+			
 		});
 		
-		tranGrid.getColumnByField("SourceID").setAsCombobox(BOSource.getSourceSet(), "SourceID", "SourceName");
-		tranGrid.getColumnByField("SourceID").setCtrlPropertySetter(initSource);
-		tranGrid.getColumnByField("TransactionDate").setAsDatePicker();
-	
-		ToolBar tb = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton());
+		toggleGroup.selectToggle(btnTrans);
 		
-		pane.getChildren().addAll(tranGrid, grid, tb);
 		
-		Scene scene = new Scene(pane);
-//		scene.getStylesheets().add("resource/calendarstyle.css");
+		Scene scene = new Scene(bp);
+		scene.getStylesheets().add("resource/calendarstyle.css");
 		
 		stage.setScene(scene);
-		
-		tranGrid.refresh();
 		
 		stage.show();
 	}

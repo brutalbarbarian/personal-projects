@@ -2,10 +2,13 @@ package com.lwan.bo.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
+import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
 import com.lwan.jdbc.GConnection;
@@ -13,9 +16,11 @@ import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
 
 public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
-	Property<StoredProc> selectStoredProcProperty;
-	Property<StoredProc> existsStoredProcProperty;
-	Property<String> childIdFieldNameProperty;
+	private Property<StoredProc> selectStoredProcProperty;
+	private Property<StoredProc> existsStoredProcProperty;
+	private Property<String> childIdFieldNameProperty;
+	
+	private HashMap<String, BODbAttribute<?>> fields;
 	
 	// Exists and select stored procs are mutually exclusive.
 	// Select is used upon populateAttributes with LoadMode = Active or Passive
@@ -45,6 +50,10 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 		return childIdFieldNameProperty;
 	}
 	
+	protected void initialise() {
+		fields = new HashMap<>();
+		super.initialise();
+	}
 
 	public BODbSet(BusinessObject owner, String name, String childIdName, String childIdFieldName) {
 		super(owner, name, childIdName);
@@ -59,6 +68,15 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 	 * 
 	 */
 	protected abstract void createStoredProcs();
+	
+	protected <R extends BusinessObject> R addAsChild(R object) {
+		super.addAsChild(object);
+		if (object instanceof BODbAttribute) {
+			BODbAttribute<?> attr = (BODbAttribute<?>)object;
+			fields.put(attr.fieldNameProperty().getValue(), attr);
+		}
+		return object;
+	}
 
 	@Override
 	protected boolean populateAttributes() {
@@ -92,6 +110,16 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 			// Never load anything if loadmode is cache
 			return true;
 		}
+	}
+	
+	/**
+	 * Get the BODbAttribute with the same field name as the value passed in
+	 * 
+	 * @param fieldName
+	 * @return
+	 */
+	public BODbAttribute<?> findAttributeByFieldName(String fieldName)   {
+		return fields.get(fieldName);
 	}
 	
 	/**
@@ -151,17 +179,20 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 		BODbObject owner = (BODbObject)ownerProperty().getValue(); 
 		for (Parameter param : storedProc.getAllParameters()) {
 			String name = param.name().substring(1);
-			BODbAttribute<?> attr = null;
+			BOAttribute<?> attr = null;
 			if (owner == null) {
 				// this only an issue if parameters are required...
-				throw new SQLException("No owner found for class " + getClass().getName());
+//				throw new SQLException("No owner found for class " + getClass().getName());
+				attr = findAttributeByFieldName(name);	
 			} else {
 				attr = owner.findAttributeByFieldName(name);
 			}
 			if (attr == null) {
-				throw new SQLException("Attribute for param '" + param.name() + "' not found.");
+//				throw new SQLException("Attribute for param '" + param.name() + "' not found.");
+				param.set(null);
+			} else { 			
+				param.set(attr.getValue());
 			}
-			param.set(attr.getValue());
 		}
 	}
 	

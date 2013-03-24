@@ -1,26 +1,12 @@
-import java.util.Locale;
-
 import com.lwan.bo.BOLinkEx;
 import com.lwan.eaproj.bo.BOEmployee;
 import com.lwan.eaproj.bo.cache.BOUserSet;
 import com.lwan.javafx.app.App;
-import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.LngUtil;
-import com.lwan.javafx.controls.CheckBox;
-import com.lwan.javafx.controls.ComboBox;
-import com.lwan.javafx.controls.MaskedTextField;
 import com.lwan.javafx.controls.bo.BOCheckBox;
 import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BOTextField;
-import com.lwan.jdbc.GConnection;
-import com.lwan.util.CollectionUtil;
-import com.sun.org.apache.bcel.internal.generic.ALOAD;
-
 import javafx.application.Application;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -28,7 +14,6 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 
 public class TestJFX extends App{

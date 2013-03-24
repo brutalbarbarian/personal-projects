@@ -120,8 +120,8 @@ public class BOTransaction extends BODbObject{
 	}
 	
 	public static class BOTransactionSet extends BODbSet<BOTransaction> {
-
-		public BOTransactionSet() {
+		
+		private BOTransactionSet() {
 			super(null, "TransactionCache", "TransactionID", "trn_id");
 		}
 

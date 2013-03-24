@@ -81,6 +81,11 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 
 		modeType = mode;
 		_source_set().setValue(source);
+		source.addListener(new ModifiedEventListener() {
+			public void handleModified(ModifiedEvent event) {
+				fireModified(event);
+			}			
+		});
 		this.filter = filter;
 	}
 
@@ -90,6 +95,15 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 
 	protected T createChildInstance(Object id) {
 		return getSource().createChildInstance(id);
+	}
+	
+	protected void setActiveChildren(boolean isActive) {
+		// do nothing
+	}
+	
+	protected void handleActive(boolean isActive){
+		getSource().setActive(isActive);
+		super.handleActive(isActive);
 	}
 	
 	protected void addChild(T child) {

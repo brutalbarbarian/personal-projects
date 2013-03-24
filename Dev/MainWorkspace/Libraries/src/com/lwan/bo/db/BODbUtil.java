@@ -8,7 +8,7 @@ import com.lwan.jdbc.StoredProc;
 public class BODbUtil {
 	public static void assignParamsFromBO (StoredProc sp, BODbCustomObject obj, boolean allowMissingParam) {
 		for (Parameter param : sp.getAllParameters()) {
-			BODbAttribute<?> attr = obj.findAttributeByFieldName(param.name());
+			BODbAttribute<?> attr = obj.findAttributeByFieldName(param.name().substring(1));
 			if (attr == null && !allowMissingParam) {
 				throw new BOException("Attribute missing in assignParamsFromBO where " +
 						"allowMissingParam = false", (BusinessObject)obj);
