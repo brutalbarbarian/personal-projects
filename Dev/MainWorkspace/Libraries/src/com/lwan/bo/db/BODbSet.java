@@ -54,6 +54,20 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 		fields = new HashMap<>();
 		super.initialise();
 	}
+	
+	protected void removeChild(BusinessObject child) {
+		if (fields != null && child instanceof BODbAttribute) {
+			fields.entrySet().remove(child);
+		}
+		
+		super.removeChild(child);
+	}
+	
+	public void free() {
+		fields.clear();
+		
+		super.free();
+	}
 
 	public BODbSet(BusinessObject owner, String name, String childIdName, String childIdFieldName) {
 		super(owner, name, childIdName);

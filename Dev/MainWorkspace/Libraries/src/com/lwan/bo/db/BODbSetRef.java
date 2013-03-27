@@ -76,7 +76,6 @@ public class BODbSetRef<T extends BODbObject> extends BOSetRef<T> implements BOD
 		}		
 	}
 
-
 	@Override
 	public BODbAttribute<?> findAttributeByFieldName(String fieldName) {
 		return fields.get(fieldName);

@@ -97,7 +97,17 @@ public class BOTransaction extends BODbObject{
 		
 		sourceLink = addAsChild(new BOLink<BOSource>(this, "Source"));
 	}
-
+	
+	protected void handleActive(boolean active) {		
+		super.handleActive(active);
+		
+		BOSource src = source();
+		if (src != null) {			
+			src.transactionCount().setValue(
+					src.transactionCount().asInteger() + (active? 1 : -1));
+		}
+	}
+	
 	@Override
 	public void clearAttributes() {
 		transactionAmount.clear();
@@ -107,7 +117,24 @@ public class BOTransaction extends BODbObject{
 
 	@Override
 	public void handleModified(ModifiedEvent source) {
-
+		if (isActive()) {
+			if (source.getType() == ModifiedEvent.TYPE_ATTRIBUTE && 
+					source.getSource() == sourceID) {
+				// how do i find out the previous value?...
+				BOSource prevSrc = BOSource.getSourceSet().findChildByID(
+						sourceID.previousValueProperty().getValue());
+				if (prevSrc != null) {
+					prevSrc.transactionCount().setValue(
+							prevSrc.transactionCount().asInteger() - 1);
+				}
+				
+				BOSource src = source();
+				if (src != null) {
+					src.transactionCount().setValue(
+							prevSrc.transactionCount().asInteger() + 1);
+				}
+			}
+		}
 	}
 	
 	private static BOTransactionSet transactionSet;

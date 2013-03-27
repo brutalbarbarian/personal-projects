@@ -67,6 +67,18 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 		fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_LINK));
 	}
 	
+	public void free() {
+		T link = getLinkedObject();
+		if (link != null) {
+			// remove reference to this link
+			link.removeListener(this);
+		}
+		// clear link
+		LinkedObjectProperty().setValue(null);
+		
+		super.free();
+	}
+	
 	@Override
 	public void handleModified(ModifiedEvent source) {
 		fireModified(new ModifiedEvent(source, this));

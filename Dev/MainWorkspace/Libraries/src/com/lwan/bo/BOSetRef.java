@@ -34,7 +34,6 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 		} else {
 			throw new RuntimeException("allows() called when mode is not MODE_FILTER");
 		}
-		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -48,6 +47,16 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 		} else {
 			throw new RuntimeException("getSubset() called when mode is not MODE_SUBSET");
 		}
+	}
+	
+	public void free() {
+		BOSet<T> set = getSource();
+		if (set != null) {
+			set.removeListener(this);
+			_source_set().setValue(null);
+		}
+		
+		super.free();
 	}
 	
 	public ReadOnlyProperty<BOSet<T>> SourceSet() {
@@ -81,12 +90,12 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 
 		modeType = mode;
 		_source_set().setValue(source);
-		source.addListener(new ModifiedEventListener() {
-			public void handleModified(ModifiedEvent event) {
-				fireModified(event);
-			}			
-		});
+		source.addListener(this);
 		this.filter = filter;
+	}
+	
+	public void handleModified(ModifiedEvent event) {
+		fireModified(new ModifiedEvent(event, this));			
 	}
 
 	protected boolean childExists(Object id) {
@@ -101,8 +110,12 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 		// do nothing
 	}
 	
+	@Override
 	protected void handleActive(boolean isActive){
-		getSource().setActive(isActive);
+//		getSource().setActive(isActive);	// none of the ref's business?
+		if (isActive) {
+			clearChildren();
+		}
 		super.handleActive(isActive);
 	}
 	
@@ -128,7 +141,7 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 		}
 		return result;		
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected boolean populateAttributes() {

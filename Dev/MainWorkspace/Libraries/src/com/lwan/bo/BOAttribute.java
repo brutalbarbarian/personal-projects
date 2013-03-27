@@ -20,6 +20,7 @@ public class BOAttribute <T> extends BusinessObject {
 	private Property<AttributeType> attributeTypeProperty;
 	
 	private ValidatedProperty<T> valueProperty;
+	private Property<T> previousValueProperty;
 	
 	// Specific for numerics... note these only impact UI input validation
 	private Property<Boolean> allowNegativeProperty;
@@ -37,6 +38,17 @@ public class BOAttribute <T> extends BusinessObject {
 			valueProperty = new ValidatedProperty<>(this, "Value");
 		}
 		return valueProperty;
+	}
+	
+	public ReadOnlyProperty<T> previousValueProperty() {
+		return _previousValueProperty();
+	}
+	
+	private Property<T> _previousValueProperty() {
+		if (previousValueProperty == null) {
+			previousValueProperty = new SimpleObjectProperty<>(this, "PreviousValue", null);
+		}
+		return previousValueProperty;
 	}
 	
 	/**
@@ -119,6 +131,13 @@ public class BOAttribute <T> extends BusinessObject {
 		} else {
 			return "Attribute '" + nameProperty().getValue() + "' is invalid";
 		}
+	}
+	
+	public void free() {
+		// unbind all listeners
+		valueProperty().unbind();
+		
+		super.free();
 	}
 	
 	/**
@@ -257,6 +276,7 @@ public class BOAttribute <T> extends BusinessObject {
 	 * @param newValue
 	 */
 	public void doChanged(T oldValue, T newValue) {
+		_previousValueProperty().setValue(oldValue);	// reference...
 		fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_ATTRIBUTE));
 	}	
 	
@@ -383,7 +403,7 @@ public class BOAttribute <T> extends BusinessObject {
 	}
 	
 	
-	protected void handleActive(Boolean isActive) {
+	protected void handleActive(boolean isActive) {
 		// Do nothing... active state is meaningless to attributes
 	}
 	

@@ -17,6 +17,7 @@ import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
+import com.lwan.util.wrappers.Freeable;
 import com.lwan.util.wrappers.ResultCallback;
 
 import javafx.beans.value.ChangeListener;
@@ -30,8 +31,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.util.Callback;
 
-public class TransactionPage extends BorderPane{
+public class TransactionPage extends BorderPane implements Freeable{
 	BOGrid<BOTransaction> tranGrid;
+	BOLinkEx<BOSet<BOTransaction>> gridLink;
+	BOTransactionSetRef gridSetRef;
 	BOGridControl<BOTransaction> gridCtrl;
 	BOLinkEx<BOTransaction> record; 
 	
@@ -55,33 +58,48 @@ public class TransactionPage extends BorderPane{
 		tranGrid.refresh();
 	}
 	
+	protected void finalize() throws Throwable {
+		free();
+		super.finalize();
+	}
+
+	@Override
+	public void free() {
+		gridLink.free();
+		gridSetRef.free();
+		record.free();
+		BOCtrlUtil.buildAttributeLinks(paramBar);
+		BOCtrlUtil.buildAttributeLinks(grid);
+		tranGrid.refresh();
+	}
+	
 	protected void initControls() {
 		// init grid
-		BOLinkEx<BOSet<BOTransaction>> link = new BOLinkEx<>();
-		tranGrid = new BOGrid<>(link, new String[]{"TransactionAmount",
+		gridLink = new BOLinkEx<>();
+		tranGrid = new BOGrid<>(gridLink, new String[]{"TransactionAmount",
 				"TransactionNotes", "TransactionDate", "SourceName"}, 
 				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate", 
 				"SourceID"}, new boolean[]{true, true, true, true});
 		tranGrid.setEditable(true);
 		
-		BOTransactionSetRef set = new BOTransactionSetRef();
-		link.setLinkedObject(set);
-		set.ensureActive();
+		gridSetRef = new BOTransactionSetRef();
+		gridLink.setLinkedObject(gridSetRef);
+		gridSetRef.ensureActive();
 	
 		gridCtrl = new BOGridControl<>(tranGrid);		
 		record = gridCtrl.getSelectedLink();
 		
 		// init param fields
-		param_src = new BOComboBox<>(link, "SourceID");
+		param_src = new BOComboBox<>(gridLink, "SourceID");
 		param_src.setEditable(true);
 		param_src.setSource(BOSource.getSourceSet(), "SourceID", "SourceName", "");
 		param_src.setAppendUniqueStrings(false);
 		
-		param_minDate = new BODatePicker(link, "DateStart");
-		param_maxDate = new BODatePicker(link, "DateEnd");
+		param_minDate = new BODatePicker(gridLink, "DateStart");
+		param_maxDate = new BODatePicker(gridLink, "DateEnd");
 		
-		param_minAmount = new BOTextField(link, "AmountMin");
-		param_maxAmount = new BOTextField(link, "AmountMax");
+		param_minAmount = new BOTextField(gridLink, "AmountMin");
+		param_maxAmount = new BOTextField(gridLink, "AmountMax");
 		
 		paramBar = ToolBarBuilder.create().items(
 				new Label("Source"), param_src,

@@ -172,11 +172,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	boolean revertingSelection;
 	private R selected;
 	
-//	protected void layoutChildren() {
-//		// set the width of each child
-//		for (Colum)
-//	}
-	
 	public void save() throws BOException {
 		// No point continuing if not in edit mode...
 		if (isEditingProperty().getValue()) {
@@ -674,7 +669,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	}
 
 	
-	private class ComboboxGridCell extends CustomGridCell {
+	public class ComboboxGridCell extends CustomGridCell {
 		private BOComboBox<?> combobox;
 		
 		@Override
@@ -743,9 +738,13 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			combobox.setOnKeyPressed(new EventHandler<KeyEvent>() {
 				public void handle(KeyEvent t) {
 					if (t.getCode() == KeyCode.TAB) {
-						cancelEdit();
+						commitEdit(null);
 						
 						gotoNextColumn(!t.isShiftDown());
+					} else if (t.getCode() == KeyCode.HOME || 
+							t.getCode() == KeyCode.END) {
+						// don't want the home and end events reaching the grid
+						t.consume();
 					}
 				}				
 			});

@@ -97,9 +97,12 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 		}
 		
 		// disable all params if in edit state
-		for (BusinessObject attr : grid.getSourceSet().getChildren()) {
-			if (attr.isAttribute()) {
-				((BOAttribute<?>)attr).allowUserModifyProperty().setValue(!inEditState);
+		BOSet<T> set = grid.getSourceSet();
+		if (set != null) {
+			for (BusinessObject attr : set.getChildren()) {
+				if (attr.isAttribute()) {
+					((BOAttribute<?>)attr).allowUserModifyProperty().setValue(!inEditState);
+				}
 			}
 		}
 	}

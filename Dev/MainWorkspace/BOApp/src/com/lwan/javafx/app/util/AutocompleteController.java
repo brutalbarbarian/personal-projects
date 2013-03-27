@@ -177,4 +177,5 @@ public class AutocompleteController {
 			trie.endBulkUpdate();
 		}
 	}
+
 }

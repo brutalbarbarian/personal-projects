@@ -105,6 +105,23 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 		createStoredProcs();
 	}
 	
+	public void free() {
+		// clear the fields cache
+		fields.clear();
+		
+		// clear the stored procs
+		storedProcs.clear();
+		
+		super.free();
+	}
+	
+	protected void removeChild(BusinessObject child) {
+		if (fields != null && child instanceof BODbAttribute<?>) {
+			fields.entrySet().remove(child);
+		}
+		super.removeChild(child);
+	}
+	
 	protected void initialise () {
 		fields = new HashMap<>();
 		super.initialise();

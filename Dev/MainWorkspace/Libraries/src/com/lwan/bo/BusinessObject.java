@@ -7,10 +7,12 @@ import java.util.Vector;
 
 import com.lwan.util.ClassUtil;
 import com.lwan.util.StringUtil;
+import com.lwan.util.wrappers.Freeable;
 import com.sun.javafx.collections.ObservableListWrapper;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -70,18 +72,18 @@ import javafx.util.Callback;
  * @author Brutalbarbarian
  *
  */
-public abstract class BusinessObject implements ModifiedEventListener{
+public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 	/* Property Declarations */
 	
 	private Property<BusinessObject> ownerProperty;
 	private Property<Boolean> activeProperty;
 	private Property<String> nameProperty;
-	private Property<String> tagProperty;
 	private Property<Boolean> allowNotificationsProperty;
 	private Property<Boolean> independentProperty;
 	private Property<Set<State>> stateProperty;
 	private Property<Boolean> isPopulatingProperty;
 	private Property<Boolean> isHandlingActiveProperty;
+	private Property<Boolean> triggersModifyProperty;
 	
 	/* Property Accessor Methods */
 	public ReadOnlyProperty<BusinessObject> ownerProperty() {
@@ -94,9 +96,58 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		return nameProperty;
 	}
 	
+	public Property<Boolean> triggersModifyProperty() {
+		if (triggersModifyProperty == null) {
+			triggersModifyProperty = new SimpleBooleanProperty(this, "TriggersModify", true);
+		}
+		return triggersModifyProperty;
+	}
+	
 	protected void finalize() throws Throwable {
-		System.out.println(getClass().getName() + ":" + getName());
+		free();
 		super.finalize();
+	}
+	
+	/**
+	 * Set overrides this to remove from the set as well if needed
+	 * 
+	 * @param child
+	 */
+	protected void removeChild(BusinessObject child) {
+		if (children != null) {
+			children.values().remove(child);
+		}
+	}
+	
+	/**
+	 * Is called upon finalize.
+	 * Can also be called prior to nulling a pointer to a business object,
+	 * in order to ensure all links and pointers are also nulled.
+	 * 
+	 */
+	public void free() {
+		BusinessObject owner = getOwner();
+		if (owner != null) {
+			// remove potential owner's pointer to this
+			owner.removeChild(this);
+			// remove pointer to owner
+			_ownerProperty().setValue(null);
+		}
+		
+		// free all children {
+		if (children != null) {
+			BusinessObject[] array = new BusinessObject[children.size()];
+			children.values().toArray(array);
+			for (BusinessObject bo : array) {
+				bo.free();
+			}
+	
+			children.clear();
+			children = null;	// not needed anymore
+		}
+		
+		// stop anyone from listening to this object
+		listeners.clear();
 	}
 	
 	public ReadOnlyProperty<Set<State>> stateProperty(){
@@ -120,19 +171,6 @@ public abstract class BusinessObject implements ModifiedEventListener{
 		return activeProperty;
 	}
 	
-	/**
-	 * Any miscellaneous tags attached to this object.
-	 * This has no actual effect on the BusinessObject itself.
-	 * 
-	 * 
-	 * @return
-	 */
-	public Property<String> tagProperty() {
-		if (tagProperty == null) {
-			tagProperty = new SimpleObjectProperty<>(this, "Tag", "");
-		}
-		return tagProperty;
-	}
 	/**
 	 * <p>
 	 * Independent represents if an object is independent from its parent.
@@ -232,7 +270,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	
 	
 	public BusinessObject(BusinessObject owner, String name) {
-		children = new HashMap<>();
+//		children = new HashMap<>();
 		listeners = new Vector<>();
 		nameProperty().setValue(name);
 		_ownerProperty().setValue(owner);
@@ -261,6 +299,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	public BusinessObject findChildByName(String name) {
+		if (children == null) return null;
 		BusinessObject child = children.get(name.toLowerCase());
 		if (child == null) return null;
 		return child.getReferencedObject();
@@ -304,7 +343,8 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	}
 	
 	public ObservableList<BusinessObject> getChildren() {
-		return new ObservableListWrapper<BusinessObject>(
+		return children == null? new ObservableListWrapper<>(new Vector<BusinessObject>()) :
+				new ObservableListWrapper<BusinessObject>(
 				new Vector<BusinessObject>(children.values()));
 	}
 	
@@ -390,15 +430,22 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @return
 	 */
 	public boolean equivalentTo (BusinessObject other, Callback<BusinessObject, Boolean> ignoreFields) {
-		if (getClass() != other.getClass() || children.size() != other.children.size()) {
+		if (this == other) {
+			return true;	// no point checking... we know they're the same...
+		}
+		if (getClass() != other.getClass() ||	// different class... must be different
+				((children == null) != (other.children == null)) ||	// one is null while other isn't
+				(children != null && children.size() != other.children.size())) {	// both has children, but differing amounts	
 			return false;
 		} 
-		for (BusinessObject child : children.values()) {
-			// Not going to bother comparing if callback returns true
-			if (ignoreFields != null && ignoreFields.call(child)) continue;	
-			String name = child.nameProperty().getValue();
-			BusinessObject otherChild = other.findChildByName(name);
-			if(otherChild == null || !child.equivalentTo(otherChild, ignoreFields)) return false;
+		if (children != null) {
+			for (BusinessObject child : children.values()) {
+				// Not going to bother comparing if callback returns true
+				if (ignoreFields != null && ignoreFields.call(child)) continue;	
+				String name = child.nameProperty().getValue();
+				BusinessObject otherChild = other.findChildByName(name);
+				if(otherChild == null || !child.equivalentTo(otherChild, ignoreFields)) return false;
+			}
 		}
 		
 		return true;
@@ -437,7 +484,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 * @param isActive
 	 */
-	protected void handleActive(Boolean isActive) {
+	protected void handleActive(boolean isActive) {
 		_isHandlingActiveProperty().setValue(true);
 		try {
 			if (isActive) {
@@ -474,10 +521,12 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	
 	protected void setActiveChildren(boolean isActive) {
 		// Set the active state of all children to match this
-		for (BusinessObject child : children.values()) {
-			// Active state is meaningless to BOAttributes
-			if (!(child.isAttribute())) {
-				child.activeProperty().setValue(isActive);
+		if (children != null) {
+			for (BusinessObject child : children.values()) {
+				// Active state is meaningless to BOAttributes
+				if (!(child.isAttribute())) {
+					child.activeProperty().setValue(isActive);
+				}
 			}
 		}
 	}
@@ -502,7 +551,8 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	public final void fireModified(ModifiedEvent event) {
 		if (allowNotificationsProperty().getValue()) { 
-			if (!(isHandlingActiveProperty().getValue() &&
+			if (!(isHandlingActiveProperty().getValue() && 
+					event.getSource().triggersModifyProperty().getValue() &&					
 					event.getType() == ModifiedEvent.TYPE_ACTIVE)) {
 				stateProperty().getValue().add(State.Modified);
 			}
@@ -531,8 +581,10 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 */
 	public void clear() {
 		// If settingActive is true, clear will be called for all children anyway. No need to loop.
-		for (BusinessObject child : children.values()) {
-			child.clear();
+		if (children != null) {
+			for (BusinessObject child : children.values()) {
+				child.clear();
+			}
 		}
 	}
 	
@@ -543,6 +595,9 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * @param object
 	 */
 	protected <T extends BusinessObject> T addAsChild(T object) {
+		if (children == null) {
+			children = new HashMap<>();
+		}
 		children.put(object.nameProperty().getValue().toLowerCase(), object);		
 		return object;
 	}
@@ -566,8 +621,8 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	 * 
 	 * @param listener
 	 */
-	public void removeListener(ModifiedEventListener listener) {
-		listeners.remove(listener);
+	public boolean removeListener(ModifiedEventListener listener) {
+		return listeners.remove(listener);
 	}
 	
 	public void setNotifications(boolean allow) {
@@ -616,18 +671,22 @@ public abstract class BusinessObject implements ModifiedEventListener{
 	protected boolean verifyState() throws BOException {
 		// No need to validate inactive objects
 		if (isActive()) {
-			for (BusinessObject child : children.values()) {
-				if (child.independentProperty().getValue()) {
-					child.verifyState();
+			if (children != null) {
+				for (BusinessObject child : children.values()) {
+					if (child.independentProperty().getValue()) {
+						child.verifyState();
+					}
 				}
 			}
 			String err = doVerifyState();
 			if (!StringUtil.isNullOrBlank(err)) {
 				throw new BOException("Failed to verfy child with message '" + err + "'", this);
 			}
-			for(BusinessObject child : children.values()) {
-				if (!child.independentProperty().getValue()) {
-					child.verifyState();
+			if (children != null) {
+				for(BusinessObject child : children.values()) {
+					if (!child.independentProperty().getValue()) {
+						child.verifyState();
+					}
 				}
 			}
 		}
@@ -649,12 +708,14 @@ public abstract class BusinessObject implements ModifiedEventListener{
 				// or if loaded from a dataset but was set inactive afterwards
 				(stateProperty().getValue().contains(State.Dataset) && !activeProperty().getValue())) {
 			// Save all the independent children first
-			for (BusinessObject child : children.values()) {
-				// Attributes should be managed by the owner, and shouldn't need to manage themselves
-				if(!(child.isAttribute()) &&
-						// either independent and active, or dependent and inactive
-						child.independentProperty().getValue() == isActive()) {
-					child.save();
+			if (children != null) {
+				for (BusinessObject child : children.values()) {
+					// Attributes should be managed by the owner, and shouldn't need to manage themselves
+					if(!(child.isAttribute()) &&
+							// either independent and active, or dependent and inactive
+							child.independentProperty().getValue() == isActive()) {
+						child.save();
+					}
 				}
 			}
 			
@@ -666,14 +727,16 @@ public abstract class BusinessObject implements ModifiedEventListener{
 			}
 			
 			// Save all the dependent children after this object has been saved
-			for (BusinessObject child: children.values()) {
-				// Attributes should be managed by the owner, and shouldn't need to manage themselves
-				if (!(child.isAttribute()) &&
-						// either independent and inactive, or dependent and active
-						child.independentProperty().getValue() != isActive()) {
-					child.save();
+			if (children != null) {
+				for (BusinessObject child: children.values()) {
+					// Attributes should be managed by the owner, and shouldn't need to manage themselves
+					if (!(child.isAttribute()) &&
+							// either independent and inactive, or dependent and active
+							child.independentProperty().getValue() != isActive()) {
+						child.save();
+					}
 				}
-			}			
+			}
 			// Should be safe to assume the following state after successful saving
 			stateProperty().getValue().remove(State.Modified);
 			if (isActive()) {
@@ -771,7 +834,7 @@ public abstract class BusinessObject implements ModifiedEventListener{
 				append(' ').append(getPropertyStrings()).append('\n');
 		
 		// call toString on all children with spaces += 4
-		if (expansion != 0) {
+		if (expansion != 0 && children != null) {
 			// Print attributes first
 			for (BusinessObject child : children.values()) {
 				if (child.isAttribute()) {

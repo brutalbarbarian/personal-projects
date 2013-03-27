@@ -114,6 +114,40 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		}
 	}
 	
+	protected void removeChild(BusinessObject child) {
+		super.removeChild(child);
+		
+		// the child might not be a child of this object, but rather, a child of this set
+		if (children != null) {
+			Iterator<Entry> it = children.iterator();
+			while (it.hasNext()) {
+				if (it.next().child == child) {
+					it.remove();
+					break;
+				}
+			}
+		}
+	}
+	
+	public void free() {			
+		// free any children who's parents = this
+		Vector<T> toFree = new Vector<>();
+		for (Entry e : children) {
+			if (e.child.getOwner() == this) {
+				toFree.add(e.child);
+			}
+		}
+		for (T child : toFree) {
+			child.free();
+		}
+			
+		children.clear();
+		
+		super.free();
+	}
+	
+	
+	
 	/**
 	 * Find a child of this set, where the child contains an attribute with the specified name,
 	 * and the attribute has the same value as the passed in value.
@@ -342,12 +376,13 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	public boolean equivalentTo (BusinessObject other, 
 			Callback<BusinessObject, Boolean> ignoreFields) {
 		boolean result = super.equivalentTo(other, ignoreFields);
-		if (result) {
+		if (result && other != this) {
 			BOSet<?> otherSet = (BOSet<?>)other;
 			if (getActiveCount() != otherSet.getActiveCount()) return false;
 			for (T child : this) {
-				if (ignoreFields.call(child)) continue;	// seems a little silly...
+				if (ignoreFields != null && ignoreFields.call(child)) continue;	// seems a little silly...
 				BOAttribute<?> attr = (BOAttribute<?>)child.findChildByName(childIDNameProperty().getName());
+				if (attr == null) return false;	// wtf?
 				BusinessObject otherChild = otherSet.findChildByID(attr.getValue());
 				if (otherChild == null || !child.equivalentTo(otherChild, ignoreFields)) return false;
 			}
@@ -459,17 +494,23 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * @param isActive
 	 */
 	@Override
-	protected void handleActive(Boolean isActive) {
+	protected void handleActive(boolean isActive) {
 		// delete all inactive children if isActive is true
 		// not sure if this is the best practice... but don't really see much better way of handling this
 		if (isActive && children != null) {
 			Iterator<Entry> it = children.iterator();//childIterable().iterator();
+			Vector<T> removed = new Vector<>();
 			while (it.hasNext()) {
 				Entry e = it.next();
 				// If child isn't loaded, we can assume its supposed to be active
 				if (e.loaded && !e.child.isActive()) {
+					removed.add(e.child);
 					it.remove();
 				}
+			}
+			// free the removed children
+			for (T child : removed) {
+				child.free();
 			}
 		}
 		

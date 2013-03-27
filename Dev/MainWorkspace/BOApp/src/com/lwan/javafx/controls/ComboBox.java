@@ -22,6 +22,7 @@ import com.lwan.util.GenericsUtil;
 import com.lwan.util.StringUtil;
 import com.lwan.util.containers.TrieMap;
 import com.sun.javafx.collections.ObservableListWrapper;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 
 /**
  * Extension of the default ComboBox with support for a display/value map.
@@ -98,7 +99,8 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 				double length = arg0.length();
 				for (ComboBoxItem<T> item : items) {
 					if (StringUtil.beginsWith(item.toString(), arg0, true)) {
-						double match = length / item.toString().length();
+						double match = (length == 0 && item.toString().length() == 0) ?
+								1 : (length / item.toString().length());
 						if (match > closestMatch) {
 							closestItem = item;
 							closestMatch = match;
