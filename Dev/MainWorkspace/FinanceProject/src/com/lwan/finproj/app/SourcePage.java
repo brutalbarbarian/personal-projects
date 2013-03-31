@@ -2,8 +2,12 @@ package com.lwan.finproj.app;
 
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
+import com.lwan.bo.BOSetRef;
+import com.lwan.bo.ModifiedEvent;
+import com.lwan.bo.ModifiedEventListener;
 import com.lwan.bo.db.BODbSetRef;
 import com.lwan.finproj.bo.BOSource;
+import com.lwan.finproj.bo.BOTransaction;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
@@ -11,13 +15,19 @@ import com.lwan.util.wrappers.Freeable;
 
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 public class SourcePage extends BorderPane implements Freeable{
 	BOGrid<BOSource> srcGrid;
 	BOLinkEx<BOSet<BOSource>> gridLink;
 	BOGridControl<BOSource> gridCtrl;
 	BOSourceSetRef gridSetRef;
-	BOLinkEx<BOSource> record; 
+	BOLinkEx<BOSource> record;
+	
+	BOLinkEx<BOSet<BOTransaction>> tranSetLink;
+	BOTransactionSubSet transactionSet;
+	BOGrid<BOTransaction> tranGrid;
 	
 	ToolBar bottomBar;
 	
@@ -39,13 +49,46 @@ public class SourcePage extends BorderPane implements Freeable{
 		gridCtrl = new BOGridControl<>(srcGrid);
 		record = gridCtrl.getSelectedLink();
 		
+		tranSetLink = new BOLinkEx<>();
+		tranGrid = new BOGrid<>(tranSetLink, new String[]{"TransactionAmount",
+				"TransactionNotes", "TransactionDate"}, 
+				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate"}, 
+				new boolean[]{false, false, false});
+		tranGrid.setEditable(false);
+		
+		transactionSet = new BOTransactionSubSet();
+		tranSetLink.setLinkedObject(transactionSet);
+		
+		record.addListener(new ModifiedEventListener(){
+			public void handleModified(ModifiedEvent event) {
+				if (event.getType() == ModifiedEvent.TYPE_LINK) {
+					transactionSet.reload();
+					tranGrid.refresh();
+				}
+			}			
+		});
+		
+		VBox main = new VBox(2);
+		main.getChildren().addAll(srcGrid, tranGrid);
+		
 		bottomBar = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton());
 		
-		setCenter(srcGrid);
+		setCenter(main);
 		setBottom(bottomBar);
 	}
 	
-//	protected class BOSourceSetRef
+	protected class BOTransactionSubSet extends BOSetRef<BOTransaction> {
+		public BOTransactionSubSet() {
+			super(BOTransaction.getTransactionSet(), 
+					new Callback<BOTransaction, Boolean>(){
+						public Boolean call(BOTransaction transaction) {
+							return record.getLinkedObject() == null ? false :
+								record.getLinkedObject().sourceID().getValue().equals( 
+								transaction.sourceID().getValue());
+						}				
+			}, BOSetRef.MODE_FILTER);
+		}		
+	}
 	
 	protected class BOSourceSetRef extends BODbSetRef<BOSource> {
 		public BOSourceSetRef() {
@@ -63,8 +106,12 @@ public class SourcePage extends BorderPane implements Freeable{
 		gridLink.free();
 		gridSetRef.free();
 		record.free();
+		
+		tranSetLink.free();
+		transactionSet.free();
 //		BOCtrlUtil.buildAttributeLinks(paramBar);
 //		BOCtrlUtil.buildAttributeLinks(grid);
 		srcGrid.refresh();
+		tranGrid.refresh();
 	}
 }

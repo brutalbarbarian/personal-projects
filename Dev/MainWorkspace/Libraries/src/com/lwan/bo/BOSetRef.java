@@ -75,7 +75,7 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 	}
 	
 	public static <T extends BusinessObject>  BOSetRef<T> createFilteredSet(
-			BOSet<T> source, Callback<T, Integer> filter) {
+			BOSet<T> source, Callback<T, Boolean> filter) {
 		return new BOSetRef<>(source, filter, MODE_FILTER);
 	}
 	

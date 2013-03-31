@@ -4,7 +4,7 @@ import com.lwan.javafx.scene.control.ImageDialog;
 import com.lwan.musicsync.audioinfo.AudioInfoArtworkProperty;
 import com.lwan.musicsync.main.Constants;
 import com.lwan.util.ImageUtil;
-import com.lwan.util.wrappers.ResultCallback;
+import com.lwan.util.wrappers.Procedure;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -157,7 +157,7 @@ public class ArtworkEdit extends Group implements EventHandler<MouseEvent>,
 	public void showBasicEditScreen() {
 		ImageDialog id = new ImageDialog(
 				artworkProperty.call(this).getArtworkAsFullSizedImage());
-		id.show(getScene().getWindow(), new ResultCallback<ImageDialog>() {
+		id.show(getScene().getWindow(), new Procedure<ImageDialog>() {
 			public void call(ImageDialog result) {
 				if (result.resultProperty().get() == ImageDialog.ResultOK) {
 					Image img = result.imageProperty().getValue();

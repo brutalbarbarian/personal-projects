@@ -1,14 +1,14 @@
 package com.lwan.javafx.app.util;
 
 import com.lwan.javafx.controls.bo.binding.BoundControl;
-import com.lwan.util.wrappers.ResultCallback;
+import com.lwan.util.wrappers.Procedure;
 
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ToolBar;
 
 public class BOCtrlUtil {
-	public static void iterateControls(Node n, ResultCallback<Node> callback) {
+	public static void iterateControls(Node n, Procedure<Node> callback) {
 		callback.call(n);
 		
 		if (n instanceof Parent) {
@@ -24,7 +24,7 @@ public class BOCtrlUtil {
 	}
 	
 	public static void buildAttributeLinks(Node n) {
-		iterateControls(n, new ResultCallback<Node>(){
+		iterateControls(n, new Procedure<Node>(){
 			public void call(Node node) {
 				if (node instanceof BoundControl<?>) {
 					((BoundControl<?>)node).dataBindingProperty().buildAttributeLinks();

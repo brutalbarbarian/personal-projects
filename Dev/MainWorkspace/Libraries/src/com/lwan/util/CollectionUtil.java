@@ -1,6 +1,7 @@
 package com.lwan.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,6 +35,14 @@ public class CollectionUtil {
 	 */
 	public static <T> ObservableList<T> asObservableList(T...items) {
 		return new ObservableListWrapper<T>(Arrays.asList(items));
+	}
+	
+	public static <T> ObservableList<T> asObservableList(Iterable<T> items) {
+		List<T> list = new ArrayList<>();
+		for (T item : items) {
+			list.add(item);
+		}
+		return new ObservableListWrapper<>(list);		
 	}
 	
 	public static <T> void addIfNotExist (T item, Collection<T> col) {

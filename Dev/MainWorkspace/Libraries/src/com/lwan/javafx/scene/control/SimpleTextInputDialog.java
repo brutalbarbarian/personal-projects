@@ -1,6 +1,6 @@
 package com.lwan.javafx.scene.control;
 
-import com.lwan.util.wrappers.ResultCallback;
+import com.lwan.util.wrappers.Procedure;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -199,7 +199,7 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 		// Do nothing
 	}
 	
-	public void show(Window owner, final ResultCallback<SimpleTextInputDialog> result) {
+	public void show(Window owner, final Procedure<SimpleTextInputDialog> result) {
 		// setup stage
 		stage = new Stage();
 		stage.initModality(Modality.WINDOW_MODAL);

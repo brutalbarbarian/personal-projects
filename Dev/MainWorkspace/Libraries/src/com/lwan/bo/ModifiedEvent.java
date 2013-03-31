@@ -10,10 +10,10 @@ import com.lwan.util.GenericsUtil;
  */
 public class ModifiedEvent {
 	public static final int TYPE_UNKNOWN = 0;
-	public static final int TYPE_ATTRIBUTE = 1;
+	public static final int TYPE_ATTRIBUTE = 1;	// attribute value change
 //	public static final int TYPE_SET = 2;
-	public static final int TYPE_ACTIVE = 2;
-	public static final int TYPE_LINK = 3;
+	public static final int TYPE_ACTIVE = 2;	// object active state change
+	public static final int TYPE_LINK = 3;	// link
 	
 	private BusinessObject source;
 	private String tags;
@@ -32,8 +32,9 @@ public class ModifiedEvent {
 		return isAttribute() && asAttribute().isUserSet();
 	}
 	
-	public BOAttribute<?> asAttribute() {
-		return (BOAttribute<?>)source;
+	@SuppressWarnings("unchecked")
+	public <T> BOAttribute<T> asAttribute() {
+		return (BOAttribute<T>)source;
 	}
 	
 	public boolean checkSource (Class<? extends BusinessObject> parentClass, String attributeName) {
@@ -108,7 +109,7 @@ public class ModifiedEvent {
 	 * 
 	 * @return
 	 */
-	public BusinessObject getDirectChild() {
+	public BusinessObject getCaller() {
 		return directChild;
 	}
 	

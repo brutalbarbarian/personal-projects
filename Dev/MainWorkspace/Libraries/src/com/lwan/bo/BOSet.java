@@ -307,6 +307,14 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		return count;
 	}
 	
+	/**
+	 * Reloads the set
+	 */
+	public void reload() {
+		setActive(false);
+		ensureActive();
+	}
+	
 	protected boolean verifyState() throws BOException {
 		super.verifyState();
 		// no need to verify the state of unloaded children

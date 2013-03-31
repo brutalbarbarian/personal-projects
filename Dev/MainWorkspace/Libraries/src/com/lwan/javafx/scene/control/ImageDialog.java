@@ -4,7 +4,7 @@ import java.io.File;
 
 import com.lwan.util.GenericsUtil;
 import com.lwan.util.JavaFXUtil;
-import com.lwan.util.wrappers.ResultCallback;
+import com.lwan.util.wrappers.Procedure;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
@@ -190,7 +190,7 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 		} else if (src == btnLoadFromURL) {
 			SimpleTextInputDialog dialog = new SimpleTextInputDialog("Load Image from URL...", "URL:",
 					Orientation.VERTICAL, "Enter url of image", "http://", 20);
-			dialog.show(getScene().getWindow(), new ResultCallback<SimpleTextInputDialog>() {
+			dialog.show(getScene().getWindow(), new Procedure<SimpleTextInputDialog>() {
 				public void call(SimpleTextInputDialog result) {
 					if (result.resultProperty().get() == SimpleTextInputDialog.ResultOK)  {
 						String url = result.textProperty().getValue();
@@ -236,7 +236,7 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 	 * @param owner
 	 * @param result
 	 */
-	public void show(Window owner, final ResultCallback<ImageDialog> result) {
+	public void show(Window owner, final Procedure<ImageDialog> result) {
 		// setup stage
 		stage = new Stage();
 		stage.initModality(Modality.WINDOW_MODAL);

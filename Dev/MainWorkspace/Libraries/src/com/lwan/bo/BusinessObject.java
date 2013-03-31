@@ -558,7 +558,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 			}
 			
 			// Don't handle event if this was the object which fired it last
-			if (event.getDirectChild() != this) {
+			if (event.getCaller() != this) {
 				handleModified(event);
 			}
 			

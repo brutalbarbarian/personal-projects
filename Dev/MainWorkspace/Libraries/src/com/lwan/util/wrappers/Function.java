@@ -1,5 +1,5 @@
 package com.lwan.util.wrappers;
 
-public interface ReadOnlyCallback <T> {
+public interface Function <T> {
 	public T getCallback();
 }

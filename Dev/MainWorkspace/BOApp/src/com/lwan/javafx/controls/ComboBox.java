@@ -22,7 +22,6 @@ import com.lwan.util.GenericsUtil;
 import com.lwan.util.StringUtil;
 import com.lwan.util.containers.TrieMap;
 import com.sun.javafx.collections.ObservableListWrapper;
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 
 /**
  * Extension of the default ComboBox with support for a display/value map.

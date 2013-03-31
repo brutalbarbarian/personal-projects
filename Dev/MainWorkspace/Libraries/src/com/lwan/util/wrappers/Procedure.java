@@ -1,5 +1,5 @@
 package com.lwan.util.wrappers;
 
-public interface ResultCallback <T> {
+public interface Procedure <T> {
 	public void call (T result);
 }

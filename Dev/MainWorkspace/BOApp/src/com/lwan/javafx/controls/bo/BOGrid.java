@@ -22,7 +22,7 @@ import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.JavaFXUtil;
-import com.lwan.util.wrappers.ResultCallback;
+import com.lwan.util.wrappers.Procedure;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -273,7 +273,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 	public class GridColumn extends TableColumn<R, Object> {
 		private String fieldPath;
 		private Map<String, Object> params;	// Extra params for the cellFactory
-		private ResultCallback<BoundControl<?>> ctrlPropertySetter;
+		private Procedure<BoundControl<?>> ctrlPropertySetter;
 		
 		GridColumn(String caption, String fieldPath, boolean editable) {
 			super(caption);
@@ -289,11 +289,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 			setPrefWidth(100);	// Minimum? 
 		}
 		
-		public ResultCallback<BoundControl<?>> getCtrlPropertySetter() {
+		public Procedure<BoundControl<?>> getCtrlPropertySetter() {
 			return ctrlPropertySetter;
 		}
 		
-		public void setCtrlPropertySetter(ResultCallback<BoundControl<?>> setter) {
+		public void setCtrlPropertySetter(Procedure<BoundControl<?>> setter) {
 			ctrlPropertySetter = setter;
 		}
 		

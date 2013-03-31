@@ -1,6 +1,12 @@
 package com.lwan.finproj.app;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Vector;
 
 import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOLinkEx;
@@ -11,17 +17,29 @@ import com.lwan.finproj.bo.BOSource;
 import com.lwan.finproj.bo.BOTransaction;
 import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.app.util.DbUtil;
+import com.lwan.javafx.controls.BOChartControl;
 import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BODatePicker;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
+import com.lwan.util.GenericsUtil;
 import com.lwan.util.wrappers.Freeable;
-import com.lwan.util.wrappers.ResultCallback;
+import com.lwan.util.wrappers.Procedure;
+import com.sun.javafx.collections.ObservableListWrapper;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.LineChartBuilder;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.PieChart.Data;
+import javafx.scene.chart.PieChartBuilder;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
@@ -29,6 +47,7 @@ import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class TransactionPage extends BorderPane implements Freeable{
@@ -48,7 +67,7 @@ public class TransactionPage extends BorderPane implements Freeable{
 	BODatePicker date;
 	BOComboBox<Integer> name;
 	
-	ResultCallback<BoundControl<?>> initSource;
+	Procedure<BoundControl<?>> initSource;
 	
 	ToolBar bottomBar;
 	
@@ -119,7 +138,7 @@ public class TransactionPage extends BorderPane implements Freeable{
 		amount = new BOTextField(record, "TransactionAmount");
 		name = new BOComboBox<>(record, "SourceID");
 		
-		initSource = new ResultCallback<BoundControl<?>>() {
+		initSource = new Procedure<BoundControl<?>>() {
 			@SuppressWarnings("unchecked")
 			public void call(BoundControl<?> result) {
 				final BOComboBox<Integer> cb = (BOComboBox<Integer>)result;
@@ -170,11 +189,54 @@ public class TransactionPage extends BorderPane implements Freeable{
 		tranGrid.getColumnByField("SourceID").setCtrlPropertySetter(initSource);
 		tranGrid.getColumnByField("TransactionDate").setAsDatePicker();
 	
-		bottomBar = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton());
+		Button btnGraph = new Button("Graph");
+		btnGraph.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent arg0) {
+				BOChartControl<BOTransaction> chartControl = new BOChartControl<>(gridSetRef, "");
+				chartControl.show(getScene().getWindow());
+			}			
+		});
+		
+		bottomBar = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton(),
+				btnGraph);
 		
 		setTop(paramBar);
 		setCenter(VBoxBuilder.create().children(tranGrid, grid).spacing(2).build());		
 		setBottom(bottomBar);
+	}
+	
+	protected void showPieGraph(BOSet<BOTransaction> set) {
+		// % of srcs...
+		
+		HashMap<Integer, Double> values = new HashMap<>(set.getActiveCount());
+		for (BOTransaction trans : set) {
+			int src = trans.sourceID().getValue();
+			double val = GenericsUtil.Coalice(values.get(src), 0d) + 
+					trans.transactionAmount().getValue();
+			values.put(src, val);
+		}
+		
+		List<Data> data = new Vector<>();
+		for (Entry<Integer, Double> entry : values.entrySet()) {
+			BOSource src = BOSource.getSourceSet().findChildByID(entry.getKey());
+			data.add(new Data(src.sourceName().getValue(), entry.getValue()));
+		}
+		Collections.sort(data, new Comparator<Data>() {
+			public int compare(Data o1, Data o2) {
+				if (o2.getPieValue() > o1.getPieValue()) {
+					return 1;
+				} else if (o2.getPieValue() < o1.getPieValue()) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}			
+		});
+		
+		PieChart chart = PieChartBuilder.create().data(new ObservableListWrapper<>(data)).build();
+		Stage stage = new Stage();
+		stage.setScene(new Scene(chart));
+		stage.showAndWait();
 	}
 	
 	protected class BOTransactionSetRef extends BODbSetRef<BOTransaction>{

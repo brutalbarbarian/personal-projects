@@ -7,7 +7,6 @@ import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
 import com.lwan.bo.db.BODbSet;
-import com.lwan.finproj.bo.BOTransaction.BOTransactionSet;
 import com.lwan.javafx.app.util.DbUtil;
 
 public class BOSource extends BODbObject{
