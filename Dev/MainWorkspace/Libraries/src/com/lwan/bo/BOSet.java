@@ -495,6 +495,15 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			iterator.remove();
 		}
 	}
+		
+	private T exampleChild;
+	public T getExampleChild(){
+		if (exampleChild == null) {
+			exampleChild = createChildInstance(null);
+			exampleChild.initialiseAsExample();
+		}
+		return exampleChild;
+	}
 	
 	/**
 	 * Will pass the active handling down to all the children of this set as well.

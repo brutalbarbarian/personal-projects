@@ -74,6 +74,7 @@ public class MainApp extends App{
 		
 		Scene scene = new Scene(bp);
 		scene.getStylesheets().add("resource/calendarstyle.css");
+		scene.getStylesheets().add("resource/chartcontrol.css");
 		
 		stage.setScene(scene);
 		

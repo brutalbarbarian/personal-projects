@@ -1,6 +1,7 @@
 package com.lwan.bo;
 
 public enum AttributeType {
+	ID,				// Integer
 	Integer,		// Integer
 	Double,			// Double
 	Currency,		// Double

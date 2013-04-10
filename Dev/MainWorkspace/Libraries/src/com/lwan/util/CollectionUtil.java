@@ -51,6 +51,14 @@ public class CollectionUtil {
 		}
 	}
 	
+	public static Integer[] getIndexArray(int length) {
+		Integer[] result = new Integer[length];
+		for (int i = 0; i < length; i++) {
+			result[i] = i;
+		}
+		return result;
+	}
+	
 	/**
 	 * Print out all values in the order that the iterator returns them
 	 * Each value is seperated by the passed in seperator

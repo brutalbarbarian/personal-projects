@@ -214,6 +214,7 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 			}
 		});
 		stage.setScene(new Scene(this));
+		stage.getScene().getStylesheets().addAll(owner.getScene().getStylesheets());
 		
 		// initialise variables
 		_resultProperty().set(ResultUnknown);

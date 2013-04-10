@@ -52,10 +52,12 @@ public class BOTransaction extends BODbObject{
 	
 	@SuppressWarnings("unchecked")
 	protected <T extends BusinessObject> T getLinkedChild(BOLink<T> link) {
+		BusinessObject result = null;
 		if (link == sourceLink) {
-			return (T) BOSource.getSourceSet().findChildByID(sourceID.getValue());
+			result = isExample() ? BOSource.getSourceSet().getExampleChild() : 
+					BOSource.getSourceSet().findChildByID(sourceID.getValue());
 		}
-		return null;
+		return (T)result;
 	}
 
 	@Override
@@ -85,9 +87,9 @@ public class BOTransaction extends BODbObject{
 	@Override
 	protected void createAttributes() {
 		transactionID = addAsChild(new BODbAttribute<Integer>(
-				this, "TransactionID", "trn_id", AttributeType.Integer));
+				this, "TransactionID", "trn_id", AttributeType.ID));
 		sourceID = addAsChild(new BODbAttribute<Integer>(
-				this, "SourceID", "src_id", AttributeType.Integer));
+				this, "SourceID", "src_id", AttributeType.ID));
 		transactionAmount = addAsChild(new BODbAttribute<Double>(
 				this, "TransactionAmount", "trn_amount", AttributeType.Currency));
 		transactionNotes = addAsChild(new BODbAttribute<String>(

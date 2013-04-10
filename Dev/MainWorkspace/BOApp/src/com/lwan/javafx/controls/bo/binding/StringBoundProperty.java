@@ -125,6 +125,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 						}
 					}				
 				});
+			case ID:
 			case Integer:
 				if (value.length() == 0) {
 					return true;	// always accept empty
@@ -166,6 +167,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 		AttributeType type = attr.getAttributeType();
 		switch (type) {
 		case String : return attr.asString();
+		case ID:
 		case Integer : return Integer.toString(attr.asInteger());
 		case Double : return Double.toString(attr.asDouble());
 		case Currency:
@@ -221,6 +223,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 		AttributeType type = attr.getAttributeType();
 		switch (type) {
 		case String : return attr.asString();
+		case ID:
 		case Integer : return Integer.toString(attr.asInteger());
 		case Double : return StringUtil.formatString("%f", attr.asDouble());
 		case Currency: return StringUtil.formatString("%.2f", attr.asDouble());
@@ -260,6 +263,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 		case String : 
 			attr.userSetValueAsObject(editValue, getBean()); 
 			break;
+		case ID:
 		case Integer : {
 			int effectiveValue;
 			if (editValue.length() == 0 || editValue.equals("-")) {

@@ -45,7 +45,7 @@ public class BOSource extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		sourceID = addAsChild(new BODbAttribute<Integer>(this, "SourceID", "src_id", AttributeType.Integer));
+		sourceID = addAsChild(new BODbAttribute<Integer>(this, "SourceID", "src_id", AttributeType.ID));
 		sourceName = addAsChild(new BODbAttribute<String>(this, "SourceName", "src_name", AttributeType.String));
 		
 		transactionCount = addAsChild(new BOAttribute<Integer>(this, "TransactionCount", AttributeType.Integer));

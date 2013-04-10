@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Vector;
 
+import com.lwan.bo.Attribute;
 import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
@@ -34,8 +35,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.LineChartBuilder;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.PieChart.Data;
 import javafx.scene.chart.PieChartBuilder;
@@ -122,7 +121,7 @@ public class TransactionPage extends BorderPane implements Freeable{
 		
 		paramBar = ToolBarBuilder.create().items(
 				new Label("Source"), param_src,
-				new Separator(),
+				new Separator(),				
 				new Label("From"), param_minDate, new Label("To"), param_maxDate,
 				new Separator(),
 				new Label("Min"), param_minAmount, new Label("To"), param_maxAmount,
@@ -192,9 +191,15 @@ public class TransactionPage extends BorderPane implements Freeable{
 		Button btnGraph = new Button("Graph");
 		btnGraph.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent arg0) {
-				BOChartControl<BOTransaction> chartControl = new BOChartControl<>(gridSetRef, "");
+				// Populate the attributes for the 
+				List<Attribute> attributes = new Vector<>();
+				attributes.add(new Attribute("SourceID", "Source.SourceName", "Source"));
+				attributes.add(new Attribute("TransactionDate", "Date"));
+				attributes.add(new Attribute("TransactionAmount", "Amount"));
+				
+				BOChartControl<BOTransaction> chartControl = new BOChartControl<>(gridSetRef, "TransactionGraphs", attributes);
 				chartControl.show(getScene().getWindow());
-			}			
+			}
 		});
 		
 		bottomBar = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton(),

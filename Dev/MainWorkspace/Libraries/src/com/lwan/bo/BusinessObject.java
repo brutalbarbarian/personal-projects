@@ -220,6 +220,23 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 		return false;
 	}
 	
+	
+	private boolean isExample;
+	public boolean isExample() {
+		return isExample;
+	}
+	
+	public void initialiseAsExample() {
+		if (!isExample) {
+			isExample = true;
+			
+			// initialise all children as an example too
+			for (BusinessObject child : getChildren()) {
+				child.initialiseAsExample();
+			}
+		}		
+	}
+	
 	/** 
 	 * Use this flag to disable notifications if needed.
 	 * This will effectively disable fireModified for this object only. 
@@ -271,6 +288,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 	
 	public BusinessObject(BusinessObject owner, String name) {
 //		children = new HashMap<>();
+		isExample = false;
 		listeners = new Vector<>();
 		nameProperty().setValue(name);
 		_ownerProperty().setValue(owner);
