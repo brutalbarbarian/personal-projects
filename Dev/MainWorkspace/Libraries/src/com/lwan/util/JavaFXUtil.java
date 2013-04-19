@@ -96,6 +96,7 @@ public class JavaFXUtil {
 		rt.spacing(10);
 		
 		err.setScene(new Scene(rt.build()));
+		err.getScene().getStylesheets().addAll(parent.getScene().getStylesheets());
 		err.show();
-	}
+	} 
 }

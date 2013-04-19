@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -58,6 +59,10 @@ public class Lng {
 		} else {
 			System.out.println("Language file not found.");
 		}
+	}
+	
+	public static String formatCurrency(Number value) {
+		return NumberFormat.getCurrencyInstance(locale).format(value.doubleValue());
 	}
 	
 	public static void store() throws IOException {

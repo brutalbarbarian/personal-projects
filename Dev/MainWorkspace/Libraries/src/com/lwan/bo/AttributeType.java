@@ -16,4 +16,9 @@ public enum AttributeType {
 				this == Currency || 
 				this == Double;
 	}
+	
+	public boolean isDateTime() {
+		return	this == Date ||
+				this == Time;
+	}
 }

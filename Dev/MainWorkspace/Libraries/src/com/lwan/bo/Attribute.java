@@ -40,7 +40,11 @@ public class Attribute {
 		return root.findAttributeByPath(path);
 	}
 	
-	public BOAttribute<?> getValuePath(BusinessObject root) {
+	public BOAttribute<?> getValueAttribute(BusinessObject root) {
 		return  root.findAttributeByPath(valuePath);
+	}
+	
+	public String getValuePath() {
+		return valuePath;
 	}
 }

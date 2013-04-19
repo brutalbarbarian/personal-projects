@@ -14,7 +14,6 @@ import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.StringUtil;
-import com.sun.javafx.binding.StringFormatter;
 
 public class StringBoundProperty extends BoundProperty<String>{
 	private Property<Boolean> editModeProperty;
@@ -172,12 +171,13 @@ public class StringBoundProperty extends BoundProperty<String>{
 		case Double : return Double.toString(attr.asDouble());
 		case Currency:
 			double value = attr.asDouble();
-			if (value >= 0) {
-				return StringFormatter.format("$%.2f", value).getValue();
-			} else {
-				// we want the sign to be on the outside of the currency symbol
-				return StringFormatter.format("-$%.2f", -value).getValue();
-			}
+			return Lng.formatCurrency(value);
+//			if (value >= 0) {
+//				return StringFormatter.format("$%.2f", value).getValue();
+//			} else {
+//				// we want the sign to be on the outside of the currency symbol
+//				return StringFormatter.format("-$%.2f", -value).getValue();
+//			}
 		case Boolean:
 			if (attr.getValue() == null) {
 				return "";
