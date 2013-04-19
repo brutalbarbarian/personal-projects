@@ -16,6 +16,51 @@ import javafx.geometry.Side;
 import javafx.scene.chart.Axis;
 
 public class DateAxis extends Axis<Date> {
+	private class DateRange {
+		Date min;
+		Date max;
+		int tick;
+		double scale;	// (value - min) * scale = position along
+	}
+	
+	protected DateRange calculateRange(double length) {
+		int base = tickInterval().get();
+		length = Math.abs(length);
+		
+		int maxTicks = (int)Math.round(length / 20);	// no more then 1 tick per 20 pixels
+		
+		Calendar min = getCalendar(minDate().getValue());
+		Calendar max = getCalendar(maxDate().getValue());
+		
+		Calendar tmp = null;
+		
+		do {
+			if (tmp != null) {
+				base = DateUtil.getAboveMode(base);
+			}
+			tmp = (Calendar)min.clone();
+			tmp.add(base, maxTicks);
+			
+		} while (tmp.before(max));
+		
+		
+		min = DateUtil.floor(min, base);
+		max = DateUtil.ceil(max, base);
+		if (min.equals(max)) {
+			max.add(base, 1);
+		}
+		
+		DateRange result = new DateRange();
+		result.tick = base;
+		result.min = min.getTime();
+		result.max = max.getTime();		
+		result.scale = length / (max.getTimeInMillis() - min.getTimeInMillis());
+		
+		return result;
+	}
+	
+	private DateRange currentRange;
+	
 	private IntegerProperty tickInterval;
 	
 	/**
@@ -34,26 +79,11 @@ public class DateAxis extends Axis<Date> {
 	public Property<Date> maxDate() {
 		return maxDate;
 	}
-	public Date getEffectiveMinDate() {
-		Calendar min = getCalendar(minDate().getValue());
-		return DateUtil.floor(min, getEffectiveTickInterval()).getTime();
-	}
-	public Date getEffectiveMaxDate() {
-		Calendar max = getCalendar(maxDate().getValue());
-		int interval = getEffectiveTickInterval();
-		Calendar result = DateUtil.ceil(max, interval);
-		
-		if (result.equals(getEffectiveMinDate())) {
-			// we don't want the min and max to every be equal...
-			max.add(interval, 1);
-		}
-		
-		return max.getTime();
-	}
 	
 	public Date getNextTick(Date date) {
 		Calendar c = getCalendar(date);
-		c.add(getEffectiveTickInterval(), 1);
+		c.add(currentRange.tick, 1);
+		
 		return c.getTime();
 	}
 	
@@ -63,63 +93,28 @@ public class DateAxis extends Axis<Date> {
 		return cal;
 	}
 	
-	
 	// TickInterval is really the baseline date unit...
-	// Calendar.Date for dates
-	// Calendar.Minute ? for time
 	public DateAxis(int tickInterval, Date minDate, Date maxDate) {
-		setAutoRanging(false);	// we don't ever want autoranging
 		this.tickInterval = new SimpleIntegerProperty(this, "TickMargin", tickInterval);
 		this.minDate = new SimpleObjectProperty<Date>(this, "MinDate", minDate);
 		this.maxDate = new SimpleObjectProperty<Date>(this, "MaxDate", maxDate);
+		
 	}
-	
-	
 	
 	@Override
 	protected Object autoRange(double length) {
-		return new Object[]{getEffectiveMinDate(), getEffectiveMaxDate(), getEffectiveTickInterval()};
+		currentRange = calculateRange(length);
+		return currentRange;
 	}
 
 	@Override
 	protected void setRange(Object range, boolean animate) {
 		// uhhh... ignore?
-	}
-	
-	protected int getEffectiveTickInterval() {
-		int base = tickInterval().get();
-		double length = Math.abs(getDisplayLength());
-		if (length == 0) {
-			length = 600;	// guess?
-//			return Calendar.YEAR;	// not initialised yet
-		}
-		
-		int maxTicks = (int)Math.round(length / 20);	// 1 per 20 pixels?
-		
-		Calendar min = getCalendar(minDate().getValue()); //getEffectiveMinDate());
-		Calendar max = getCalendar(maxDate().getValue());//getEffectiveMaxDate());
-		
-		Calendar tmp = null;// = (Calendar)min.clone();
-		
-		do {
-			if (tmp != null) {
-				base = DateUtil.getAboveMode(base);
-			}
-			tmp = (Calendar)min.clone();
-			tmp.add(base, maxTicks);
-			
-		} while (tmp.before(max));
-		
-		return base;
-	}
+	}	
 
 	@Override
-	protected Object getRange() {
-		return new Object[]{
-			getEffectiveMinDate(),
-			getEffectiveMaxDate(),
-			getEffectiveTickInterval()
-		};
+	protected DateRange getRange() {
+		return currentRange;
 	}
 
 	@Override
@@ -139,43 +134,27 @@ public class DateAxis extends Axis<Date> {
 	
 	@Override
 	public double getDisplayPosition(Date value) {
-		Object[] range = (Object[])getRange();		
-		Date minDate = (Date)range[0];
-		Date maxDate = (Date)range[1];
-		if (value.before(minDate) || value.after(maxDate)) {
+		if (value.before(currentRange.min) || value.after(currentRange.max)) {
 			// out of range...
 			return Double.NaN;
 		}		
 		
-		long min = minDate.getTime();
-		long max = maxDate.getTime();
-		long timeLength = max - min;
-		double date = value.getTime();
-		
-		double length = getDisplayLength();
-		return ((date - min) / timeLength) * length;
+		long range = value.getTime() - getCalendar(currentRange.min).getTimeInMillis();
+		return range * currentRange.scale;
 	}
 
 	@Override
 	public Date getValueForDisplay(double displayPosition) {
-		Object[] range = (Object[])getRange();		
-		Date minDate = (Date)range[0];
-		Date maxDate = (Date)range[1];
-		
-		long min = minDate.getTime();
-		long max = maxDate.getTime();
-		long timeLength = max - min;
-		
-		double length = getDisplayLength();
-		long date = Math.round(((displayPosition / length) * timeLength) + min);
+		long date = Math.round(displayPosition / currentRange.scale) + 
+				getCalendar(currentRange.min).getTimeInMillis();
 		
 		return new Date(date);
 	}
 
 	@Override
 	public boolean isValueOnAxis(Date value) {
-		return value.compareTo(getEffectiveMinDate()) >= 0 &&
-				value.compareTo(getEffectiveMaxDate()) <= 0;
+		return value.compareTo(currentRange.min) >= 0 &&
+				value.compareTo(currentRange.max) <= 0;
 	}
 
 	@Override
@@ -191,21 +170,15 @@ public class DateAxis extends Axis<Date> {
 
 	@Override
 	protected List<Date> calculateTickValues(double length, Object range) {
-		Object[] rng = (Object[])range;
-		Date min = (Date)rng[0];
-		Date max = (Date)rng[1];
-		int interval = (int)rng[2];
-		
-		
-		Calendar cal = getCalendar(min);
-		Calendar maxCal = getCalendar(max);
+		Calendar cal = getCalendar(currentRange.min);
+		Calendar maxCal = getCalendar(currentRange.max);
 		
 		List<Date> ticks = new Vector<>();
 		while (cal.before(maxCal)) {
 			ticks.add(cal.getTime());	
-			cal.add(interval, 1);
+			cal.add(currentRange.tick, 1);
 		}
-		ticks.add(max);
+		ticks.add(currentRange.max);
 				
 		return ticks;
 	}
@@ -215,7 +188,7 @@ public class DateAxis extends Axis<Date> {
 		Calendar cal = getCalendar(value);
 		
 		String result = "";
-		switch(getEffectiveTickInterval()) {
+		switch(currentRange.tick) {
 		case Calendar.DATE:
 			result = result + cal.get(Calendar.DATE) + " ";
 		case Calendar.MONTH:

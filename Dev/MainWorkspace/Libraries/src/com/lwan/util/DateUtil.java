@@ -18,9 +18,7 @@ public class DateUtil {
 		// Floor means we want all fields lower then this to go to its minimum
 		int nextMode = mode;
 		while ((nextMode = getBelowMode(nextMode)) >= 0) {
-			int min = result.getMinimum(nextMode);
-			int curr = result.get(nextMode);
-			result.add(nextMode, curr - min);
+			result.set(nextMode, result.getMinimum(nextMode));
 		}
 		
 		return result;

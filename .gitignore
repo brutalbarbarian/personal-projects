@@ -14,3 +14,6 @@ keys.ini
 ## TestDB.java
 
 baregrep.exe
+
+## language files
+*.lng
