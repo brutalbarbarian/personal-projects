@@ -1,11 +1,11 @@
-package com.lwan.javafx.controls;
+package com.lwan.javafx.scene.control;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
-import com.lwan.javafx.app.App;
 import com.lwan.util.DateUtil;
 
 import javafx.beans.property.IntegerProperty;
@@ -16,18 +16,28 @@ import javafx.geometry.Side;
 import javafx.scene.chart.Axis;
 
 public class DateAxis extends Axis<Date> {
+	private static int GAP = 60;
+	
+	private Locale locale;
+	
 	private class DateRange {
 		Date min;
 		Date max;
 		int tick;
 		double scale;	// (value - min) * scale = position along
+//		int miniTicks;
+		
+//		boolean isMiniTick(Date d) {
+//			Calendar c = getCalendar(d);
+//			return !DateUtil.floor(c, tick).equals(c); 
+//		}
 	}
 	
 	protected DateRange calculateRange(double length) {
 		int base = tickInterval().get();
 		length = Math.abs(length);
 		
-		int maxTicks = (int)Math.round(length / 20);	// no more then 1 tick per 20 pixels
+		int maxTicks = (int)Math.round(length / GAP);
 		
 		Calendar min = getCalendar(minDate().getValue());
 		Calendar max = getCalendar(maxDate().getValue());
@@ -43,6 +53,17 @@ public class DateAxis extends Axis<Date> {
 			
 		} while (tmp.before(max));
 		
+//		int miniTicks = 0;
+//		
+//		while (true) {
+//			tmp = (Calendar)min.clone();
+//			tmp.add(base, maxTicks / ((miniTicks + 1) * 2));
+//			if (tmp.before(max)) {
+//				break;
+//			} else {
+//				miniTicks ++;
+//			}
+//		}
 		
 		min = DateUtil.floor(min, base);
 		max = DateUtil.ceil(max, base);
@@ -55,6 +76,7 @@ public class DateAxis extends Axis<Date> {
 		result.min = min.getTime();
 		result.max = max.getTime();		
 		result.scale = length / (max.getTimeInMillis() - min.getTimeInMillis());
+//		result.miniTicks = miniTicks;
 		
 		return result;
 	}
@@ -80,25 +102,24 @@ public class DateAxis extends Axis<Date> {
 		return maxDate;
 	}
 	
-	public Date getNextTick(Date date) {
-		Calendar c = getCalendar(date);
-		c.add(currentRange.tick, 1);
-		
-		return c.getTime();
-	}
-	
 	protected Calendar getCalendar(Date date) {
-		Calendar cal = Calendar.getInstance(App.getLocale());
+		Calendar cal = Calendar.getInstance(locale);
 		cal.setTime(date);
 		return cal;
 	}
 	
 	// TickInterval is really the baseline date unit...
 	public DateAxis(int tickInterval, Date minDate, Date maxDate) {
+		this(tickInterval, minDate, maxDate, Locale.getDefault());
+	}
+	
+	public DateAxis(int tickInterval, Date minDate, Date maxDate, Locale locale) {
 		this.tickInterval = new SimpleIntegerProperty(this, "TickMargin", tickInterval);
 		this.minDate = new SimpleObjectProperty<Date>(this, "MinDate", minDate);
 		this.maxDate = new SimpleObjectProperty<Date>(this, "MaxDate", maxDate);
-		
+		this.locale = locale;
+		setTickLabelRotation(45);
+		setTickLabelGap(GAP);
 	}
 	
 	@Override
@@ -110,6 +131,9 @@ public class DateAxis extends Axis<Date> {
 	@Override
 	protected void setRange(Object range, boolean animate) {
 		// uhhh... ignore?
+		if (range != currentRange) {
+			currentRange = (DateRange) range;
+		}
 	}	
 
 	@Override
@@ -122,15 +146,15 @@ public class DateAxis extends Axis<Date> {
 		// there is no such thing as a zero position for date
 		return Double.NaN;
 	}
-
-	protected double getDisplayLength() {
-		Side side = getSide();
-		if (Side.TOP.equals(side) || Side.BOTTOM.equals(side)) {
-			return getWidth();
-		} else {
-			return getHeight();
-		}
-	}
+//
+//	protected double getDisplayLength() {
+//		Side side = getSide();
+//		if (Side.TOP.equals(side) || Side.BOTTOM.equals(side)) {
+//			return getWidth();
+//		} else {
+//			return getHeight();
+//		}
+//	}
 	
 	@Override
 	public double getDisplayPosition(Date value) {
@@ -175,8 +199,15 @@ public class DateAxis extends Axis<Date> {
 		
 		List<Date> ticks = new Vector<>();
 		while (cal.before(maxCal)) {
-			ticks.add(cal.getTime());	
+			ticks.add(cal.getTime());
+			
+//			long pre = cal.getTimeInMillis();
 			cal.add(currentRange.tick, 1);
+						
+//			long rng = cal.getTimeInMillis() - pre;
+//			for (int i = 1; i <= currentRange.miniTicks; i++) {
+//				ticks.add(new Date(pre + (rng * i / (currentRange.miniTicks + 1))));
+//			}
 		}
 		ticks.add(currentRange.max);
 				
@@ -185,14 +216,20 @@ public class DateAxis extends Axis<Date> {
 
 	@Override
 	protected String getTickMarkLabel(Date value) {
+		int tick = currentRange.tick;
+//		if (currentRange.isMiniTick(value)) {
+//			tick = DateUtil.getBelowMode(tick);
+//		}
+//		
 		Calendar cal = getCalendar(value);
 		
 		String result = "";
-		switch(currentRange.tick) {
+		switch(tick) {
 		case Calendar.DATE:
+		case Calendar.WEEK_OF_MONTH:
 			result = result + cal.get(Calendar.DATE) + " ";
 		case Calendar.MONTH:
-			result = result + cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, App.getLocale()) + " ";
+			result = result + cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, locale) + " ";
 		case Calendar.YEAR:
 			result = result + cal.get(Calendar.YEAR);		
 		}

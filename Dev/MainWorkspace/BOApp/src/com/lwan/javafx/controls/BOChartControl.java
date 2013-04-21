@@ -40,8 +40,11 @@ import javafx.scene.chart.PieChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -55,6 +58,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 
 import com.lwan.bo.Attribute;
 import com.lwan.bo.AttributeType;
@@ -67,6 +71,7 @@ import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.State;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.scene.control.DateAxis;
 import com.lwan.javafx.scene.control.SimpleTextInputDialog;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.GenericsUtil;
@@ -421,11 +426,11 @@ public class BOChartControl <T extends BusinessObject> {
 			
 			AttributeType xType = getAttributeType(xAttr);
 			if (xType.isDateTime()) {
-				xAxis = new DateAxis(Calendar.MONTH, (Date)minX, (Date)maxX);
+				xAxis = new DateAxis(Calendar.DATE, (Date)minX, (Date)maxX, App.getLocale());				
 			} else { // xType.isNumeric()
 				xAxis = new NumberAxis();
-				((NumberAxis)xAxis).setLabel(xAttr.getDisplayName());
 			}
+			xAxis.setLabel(xAttr.getDisplayName());
 			
 		
 			LineChart lineChart = new LineChart(xAxis, yAxis);
@@ -973,7 +978,8 @@ public class BOChartControl <T extends BusinessObject> {
 					populateList(listTypes.getSelectionModel().getSelectedIndex());
 				}									
 			});
-			btnCreate.setOnAction(new EventHandler<ActionEvent>(){
+			
+			final EventHandler<ActionEvent> createEvent = new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent arg0) {
 					currentTemplate = null;
 					for (ChartTemplate template : templates) {
@@ -988,7 +994,8 @@ public class BOChartControl <T extends BusinessObject> {
 					//										 
 					initScene(SCENE_DISPLAY);
 				}									
-			});
+			};
+			btnCreate.setOnAction(createEvent);
 
 			listTypes.getSelectionModel().selectedIndexProperty().addListener(
 					new ChangeListener<Number>(){
@@ -999,6 +1006,35 @@ public class BOChartControl <T extends BusinessObject> {
 							populateList(index);
 						}									
 					});
+			listTemplates.setCellFactory(new Callback<ListView<String>, ListCell<String>>(){
+				public ListCell<String> call(ListView<String> arg0) {
+					ListCell<String> cell = new ListCell<String>() {
+						public void updateItem(String item, boolean empty) {
+							super.updateItem(item, empty);
+							setText(empty ? null : getString());
+							setGraphic(null);
+						}
+
+						private String getString() {
+							return getItem() == null ? "" : getItem().toString();
+						}
+					};
+					
+					cell.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+	                    @Override
+	                    public void handle(MouseEvent event) {
+	                        if (event.getClickCount() > 1) {
+	                            ListCell<String> c = (ListCell<String>) event.getSource();
+	                            if (c.getText() != null) {
+	                            	createEvent.handle(null);
+	                            }
+	                        }
+	                    }
+	                });
+						
+					return cell;
+				}
+			});
 
 			HBox toolbar = new HBox();
 			toolbar.getStyleClass().add(CSS_TOOLBAR);

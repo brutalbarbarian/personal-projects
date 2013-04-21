@@ -38,10 +38,12 @@ public class DateUtil {
 			return Calendar.YEAR;
 		case Calendar.WEEK_OF_MONTH:
 		case Calendar.WEEK_OF_YEAR:
+			return Calendar.MONTH;
 		case Calendar.DAY_OF_MONTH:
 		case Calendar.DAY_OF_WEEK:
 		case Calendar.DAY_OF_YEAR:
-			return Calendar.MONTH;
+//			return Calendar.MONTH;
+			return Calendar.WEEK_OF_MONTH;
 		case Calendar.HOUR:
 		case Calendar.HOUR_OF_DAY:
 			return Calendar.DATE;
