@@ -41,7 +41,9 @@ public class JavaFXUtil {
 	}
 	
 	public static boolean isChildOf(Node child, Node parent) {
-		if (child == parent) {
+		if (child == null || parent == null) {
+			return false;
+		} else if (child == parent) {
 			return true;
 		} else {
 			Node p = child.getParent();

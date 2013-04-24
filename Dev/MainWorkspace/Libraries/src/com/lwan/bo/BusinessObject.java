@@ -583,7 +583,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 			BusinessObject owner = ownerProperty().getValue();
 			ModifiedEvent modEvent = new ModifiedEvent(event, this);
 			if (owner != null) {
-				ownerProperty().getValue().fireModified(modEvent);
+				owner.fireModified(modEvent);
 			}
 			for(ModifiedEventListener listener : listeners) {
 				listener.handleModified(modEvent);

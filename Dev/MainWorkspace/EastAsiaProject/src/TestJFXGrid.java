@@ -34,7 +34,7 @@ public class TestJFXGrid extends App{
 		BOLinkEx<BOSet<BOEmployeePayment>> setLink = new BOLinkEx<>();
 		
 		final BOGrid<BOEmployeePayment> grid = new BOGrid<>(
-				setLink,
+				"TEST", setLink,
 				new String[]{"Name", "Date Paid", "Notes", "Paid Amount"}, 
 				new String[]{".../.../NameFirst", "DatePaid", "notes", "PaidAmount"},
 				new boolean[]{false, true, true, true});

@@ -125,8 +125,8 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 		children.add(e);
 	}
 	
-	protected T ensureChildActive(int id) {
-		T result = getSource().ensureChildActive(id);
+	public T ensureChildActive(Object id) {
+		T result = getSource().populateChild(id, false);
 		if (result != null) {
 			boolean containsChild = false;
 			for (T child : this) {
@@ -138,6 +138,8 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 			if (!containsChild) {
 				addChild(result);				
 			}
+			
+			result.ensureActive();
 		}
 		return result;		
 	}

@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Vector;
 
-import sun.misc.Timeable;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -23,31 +21,26 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.Axis;
-import javafx.scene.chart.AxisBuilder;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.Chart;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.LineChartBuilder;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.PieChart;
 import javafx.scene.chart.PieChartBuilder;
-import javafx.scene.chart.ValueAxis;
-import javafx.scene.chart.ValueAxisBuilder;
+import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.PieChart.Data;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -223,14 +216,14 @@ public class BOChartControl <T extends BusinessObject> {
 	protected static final int SCENE_DISPLAY = 1;
 	
 	protected static final String [] GRAPH_TYPES = {
-		"Templates", "Pie", "Line", "Bar", "XY"
+		"Templates", "Pie", "Line", "Bar", "Scatter"
 	};
 	
 	public static final int GRAPH_TEMPLATE = 0;
 	public static final int GRAPH_PIE = 1;
 	public static final int GRAPH_LINE = 2;
 	public static final int GRAPH_BAR = 3;
-	public static final int GRAPH_XY = 4;
+	public static final int GRAPH_SCATTER = 4;
 	
 	static final String GROUP_KEY = "GROUP";
 	static final String VALUE_KEY = "VALUE";
@@ -308,14 +301,12 @@ public class BOChartControl <T extends BusinessObject> {
 							case GRAPH_PIE:
 								centre = new PieScreen();
 								break;		
-							case GRAPH_LINE:
-								centre = new LineScreen();
+							case GRAPH_LINE:							
+							case GRAPH_SCATTER:
+								centre = new XYScreen();
 								break;
 							case GRAPH_BAR:
-
-								break;
-							case GRAPH_XY:
-
+								centre = new BarScreen();
 								break;
 							default:
 								throw new RuntimeException("Unknown graph mode selected");	
@@ -343,10 +334,10 @@ public class BOChartControl <T extends BusinessObject> {
 				centre = new LineGraph();
 				break;
 			case GRAPH_BAR:
-
+				centre = new BarGraph();
 				break;
-			case GRAPH_XY:
-
+			case GRAPH_SCATTER:
+				centre = new ScatterGraph();
 				break;
 			default:
 				throw new RuntimeException("Unknown graph mode selected");	
@@ -362,27 +353,60 @@ public class BOChartControl <T extends BusinessObject> {
 		stage.setScene(sc);
 	}
 	
+	class LineGraph extends BasicXYGraph{
+		XYChart<?, ?> getChart(Axis<?> xAxis, Axis<?> yAxis) {
+			return new LineChart<>(xAxis, yAxis);
+		}
+
+		boolean xIsDiscrete() {
+			return false;
+		}
+	}
+	
+	class BarGraph extends BasicXYGraph{
+		XYChart<?, ?> getChart(Axis<?> xAxis, Axis<?> yAxis) {
+			return new BarChart<>(xAxis, yAxis);
+		}
+
+		@Override
+		boolean xIsDiscrete() {
+			return true;
+		}		
+	}
+	
+	class ScatterGraph extends BasicXYGraph{
+		XYChart<?, ?> getChart(Axis<?> xAxis, Axis<?> yAxis) {
+			return new ScatterChart<>(xAxis, yAxis);
+		}
+
+		@Override
+		boolean xIsDiscrete() {
+			return false;
+		}		
+	}
+	
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	class LineGraph extends GraphBase {	
+	abstract class BasicXYGraph extends GraphBase {
+		abstract XYChart<?, ?> getChart(Axis<?> xAxis, Axis<?> yAxis);
+		abstract boolean xIsDiscrete();
+		
 		Chart initChart() {
 			// fetch the attributes
 			String[] xStrs = currentTemplate.properties.get(X_KEY).split("#");
 			Attribute xAttr = findAttribute(xStrs[0]);
-//			AttributeType xType = getAttributeType(xAttr);
 			
 			String[] yStrs = currentTemplate.properties.get(Y_KEY).split("#");
 			Attribute yAttr = findAttribute(yStrs[0]);
-//			AttributeType yType = getAttributeType(yAttr);
 			
 			String[] groupStrs = currentTemplate.properties.get(GROUP_KEY).split("#");
 			Attribute groupAttr = findAttribute(groupStrs[0]);
-//			AttributeType groupType = getAttributeType(groupAttr);
 			
 			// need to find the min and max of x and y... so we construct data first
-			Comparable<?> minX = null, maxX = null, minY = null, maxY = null;
+			Comparable<?> minX = null, maxX = null;
+			Number minY = null, maxY = null;
 			
-			HashMap<Object, List<javafx.scene.chart.XYChart.Data<Comparable<?>, Comparable<?>>>> valueLines = 
-					new HashMap<>();			
+			HashMap<Object, HashMap<Comparable, Number>> valueLines = new HashMap<>();
+			HashMap<Comparable, String> displayValues = new HashMap<>();
 			HashMap<Object, String> seriesDisplay = new HashMap<>();
 			
 			DisplayRecord record = new DisplayRecord();
@@ -401,49 +425,62 @@ public class BOChartControl <T extends BusinessObject> {
 				if (!seriesDisplay.containsKey(group)) {
 					seriesDisplay.put(group, displayLabel);
 				}
-				
-				Comparable xValue = (Comparable)xAttr.getValueAttribute(child).getValue();				
-				Comparable yValue = (Comparable)yAttr.getValueAttribute(child).getValue();
-				javafx.scene.chart.XYChart.Data<Comparable<?>, Comparable<?>> data = 
-						new javafx.scene.chart.XYChart.Data<Comparable<?>, Comparable<?>>(xValue, yValue);
+				decodeDiscrete(xAttr, xStrs, child, record);
+				Comparable xValue = (Comparable)record.hashValue;
+				displayValues.put(xValue, record.displayValue);
+				Number yValue = (Number)yAttr.getValueAttribute(child).getValue();
 
-				List<javafx.scene.chart.XYChart.Data<Comparable<?>, Comparable<?>>> series = valueLines.get(group);
+				HashMap<Comparable, Number> series = valueLines.get(group);				
 				if (series == null) {
-					series = new Vector<>();
+					series = new HashMap<Comparable, Number>();
 					valueLines.put(group, series);
 				}
-				series.add(data);
 				
-				minX = minX == null? xValue : xValue.compareTo(minX) < 0 ? xValue : minX;
-				minY = minY == null? yValue : yValue.compareTo(minY) < 0 ? yValue : minY;
+				Number num = GenericsUtil.Coalice(series.get(xValue), 0);
+				
+				series.put(xValue, num.doubleValue() + yValue.doubleValue());
+				
+				minX = minX == null? xValue : xValue.compareTo(minX) < 0 ? xValue : minX;				
 				maxX = maxX == null? xValue : xValue.compareTo(maxX) > 0 ? xValue : maxX;
-				maxY = maxY == null? yValue : yValue.compareTo(maxY) > 0 ? yValue : maxY;
+				minY = minY == null? yValue : yValue.doubleValue() < minY.doubleValue() ? yValue : minY;
+				maxY = maxY == null? yValue : yValue.doubleValue() > maxY.doubleValue() ? yValue : maxY;
 			}
-			NumberAxis yAxis = new NumberAxis();
+
+			Axis<?>	yAxis = new NumberAxis();
 			yAxis.setLabel(yAttr.getDisplayName());
 			
 			Axis<?> xAxis;
-			
-			AttributeType xType = getAttributeType(xAttr);
-			if (xType.isDateTime()) {
-				xAxis = new DateAxis(Calendar.DATE, (Date)minX, (Date)maxX, App.getLocale());				
-			} else { // xType.isNumeric()
-				xAxis = new NumberAxis();
+			if (xIsDiscrete()) {
+				xAxis = new CategoryAxis();
+			} else {
+				AttributeType xType = getAttributeType(xAttr);
+				if (xType.isDateTime()) {
+					xAxis = new DateAxis(Calendar.DATE, (Date)minX, (Date)maxX, App.getLocale());
+					xAxis.setTickLabelRotation(90);
+				} else { // xType.isNumeric()
+					xAxis = new NumberAxis();
+				}
 			}
 			xAxis.setLabel(xAttr.getDisplayName());
 			
 		
-			LineChart lineChart = new LineChart(xAxis, yAxis);
+			XYChart lineChart = getChart(xAxis, yAxis); 
 			String title;
 			if (StringUtil.isNullOrBlank(currentTemplate.name)) {
 				title = currentTemplate.name;
 			} else {
 				title = "";
 			}
+			lineChart.setTitle(title);
 			
 			List<Series> data = new Vector<>();
 			for(Object key : seriesDisplay.keySet()) {
-				List dataList = valueLines.get(key);
+				HashMap<Comparable, Number> mapSeries = valueLines.get(key);
+				List dataList = new Vector<>();	// null;	// valueLines.get(key);
+				for (Entry<Comparable, Number> entry : mapSeries.entrySet()) {
+					dataList.add(new XYChart.Data(entry.getKey(), entry.getValue()));
+				}
+				
 				Collections.sort(dataList, new Comparator(){
 					public int compare(Object o1, Object o2) {
 						javafx.scene.chart.XYChart.Data d1 = (javafx.scene.chart.XYChart.Data)o1;
@@ -454,8 +491,22 @@ public class BOChartControl <T extends BusinessObject> {
 						return c1.compareTo(c2);
 					}					
 				});
-				ObservableList<javafx.scene.chart.XYChart.Data> list =
-							new ObservableListWrapper(dataList);
+				
+				
+				ObservableList<XYChart.Data> list;
+				if (xIsDiscrete()) {
+					List<XYChart.Data> tmpList = new Vector<>();
+					for (Object obj : dataList) {
+						XYChart.Data d = ((XYChart.Data)obj);
+						tmpList.add(new XYChart.Data(displayValues.get(d.getXValue()), d.getYValue()));
+					}
+					
+					list = new ObservableListWrapper(tmpList);
+				} else {
+					list = new ObservableListWrapper(dataList);	
+				}
+				
+				
 				Series series = new Series(seriesDisplay.get(key), list);
 				data.add(series);
 			}
@@ -537,23 +588,33 @@ public class BOChartControl <T extends BusinessObject> {
 				Number range;
 				Number val = (Number)value;
 				
-				range = Double.parseDouble(params[1]);
-
-				if (val.doubleValue() >= 0) {
-					min = Math.floor(val.doubleValue() / range.doubleValue()) * range.doubleValue();
+				if (params.length > 0) {
+					range = Double.parseDouble(params[1]);
+					if (val.doubleValue() >= 0) {
+						min = Math.floor(val.doubleValue() / range.doubleValue()) * range.doubleValue();
+					} else {
+						min = Math.ceil(val.doubleValue() / range.doubleValue()) * range.doubleValue();
+					}
+					
+					max = min.doubleValue() + range.doubleValue();
+					
+					result.hashValue = (min.doubleValue() + max.doubleValue()) / 2;
+					if (type == AttributeType.Integer) {
+						result.displayValue = min.intValue() + " - " + max.intValue();
+					} else if (type == AttributeType.Double) {
+						result.displayValue = min.doubleValue() + " - " + max.doubleValue();
+					} else if (type == AttributeType.Currency) {
+						result.displayValue = Lng.formatCurrency(min) + " - " + Lng.formatCurrency(max);
+					}
 				} else {
-					min = Math.ceil(val.doubleValue() / range.doubleValue()) * range.doubleValue();
-				}
-				
-				max = min.doubleValue() + range.doubleValue();
-				
-				result.hashValue = min;
-				if (type == AttributeType.Integer) {
-					result.displayValue = min.intValue() + " - " + max.intValue();
-				} else if (type == AttributeType.Double) {
-					result.displayValue = min.doubleValue() + " - " + max.doubleValue();
-				} else if (type == AttributeType.Currency) {
-					result.displayValue = Lng.formatCurrency(min) + " - " + Lng.formatCurrency(max);
+					result.hashValue = val;
+					if (type == AttributeType.Integer) {
+						result.displayValue = val.toString();
+					} else if (type == AttributeType.Double) {
+						result.displayValue = val.toString();
+					} else if (type == AttributeType.Currency) {
+						result.displayValue = Lng.formatCurrency(val);
+					}
 				}
 			} else {
 				result.hashValue = value;
@@ -640,7 +701,6 @@ public class BOChartControl <T extends BusinessObject> {
 		}
 	}
 	
-	
 	// All attributes... no grouping 
 //	private static final int MODE_ALL = 0;
 	// All attributes... numeric and date attributes are grouped into ranges
@@ -648,6 +708,7 @@ public class BOChartControl <T extends BusinessObject> {
 	// IsNumeric() attributes only.
 	private static final int MODE_NUMERIC = 2;
 	private static final int MODE_ORDERED = 3;	// Numeric and Date
+	private static final int MODE_ORDERED_DISCRETE = 4;	// Same as ordered, but allow user to clump values
 	
 	static final String[] ATTRIBUTE_DATE_GROUPS = {"Days", 
 		"Weeks", "Months", "Years"};
@@ -689,6 +750,8 @@ public class BOChartControl <T extends BusinessObject> {
 			case MODE_NUMERIC:
 				return type.isNumeric();
 			case MODE_ORDERED:
+				return type.isNumeric() || type.isDateTime();
+			case MODE_ORDERED_DISCRETE:
 				return type.isNumeric() || type.isDateTime();
 			default:
 				return false;
@@ -751,7 +814,7 @@ public class BOChartControl <T extends BusinessObject> {
 					extra = null;	// remove whatever previous selection there was
 					AttributeType type = attributeIsSpecial(selected) ? 
 							AttributeType.Unknown : selected.getValueAttribute(sample).getAttributeType();
-					if (mode == MODE_DISCRETE) {
+					if (mode == MODE_DISCRETE || mode == MODE_ORDERED_DISCRETE) {
 						if (type == AttributeType.Date) {
 							ComboBox<Integer> cbDate = new ComboBox<>();
 							cbDate.addAllItems(
@@ -778,6 +841,11 @@ public class BOChartControl <T extends BusinessObject> {
 							BOLinkEx<BOAttribute<Number>> link = new BOLinkEx<>();
 							link.setLinkedObject(dummy);
 							BOTextField textField = new BOTextField(link, "");
+							HBox.setHgrow(textField, Priority.SOMETIMES);
+							if (mode == MODE_ORDERED_DISCRETE) {
+								textField.setPromptText("<NONE>");
+								extra = "";
+							}							
 							
 							textField.dataBindingProperty().buildAttributeLinks();
 							
@@ -786,7 +854,11 @@ public class BOChartControl <T extends BusinessObject> {
 										ObservableValue<? extends Number> arg0,
 										Number arg1, Number arg2) {
 									if (arg2.doubleValue() == 0) {
-										extra = null;
+										if (mode == MODE_ORDERED_DISCRETE) {
+											extra = "";
+										} else {
+											extra = null;	
+										}										
 									} else {
 										extra = arg2.toString();	
 									}									
@@ -818,11 +890,16 @@ public class BOChartControl <T extends BusinessObject> {
 		boolean validSelected() {
 			Attribute selected = cbItems.getSelected();
 			boolean result = selected != null;
-			if (result && mode == MODE_DISCRETE) {
+			if (result && requiresExtras()) {
 				result = extra != null;
 			}
 			
 			return result;
+		}
+		
+		boolean requiresExtras() {
+			return 	mode == MODE_DISCRETE ||
+					mode == MODE_ORDERED_DISCRETE;
 		}
 		
 	}
@@ -926,18 +1003,30 @@ public class BOChartControl <T extends BusinessObject> {
 		}
 	}
 	
-	private class LineScreen extends GraphSetupScreen {
+	private class BarScreen extends GraphSetupScreen{
+		AttributeSelector xAttribute, yAttribute, groupAttribute;
+		
+		public List<AttributeSelector> getSelectors() {
+			xAttribute = new AttributeSelector(this, Lng._("X-Axis"), MODE_DISCRETE, X_KEY, false, false);
+			yAttribute = new AttributeSelector(this, Lng._("Y-Axis"), MODE_NUMERIC, Y_KEY, false, false);
+			groupAttribute = new AttributeSelector(this, Lng._("Group By"), MODE_DISCRETE, GROUP_KEY, false, true);
+//			groupAttribute.setVisible(false);
+			
+			return Arrays.asList(xAttribute, yAttribute, groupAttribute);
+		}
+	}
+	
+	private class XYScreen extends GraphSetupScreen {
 		AttributeSelector xAttribute, yAttribute, groupAttribute;
 		
 		@Override
 		public List<AttributeSelector> getSelectors() {
-			xAttribute = new AttributeSelector(this, Lng._("X-Axis"), MODE_ORDERED, X_KEY, false, false);
-			yAttribute = new AttributeSelector(this, Lng._("Y-Axis"), MODE_ORDERED, Y_KEY, false, false);
+			xAttribute = new AttributeSelector(this, Lng._("X-Axis"), MODE_ORDERED_DISCRETE, X_KEY, false, false);
+			yAttribute = new AttributeSelector(this, Lng._("Y-Axis"), MODE_NUMERIC, Y_KEY, false, false);
 			groupAttribute = new AttributeSelector(this, Lng._("Group By"), MODE_DISCRETE, GROUP_KEY, false, true);
 			
 			return Arrays.asList(xAttribute, yAttribute, groupAttribute);
 		}
-		
 	}
 	
 	private class TemplateScreen extends BorderPane{
@@ -1021,7 +1110,8 @@ public class BOChartControl <T extends BusinessObject> {
 					};
 					
 					cell.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-	                    @Override
+	                    @SuppressWarnings("unchecked")
+						@Override
 	                    public void handle(MouseEvent event) {
 	                        if (event.getClickCount() > 1) {
 	                            ListCell<String> c = (ListCell<String>) event.getSource();

@@ -22,6 +22,7 @@ import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.JavaFXUtil;
+import com.lwan.util.wrappers.Freeable;
 import com.lwan.util.wrappers.Procedure;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
@@ -33,6 +34,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.SortType;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
@@ -47,7 +50,7 @@ import javafx.util.Callback;
  *
  * @param <R>
  */
-public class BOGrid<R extends BusinessObject> extends TableView<R>{
+public class BOGrid<R extends BusinessObject> extends TableView<R> implements Freeable{
 	/**
 	 * Editing is per record basis.
 	 * What this means is that when leaving a record, to edit a different record, this
@@ -91,7 +94,9 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 		return link.getLinkedObject();
 	}
 	
-	public BOGrid(BOLinkEx<BOSet<R>> link, 
+	private String key;
+	
+	public BOGrid(String key, BOLinkEx<BOSet<R>> link, 
 			String [] columnNames, String[] fieldPaths, boolean[] editable) {
 		// initialize the grid columns?
 		if (columnNames == null || fieldPaths == null || 
@@ -121,7 +126,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 						isEditingProperty().setValue(true);
 					}
 				}
-			}			
+			}
 		});
 		// Not sure if this is a good idea...
 		link.LinkedObjectProperty().addListener(new ChangeListener<BOSet<R>>() {
@@ -168,7 +173,103 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				selected = newValue;	// Keep a local copy of the last selected item.
 			}
 		});
+		
+		setOnKeyPressed(new EventHandler<KeyEvent>(){
+			public void handle(KeyEvent e) {
+				if (e.getText().trim().length() > 0) {
+					TablePosition<R, ?> pos = editingCellProperty().get();
+					int row = getSelectionModel().getSelectedIndex();
+					if ((pos == null || pos.getRow() < 0) && row >= 0) {
+						// TODO
+						// start edit
+						edit(row, getColumns().get(0));	// first column
+					}
+				}
+			}			
+		});
+		
+		this.key = key;
+		final String layout = App.getKey(key);
+		if (layout != null) {
+			Platform.runLater(new Runnable(){
+				public void run() {
+					// TODO Auto-generated method stub
+					displayLayout(layout);		
+				}				
+			});			
+		}
 	}
+	
+	protected void displayLayout(String layout) {
+		String[] cols = layout.split("%");
+		int i = 0;
+		for (String s : cols) {
+			String[] strs = s.split(":");
+			if (i == (cols.length - 1)) {
+				GridColumn col = getColumnByField(s);
+				if (col != null) {
+					getSortOrder().add(col);
+				}
+			} else {
+			
+				String field = strs[0];
+				double width = Double.parseDouble(strs[1]);
+				boolean visible = Boolean.parseBoolean(strs[2]);
+				String sort = strs[3];
+				SortType st = sort.length() == 0? null : SortType.valueOf(sort);
+				
+				GridColumn column = getColumnByField(field);
+				column.setPrefWidth(width);
+				column.setVisible(visible);
+				if (st != null) {
+					column.setSortType(st);
+				}
+				
+				getColumns().remove(column);
+				getColumns().add(i, column);
+				
+				i++;
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void saveLayout() {
+		// save the order of each column and their respective widths
+		StringBuilder builder = new StringBuilder();
+		for (TableColumn<R, ?> c : getColumns()) {			
+			GridColumn col = (GridColumn)c;
+			
+			double width = col.getWidth();
+			String field = col.getField();
+			boolean visible = col.isVisible();
+			SortType st = col.getSortType();
+			String sort = st == null? "" : st.toString();
+			
+			
+			builder.append(field).append(':').append(width).append(':').
+					append(visible).append(':').append(sort);
+			
+			builder.append('%');
+		}
+		
+		if (getSortOrder().size() > 0) {
+			builder.append(((GridColumn)getSortOrder().get(0)).getField());
+		}
+		
+		App.putKey(key, builder.toString());
+	}
+	
+	@Override
+	public void free() {
+		saveLayout();
+	}
+	
+	protected void finalize() throws Throwable {
+		free();
+		super.finalize();
+	}
+	
 	boolean revertingSelection;
 	private R selected;
 	
@@ -838,7 +939,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R>{
 				public void handle(KeyEvent e) {
 					if (e.getCode() == KeyCode.TAB) {
 						commitEdit(null);
-						gotoNextColumn(!e.isControlDown());
+						gotoNextColumn(!e.isShiftDown());
 					} else if (e.getCode() == KeyCode.ENTER) {
 						commitEdit(null);
 					} else if (e.getCode() == KeyCode.ESCAPE) {

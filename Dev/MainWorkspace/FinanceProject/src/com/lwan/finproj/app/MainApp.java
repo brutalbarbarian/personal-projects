@@ -73,6 +73,7 @@ public class MainApp extends App{
 		
 		
 		Scene scene = new Scene(bp);
+
 		scene.getStylesheets().add("resource/calendarstyle.css");
 		scene.getStylesheets().add("resource/chartcontrol.css");
 		
@@ -89,5 +90,13 @@ public class MainApp extends App{
 	
 	public static void main(String[] args) {
 		launch(args);
+	}
+	
+	public void stop() throws Exception {
+		if (mainPane.getCenter() != null) {
+			((Freeable)mainPane.getCenter()).free();
+		}
+		
+		super.stop();
 	}
 }

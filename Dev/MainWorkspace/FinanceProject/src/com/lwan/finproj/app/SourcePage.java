@@ -37,9 +37,10 @@ public class SourcePage extends BorderPane implements Freeable{
 	
 	protected void initControls() {
 		gridLink = new BOLinkEx<>();
-		srcGrid = new BOGrid<>(gridLink, new String[]{"Source Name", "Transaction Count"}, 
-				new String[]{"SourceName", "TransactionCount"}, 
-				new boolean[]{true, false});
+		srcGrid = new BOGrid<>("SourcePageSourceGrid", gridLink, 
+				new String[]{"Source Name"},//, "Transaction Count"}, 
+				new String[]{"SourceName"},//, "TransactionCount"}, 
+				new boolean[]{true});//, false});
 		srcGrid.setEditable(true);
 		
 		gridSetRef = new BOSourceSetRef();
@@ -50,8 +51,8 @@ public class SourcePage extends BorderPane implements Freeable{
 		record = gridCtrl.getSelectedLink();
 		
 		tranSetLink = new BOLinkEx<>();
-		tranGrid = new BOGrid<>(tranSetLink, new String[]{"TransactionAmount",
-				"TransactionNotes", "TransactionDate"}, 
+		tranGrid = new BOGrid<>("SourcePageTranGrid", tranSetLink, 
+				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate"}, 
 				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate"}, 
 				new boolean[]{false, false, false});
 		tranGrid.setEditable(false);
@@ -113,5 +114,8 @@ public class SourcePage extends BorderPane implements Freeable{
 //		BOCtrlUtil.buildAttributeLinks(grid);
 		srcGrid.refresh();
 		tranGrid.refresh();
+		
+		srcGrid.free();
+		tranGrid.free();
 	}
 }

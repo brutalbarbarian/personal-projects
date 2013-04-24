@@ -10,7 +10,7 @@ public class DateUtil {
 		if (cal == null) {
 			cal = Calendar.getInstance();
 		}
-		return cal.getTime();
+		return floor(cal, Calendar.DATE).getTime();
 	}
 	
 	public static Calendar floor(Calendar c, int mode) {

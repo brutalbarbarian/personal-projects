@@ -12,7 +12,7 @@ import com.lwan.javafx.app.util.DbUtil;
 public class BOSource extends BODbObject{
 	private BODbAttribute<Integer> sourceID;
 	private BODbAttribute<String> sourceName;
-	private BOAttribute<Integer> transactionCount;
+//	private BOAttribute<Integer> transactionCount;
 
 	public BODbAttribute<Integer> sourceID() {
 		return sourceID;
@@ -20,9 +20,9 @@ public class BOSource extends BODbObject{
 	public BODbAttribute<String> sourceName() {
 		return sourceName;
 	}
-	public BOAttribute<Integer> transactionCount() {
-		return transactionCount;
-	}
+//	public BOAttribute<Integer> transactionCount() {
+//		return transactionCount;
+//	}
 	
 	public BOSource(BusinessObject owner) {
 		super(owner, "Source");	
@@ -48,14 +48,14 @@ public class BOSource extends BODbObject{
 		sourceID = addAsChild(new BODbAttribute<Integer>(this, "SourceID", "src_id", AttributeType.ID));
 		sourceName = addAsChild(new BODbAttribute<String>(this, "SourceName", "src_name", AttributeType.String));
 		
-		transactionCount = addAsChild(new BOAttribute<Integer>(this, "TransactionCount", AttributeType.Integer));
-		transactionCount.triggersModifyProperty().setValue(false);
+//		transactionCount = addAsChild(new BOAttribute<Integer>(this, "TransactionCount", AttributeType.Integer));
+//		transactionCount.triggersModifyProperty().setValue(false);
 	}
 
 	@Override
 	public void clearAttributes() {
 		sourceName.clear();
-		transactionCount.setValue(0);
+//		transactionCount.setValue(0);
 	}
 
 	@Override

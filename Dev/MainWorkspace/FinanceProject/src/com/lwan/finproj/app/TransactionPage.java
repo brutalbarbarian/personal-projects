@@ -27,13 +27,17 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.util.Callback;
 
@@ -60,6 +64,32 @@ public class TransactionPage extends BorderPane implements Freeable{
 	
 	protected TransactionPage() {		
 		initControls();
+		addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>(){
+			public void handle(KeyEvent arg0) {
+				if (arg0.isControlDown()) {
+					switch (arg0.getText()) {
+					case "n":	// new
+						if (!tranGrid.isEditingProperty().getValue()) {
+							gridCtrl.activate(gridCtrl.getPrimaryButton());
+							tranGrid.requestFocus();
+						}
+						break;
+					case "s":	// save
+						if (tranGrid.isEditingProperty().getValue()) {
+							// check what's focused
+							Node n = getScene().getFocusOwner();
+							if (n instanceof BOTextField) {
+								BOTextField txtField = (BOTextField)n;
+								txtField.dataBindingProperty().endEdit(true);
+							}
+							
+							gridCtrl.activate(gridCtrl.getPrimaryButton());
+							gridCtrl.getPrimaryButton().requestFocus();
+						}					
+					}
+				}
+			}			
+		});
 		
 		tranGrid.refresh();
 	}
@@ -76,13 +106,14 @@ public class TransactionPage extends BorderPane implements Freeable{
 		record.free();
 		BOCtrlUtil.buildAttributeLinks(paramBar);
 		BOCtrlUtil.buildAttributeLinks(grid);
-		tranGrid.refresh();
+		tranGrid.refresh();	// remove?
+		tranGrid.free();
 	}
 	
 	protected void initControls() {
 		// init grid
 		gridLink = new BOLinkEx<>();
-		tranGrid = new BOGrid<>(gridLink, new String[]{"TransactionAmount",
+		tranGrid = new BOGrid<>("TransactionPageTranGrid", gridLink, new String[]{"TransactionAmount",
 				"TransactionNotes", "TransactionDate", "SourceName"}, 
 				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate", 
 				"SourceID"}, new boolean[]{true, true, true, true});
@@ -196,6 +227,9 @@ public class TransactionPage extends BorderPane implements Freeable{
 		setTop(paramBar);
 		setCenter(VBoxBuilder.create().children(tranGrid, grid).spacing(2).build());		
 		setBottom(bottomBar);
+		
+		VBox.setVgrow(tranGrid, Priority.SOMETIMES);
+		VBox.setVgrow(grid, Priority.NEVER);
 	}
 	
 	protected class BOTransactionSetRef extends BODbSetRef<BOTransaction>{

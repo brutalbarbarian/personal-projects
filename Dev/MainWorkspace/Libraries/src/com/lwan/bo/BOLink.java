@@ -78,7 +78,6 @@ public class BOLink<T extends BusinessObject> extends BusinessObject{
 				remainder = path.substring(index + 1);
 			}
 			if (ref.equals("...")) {
-				System.out.println(getName());
 				return getOwner().findChildByPath(remainder);
 			}
 		}

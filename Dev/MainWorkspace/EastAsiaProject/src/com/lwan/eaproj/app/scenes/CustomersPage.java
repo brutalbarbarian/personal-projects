@@ -28,7 +28,7 @@ class CustomersPage extends AppPage{
 		
 		lnkCustomers.setLinkedObject(set);
 			
-		grdCustomer = new BOGrid<BOCustomer>( lnkCustomers, 
+		grdCustomer = new BOGrid<BOCustomer>("", lnkCustomers, 
 				new String[]{"Customer First Name", "Customer Last Name"}, 
 				new String[]{"", ""}, null);
 		

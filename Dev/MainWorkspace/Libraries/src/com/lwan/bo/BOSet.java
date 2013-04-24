@@ -684,5 +684,16 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * Do nothing by default. 
 	 * 
 	 */
-	public void handleModified(ModifiedEvent source) {}
+	public void handleModified(ModifiedEvent source) {
+		BusinessObject src = source.getSource();
+		if (source.getType() == ModifiedEvent.TYPE_ACTIVE &&
+				src == this) {
+			for (Entry e : children) {
+				if (e.child == src) {
+					e.loaded = true;
+					break;
+				}
+			}
+		}
+	}
 }
