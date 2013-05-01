@@ -12,7 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.util.DbUtil;
-import com.lwan.util.wrappers.Freeable;
+import com.lwan.util.wrappers.Disposable;
 
 public class MainApp extends App{
 	ToggleButton btnTrans, btnSource;
@@ -51,7 +51,7 @@ public class MainApp extends App{
 						} else if (arg2 != arg1) {
 							// change page
 							if (mainPane.getCenter() != null) {
-								((Freeable)mainPane.getCenter()).free();
+								((Disposable)mainPane.getCenter()).dispose();
 							}
 							if (arg2 == btnSource) {
 								mainPane.setCenter(new SourcePage());
@@ -94,7 +94,7 @@ public class MainApp extends App{
 	
 	public void stop() throws Exception {
 		if (mainPane.getCenter() != null) {
-			((Freeable)mainPane.getCenter()).free();
+			((Disposable)mainPane.getCenter()).dispose();
 		}
 		
 		super.stop();

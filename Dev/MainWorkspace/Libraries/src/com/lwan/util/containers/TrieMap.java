@@ -264,6 +264,7 @@ public class TrieMap<T> implements Map<String, T>{
 			}
 			
 			char c = child.remainder.charAt(0);
+			c = ignoreCase? Character.toLowerCase(c) : c;
 			// get the insertion point
 			int index = - (Arrays.binarySearch(chars, 0, count, c) + 1);
 			// move existing items across if needed
@@ -273,7 +274,7 @@ public class TrieMap<T> implements Map<String, T>{
 			}
 			
 			// add the child in the correct position
-			chars[index] = ignoreCase? Character.toLowerCase(c) : c;
+			chars[index] = c;
 			children[index] = child;
 			
 			// finally increment the count

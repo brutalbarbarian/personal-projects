@@ -133,11 +133,11 @@ public class BOAttribute <T> extends BusinessObject {
 		}
 	}
 	
-	public void free() {
+	public void dispose() {
 		// unbind all listeners
 		valueProperty().unbind();
 		
-		super.free();
+		super.dispose();
 	}
 	
 	/**

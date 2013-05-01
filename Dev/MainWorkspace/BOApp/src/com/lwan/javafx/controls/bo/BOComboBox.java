@@ -3,13 +3,12 @@ package com.lwan.javafx.controls.bo;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.beans.binding.Bindings;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
+import com.lwan.bo.ModifiedEvent;
+import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.controls.ComboBox;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
@@ -47,15 +46,13 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 		this.nullDisplayValue = nullDisplayValue;
 		
 		populateFromSet();
-//		set.addListener(new ModifiedEventListener() {
-//			public void handleModified(ModifiedEvent event) {
-//				populateFromSet();
-//			}			
-//		});
-		// Refresh on showing...not sure if this is a good idea or not but eh.
-		setOnShowing(new EventHandler<Event>() {
-			public void handle(Event arg0) {
-				populateFromSet();
+		set.addListener(new ModifiedEventListener() {
+			public void handleModified(ModifiedEvent event) {
+				if ((event.getType() == ModifiedEvent.TYPE_ACTIVE ||
+						event.getType() == ModifiedEvent.TYPE_SAVE)  &&
+						event.getSource().getOwner() == BOComboBox.this.set) {
+					populateFromSet();
+				}
 			}			
 		});
 	}

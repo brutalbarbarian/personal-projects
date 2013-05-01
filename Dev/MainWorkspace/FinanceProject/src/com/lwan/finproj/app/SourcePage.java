@@ -11,14 +11,14 @@ import com.lwan.finproj.bo.BOTransaction;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
-import com.lwan.util.wrappers.Freeable;
+import com.lwan.util.wrappers.Disposable;
 
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
-public class SourcePage extends BorderPane implements Freeable{
+public class SourcePage extends BorderPane implements Disposable{
 	BOGrid<BOSource> srcGrid;
 	BOLinkEx<BOSet<BOSource>> gridLink;
 	BOGridControl<BOSource> gridCtrl;
@@ -98,24 +98,24 @@ public class SourcePage extends BorderPane implements Freeable{
 	}
 
 	protected void finalize() throws Throwable {
-		free();
+		dispose();
 		super.finalize();
 	}
 	
 	@Override
-	public void free() {
-		gridLink.free();
-		gridSetRef.free();
-		record.free();
+	public void dispose() {
+		gridLink.dispose();
+		gridSetRef.dispose();
+		record.dispose();
 		
-		tranSetLink.free();
-		transactionSet.free();
+		tranSetLink.dispose();
+		transactionSet.dispose();
 //		BOCtrlUtil.buildAttributeLinks(paramBar);
 //		BOCtrlUtil.buildAttributeLinks(grid);
 		srcGrid.refresh();
 		tranGrid.refresh();
 		
-		srcGrid.free();
-		tranGrid.free();
+		srcGrid.dispose();
+		tranGrid.dispose();
 	}
 }

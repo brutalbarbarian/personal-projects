@@ -49,14 +49,14 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 		}
 	}
 	
-	public void free() {
+	public void dispose() {
 		BOSet<T> set = getSource();
 		if (set != null) {
 			set.removeListener(this);
 			_source_set().setValue(null);
 		}
 		
-		super.free();
+		super.dispose();
 	}
 	
 	public ReadOnlyProperty<BOSet<T>> SourceSet() {

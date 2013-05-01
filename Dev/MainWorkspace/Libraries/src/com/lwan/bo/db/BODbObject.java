@@ -105,14 +105,14 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 		createStoredProcs();
 	}
 	
-	public void free() {
+	public void dispose() {
 		// clear the fields cache
 		fields.clear();
 		
 		// clear the stored procs
 		storedProcs.clear();
 		
-		super.free();
+		super.dispose();
 	}
 	
 	protected void removeChild(BusinessObject child) {

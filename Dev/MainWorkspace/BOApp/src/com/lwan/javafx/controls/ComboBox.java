@@ -180,7 +180,21 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		autoCompleteController = new AutocompleteController(getEditor(), true);
 		autoCompleteController.allowUniqueProperty().bind(appendUniqueStringsProperty());
 		
-		autoCompleteController.editingProperty().bind(getEditor().focusedProperty());
+		getEditor().textProperty().addListener(new ChangeListener<String>() {
+			public void changed(ObservableValue<? extends String> arg0,
+					String arg1, String arg2) {
+				autoCompleteController.editingProperty().set(true);
+				// counter-intuitive as hell... but eh...
+				requestFocus();
+			}
+		});
+		selectedProperty().addListener(new ChangeListener<T>() {
+			public void changed(ObservableValue<? extends T> arg0, T arg1,
+					T arg2) {
+				autoCompleteController.editingProperty().set(false);
+			}			
+		});
+//		autoCompleteController.editingProperty().bind(getEditor().focusedProperty());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -191,6 +205,18 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		} else {
 			// Assume T is of type string... since user didn't provide details...
 			return addItem((T)s, null);
+		}
+	}
+	
+	public void forceCommit() {
+		if (isShowing()) {
+			hide();
+		} else if (isEditable() && getEditor().isFocused()) {
+			String sel = getEditor().getText();
+			ComboBoxItem<T> selected = getConverter().fromString(sel);
+			if (selected != null) {
+				getSelectionModel().select(selected);
+			}
 		}
 	}
 	

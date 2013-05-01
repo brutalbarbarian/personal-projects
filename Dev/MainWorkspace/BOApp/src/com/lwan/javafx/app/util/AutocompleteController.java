@@ -111,7 +111,7 @@ public class AutocompleteController {
 		// we need to be able to allow user to still delete... 
 		editor.textProperty().addListener(new ChangeListener<String>() {
 			public void changed(ObservableValue<? extends String> arg0,
-					String oldValue, String newValue) {				
+					String oldValue, String newValue) {
 				if (!replacing && isEditing()) try {
 					
 					replacing = true;	// we don't want this triggering recursive calls
@@ -132,8 +132,7 @@ public class AutocompleteController {
 						return;
 					}
 					
-					// lets just get something working first...
-					String best = trie.getNearest(newValue);					
+					String best = trie.getNearest(newValue);
 					
 					if (best != null) {
 						if (allowUnique()) {

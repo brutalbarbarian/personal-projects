@@ -63,10 +63,10 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 		super.removeChild(child);
 	}
 	
-	public void free() {
+	public void dispose() {
 		fields.clear();
 		
-		super.free();
+		super.dispose();
 	}
 
 	public BODbSet(BusinessObject owner, String name, String childIdName, String childIdFieldName) {

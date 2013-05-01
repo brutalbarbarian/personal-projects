@@ -21,7 +21,7 @@ import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
-import com.lwan.util.wrappers.Freeable;
+import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,7 +41,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.util.Callback;
 
-public class TransactionPage extends BorderPane implements Freeable{
+public class TransactionPage extends BorderPane implements Disposable{
 	BOGrid<BOTransaction> tranGrid;
 	BOLinkEx<BOSet<BOTransaction>> gridLink;
 	BOTransactionSetRef gridSetRef;
@@ -95,19 +95,19 @@ public class TransactionPage extends BorderPane implements Freeable{
 	}
 	
 	protected void finalize() throws Throwable {
-		free();
+		dispose();
 		super.finalize();
 	}
 
 	@Override
-	public void free() {
-		gridLink.free();
-		gridSetRef.free();
-		record.free();
+	public void dispose() {
+		gridLink.dispose();
+		gridSetRef.dispose();
+		record.dispose();
 		BOCtrlUtil.buildAttributeLinks(paramBar);
 		BOCtrlUtil.buildAttributeLinks(grid);
 		tranGrid.refresh();	// remove?
-		tranGrid.free();
+		tranGrid.dispose();
 	}
 	
 	protected void initControls() {

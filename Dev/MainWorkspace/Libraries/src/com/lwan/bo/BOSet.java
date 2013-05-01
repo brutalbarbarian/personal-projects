@@ -129,7 +129,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		}
 	}
 	
-	public void free() {			
+	public void dispose() {			
 		// free any children who's parents = this
 		Vector<T> toFree = new Vector<>();
 		for (Entry e : children) {
@@ -138,12 +138,12 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 		}
 		for (T child : toFree) {
-			child.free();
+			child.dispose();
 		}
 			
 		children.clear();
 		
-		super.free();
+		super.dispose();
 	}
 	
 	
@@ -527,7 +527,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 			// free the removed children
 			for (T child : removed) {
-				child.free();
+				child.dispose();
 			}
 		}
 		

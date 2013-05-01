@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import com.lwan.javafx.app.App;
+import com.lwan.javafx.art.CalendarArt;
 import com.lwan.util.DateUtil;
 import com.lwan.util.JavaFXUtil;
 import com.lwan.util.StringUtil;
@@ -26,8 +27,6 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 import javafx.stage.WindowEvent;
@@ -112,8 +111,11 @@ public class DatePicker extends StackPane{
 		isSetingText = false;
 		textField = new TextField();
 		btnEdit = new Button();
-		Image img = new Image(getClass().getResourceAsStream("/resource/calendar.png"));
-		btnEdit.setGraphic(new ImageView(img));
+//		Image img = new Image(getClass().getResourceAsStream("/resource/calendar.png"));
+		CalendarArt graphic = new CalendarArt();
+		graphic.setPrefSize(20, 20);
+		btnEdit.setGraphic(graphic);
+		
 		btnEdit.setFocusTraversable(false);
 		btnEdit.getStyleClass().add("datepicker-editbutton");
 		

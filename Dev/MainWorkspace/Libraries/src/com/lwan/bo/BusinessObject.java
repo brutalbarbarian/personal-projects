@@ -7,7 +7,7 @@ import java.util.Vector;
 
 import com.lwan.util.ClassUtil;
 import com.lwan.util.StringUtil;
-import com.lwan.util.wrappers.Freeable;
+import com.lwan.util.wrappers.Disposable;
 import com.sun.javafx.collections.ObservableListWrapper;
 
 import javafx.beans.property.Property;
@@ -72,7 +72,7 @@ import javafx.util.Callback;
  * @author Brutalbarbarian
  *
  */
-public abstract class BusinessObject implements ModifiedEventListener, Freeable{
+public abstract class BusinessObject implements ModifiedEventListener, Disposable{
 	/* Property Declarations */
 	
 	private Property<BusinessObject> ownerProperty;
@@ -104,7 +104,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 	}
 	
 	protected void finalize() throws Throwable {
-		free();
+		dispose();
 		super.finalize();
 	}
 	
@@ -125,7 +125,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 	 * in order to ensure all links and pointers are also nulled.
 	 * 
 	 */
-	public void free() {
+	public void dispose() {
 		BusinessObject owner = getOwner();
 		if (owner != null) {
 			// remove potential owner's pointer to this
@@ -139,7 +139,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 			BusinessObject[] array = new BusinessObject[children.size()];
 			children.values().toArray(array);
 			for (BusinessObject bo : array) {
-				bo.free();
+				bo.dispose();
 			}
 	
 			children.clear();
@@ -559,7 +559,6 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 			activeProperty().setValue(true);
 		}
 	}
-	
 
 	/**
 	 * Fire an event to this object, which will in turn pass the event up the hierarchy,
@@ -568,8 +567,9 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 	 * @param source
 	 */
 	public final void fireModified(ModifiedEvent event) {
-		if (allowNotificationsProperty().getValue()) { 
-			if (!(isHandlingActiveProperty().getValue() && 
+		if (allowNotificationsProperty().getValue()) {
+			if (	event.getType() != ModifiedEvent.TYPE_SAVE &&
+					!(isHandlingActiveProperty().getValue() && 
 					event.getSource().triggersModifyProperty().getValue() &&					
 					event.getType() == ModifiedEvent.TYPE_ACTIVE)) {
 				stateProperty().getValue().add(State.Modified);
@@ -762,6 +762,8 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 			} else {
 				stateProperty().getValue().remove(State.Dataset);
 			}
+			// Let listeners know about the save
+			fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_SAVE));			
 			return true;
 		} else {
 			return false;
@@ -876,7 +878,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Freeable{
 	 * @return
 	 */
 	protected String getPropertyStrings() {
-		return "Active:" + activeProperty().getValue();
+		return "Active:" + activeProperty().getValue() + ", FromDataset:" + isFromDataset() + ", Modified:" + isModified();
 	}
 	
 	/**

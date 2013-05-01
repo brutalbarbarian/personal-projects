@@ -22,7 +22,7 @@ import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.JavaFXUtil;
-import com.lwan.util.wrappers.Freeable;
+import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
@@ -50,7 +50,7 @@ import javafx.util.Callback;
  *
  * @param <R>
  */
-public class BOGrid<R extends BusinessObject> extends TableView<R> implements Freeable{
+public class BOGrid<R extends BusinessObject> extends TableView<R> implements Disposable{
 	/**
 	 * Editing is per record basis.
 	 * What this means is that when leaving a record, to edit a different record, this
@@ -174,26 +174,45 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Fr
 			}
 		});
 		
-		setOnKeyPressed(new EventHandler<KeyEvent>(){
+		addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>(){
 			public void handle(KeyEvent e) {
-				if (e.getText().trim().length() > 0) {
+				KeyCode code = e.getCode();
+				if (code != KeyCode.TAB &&
+						e.getText().trim().length() > 0) {
 					TablePosition<R, ?> pos = editingCellProperty().get();
 					int row = getSelectionModel().getSelectedIndex();
 					if ((pos == null || pos.getRow() < 0) && row >= 0) {
-						// TODO
 						// start edit
 						edit(row, getColumns().get(0));	// first column
 					}
 				}
-			}			
+			}
 		});
+//		addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>(){
+//			public void handle(final KeyEvent e) {
+//				TablePosition<R, ?> pos = editingCellProperty().get();
+//				int row = getSelectionModel().getSelectedIndex();
+//				if ((pos == null || pos.getRow() < 0) && row >= 0) {
+//					KeyEvent event = (KeyEvent)e.copyFor(arg0, arg1)
+//					Platform.runLater(new Runnable(){
+//						public void run() {
+//							Node n = getScene().getFocusOwner();
+//							if (n != null && n != BOGrid.this){ 
+//								System.out.println(n);
+//								Event.fireEvent(n, e.copyFor(null, n));
+//							}
+//						}						
+//					});
+//				}
+////			}			
+//		});
+		
 		
 		this.key = key;
 		final String layout = App.getKey(key);
 		if (layout != null) {
 			Platform.runLater(new Runnable(){
 				public void run() {
-					// TODO Auto-generated method stub
 					displayLayout(layout);		
 				}				
 			});			
@@ -261,12 +280,12 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Fr
 	}
 	
 	@Override
-	public void free() {
+	public void dispose() {
 		saveLayout();
 	}
 	
 	protected void finalize() throws Throwable {
-		free();
+		dispose();
 		super.finalize();
 	}
 	
@@ -807,6 +826,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Fr
 			}
 			
 			return combobox;
+		}
+		
+		public void commitEdit(Object item) {
+			System.out.println("commiting:... " + combobox);
+			if (combobox != null) {
+				combobox.forceCommit();
+			}
+			super.commitEdit(item);
 		}
 
 		private void createCombobox() {
