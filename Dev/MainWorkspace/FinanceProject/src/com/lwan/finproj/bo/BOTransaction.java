@@ -3,6 +3,7 @@ package com.lwan.finproj.bo;
 import java.util.Date;
 
 import com.lwan.bo.AttributeType;
+import com.lwan.bo.BOException;
 import com.lwan.bo.BOLink;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
@@ -68,20 +69,19 @@ public class BOTransaction extends BODbObject{
 		setSP(DbUtil.getStoredProc("PD_TRN"), BOTransaction.class, SP_DELETE);
 	}
 	
-	protected boolean verifyState() {
-		boolean result = super.verifyState();
-		BOSource src = null;
-		if (result) {
-			// check that the source actually exists
-			src = BOSource.getSourceSet().findChildByID(sourceID().getValue());
-			result = src != null;
+	protected void verifyState() throws BOException{
+		super.verifyState();
+
+		// check that the source actually exists
+		BOSource src = BOSource.getSourceSet().findChildByID(sourceID().getValue());
+			
+		if (src == null) {
+			throw new BOException("Souce cannot be empty", sourceID());
 		}
-		if (result && src.isModified()) {
+		if (src.isModified()) {
 			// Make sure the src is saved prior to attempting to save this.
 			src.trySave();
 		}
-		
-		return result;
 	}
 
 	@Override

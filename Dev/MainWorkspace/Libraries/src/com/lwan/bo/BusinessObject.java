@@ -657,9 +657,10 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 * Will throw an exception if any issues occur.
 	 */
 	public void trySave() throws BOException {
-		if (verifyState()) {
-			save();
-		}
+//		if (verifyState()) {
+		verifyState();
+		save();
+//		}
 	}
 	
 	/**
@@ -683,10 +684,8 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 * any issues occur.
 	 * 
 	 * Note this recurses in the same order as save()
-	 * 
-	 * @return
 	 */
-	protected boolean verifyState() throws BOException {
+	protected void verifyState() throws BOException {
 		// No need to validate inactive objects
 		if (isActive()) {
 			if (children != null) {
@@ -708,7 +707,6 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 				}
 			}
 		}
-		return true;
 	}
 	
 	/**

@@ -15,7 +15,6 @@ import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
-import com.lwan.bo.State;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.controls.bo.binding.BoundCellValue;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
@@ -141,7 +140,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		selected = null;
 		revertingSelection = false;
 		getSelectionModel().selectedItemProperty().addListener(new ChangeListener<R>() {
-			public void changed(ObservableValue<? extends R> arg0, R oldValue,
+			public void changed(ObservableValue<? extends R> arg0, final R oldValue,
 					R newValue) {
 				if (!revertingSelection) {
 					if (gridModeProperty().getValue() == MODE_RECORD) {
@@ -149,23 +148,28 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 							// Attempt to trigger save...
 							try {
 								save();
-							} catch (BOException e) {
+							} catch (final BOException e) {
 								// Revert back to the previous selection.
-								revertingSelection = true;
-								try {
-									getSelectionModel().select(oldValue);
-									// Attempt to focus user on the cell?...
-									GridColumn col = getColumnByField(e.getSource().getName());
-									if (col != null) {
-										edit(getSelectionModel().getSelectedIndex() , col);
-									}
-								} finally {
-									revertingSelection = false;
-								}
+								Platform.runLater(new Runnable(){
+									public void run() {
+										revertingSelection = true;
+										try {
+											getSelectionModel().select(oldValue);
+											// Attempt to focus user on the cell?...
+											GridColumn col = getColumnByField(e.getSource().getName());
+											if (col != null) {
+												edit(getSelectionModel().getSelectedIndex() , col);
+											}
+										} finally {
+											revertingSelection = false;
+										}
+									}									
+								});
+								
 							}
 						}
 						if (newValue != null && 
-								newValue.stateProperty().getValue().contains(State.Modified)) {
+								newValue.isModified()) {
 							isEditingProperty().setValue(true);
 						}
 					}
@@ -188,25 +192,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 				}
 			}
 		});
-//		addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>(){
-//			public void handle(final KeyEvent e) {
-//				TablePosition<R, ?> pos = editingCellProperty().get();
-//				int row = getSelectionModel().getSelectedIndex();
-//				if ((pos == null || pos.getRow() < 0) && row >= 0) {
-//					KeyEvent event = (KeyEvent)e.copyFor(arg0, arg1)
-//					Platform.runLater(new Runnable(){
-//						public void run() {
-//							Node n = getScene().getFocusOwner();
-//							if (n != null && n != BOGrid.this){ 
-//								System.out.println(n);
-//								Event.fireEvent(n, e.copyFor(null, n));
-//							}
-//						}						
-//					});
-//				}
-////			}			
-//		});
-		
 		
 		this.key = key;
 		final String layout = App.getKey(key);

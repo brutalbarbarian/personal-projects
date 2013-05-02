@@ -1,7 +1,6 @@
 package com.lwan.finproj.bo;
 
 import com.lwan.bo.AttributeType;
-import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;

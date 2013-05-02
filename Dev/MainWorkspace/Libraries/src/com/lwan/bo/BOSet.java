@@ -315,7 +315,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		ensureActive();
 	}
 	
-	protected boolean verifyState() throws BOException {
+	protected void verifyState() throws BOException {
 		super.verifyState();
 		// no need to verify the state of unloaded children
 		for(Entry e : children) {
@@ -323,7 +323,6 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 				e.child.verifyState();
 			}
 		}
-		return true;
 	}
 	
 	public T getActive(int index) {
