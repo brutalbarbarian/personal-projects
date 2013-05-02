@@ -8,7 +8,7 @@ public class PD_USR extends StoredProc{
 	private static final String[] PARAMS = {"@usr_id"};
 	private static final int[] PARAM_TYPES = {Types.NUMERIC};
 	private static final String[] STATEMENTS = {
-		"delete from USR_user " +
+		"delete from TM_USR_user " +
 		"where usr_id = @usr_id"
 	};
 	

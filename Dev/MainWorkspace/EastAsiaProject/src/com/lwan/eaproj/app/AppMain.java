@@ -31,7 +31,7 @@ public class AppMain extends App {
 	
 	protected void initialiseStage(Stage s) {
 		s.setTitle(Lng._("East Asia Management System"));
-		LoginScene login = new LoginScene();
+		LoginScene login  = new LoginScene();
 		Scene mainScene = new Scene(login);
 		s.setScene(mainScene);
 	}

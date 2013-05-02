@@ -106,7 +106,7 @@ public class MainScene extends BorderPane{
 		case PAGE_ALERTS:
 			return new AlertsPage();
 		case PAGE_CUSTOMERS:
-			return new CustomersPage();
+
 		case PAGE_EMPLOYEES:
 			
 		case PAGE_INVOICES:

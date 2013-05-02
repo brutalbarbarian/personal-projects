@@ -10,7 +10,7 @@ public class PI_USR extends StoredProc{
 	private static final int[] PARAM_TYPES = {Types.NUMERIC, Types.VARCHAR, Types.VARCHAR,
 		Types.VARCHAR, Types.VARCHAR};
 	private static final String[] STATEMENTS = {
-		"insert into USR_user " +
+		"insert into TM_USR_user " +
 		"(usr_id, usr_name, usr_password, usr_description, usr_timestamp) " +
 		"values(@usr_id, @usr_name, @usr_password, @usr_description, @usr_timestamp)"
 	};
