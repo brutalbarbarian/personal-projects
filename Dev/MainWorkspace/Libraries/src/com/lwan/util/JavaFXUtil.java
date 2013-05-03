@@ -55,8 +55,8 @@ public class JavaFXUtil {
 		if (level > 0) {
 			sb.append('\n');
 		}
-		sb.append(StringUtil.getRepeatedString("  ", level)).append(n.toString());
-		if (n instanceof Parent) {
+		sb.append(StringUtil.getRepeatedString("  ", level)).append(n == null? "null" : n.toString());
+		if (n != null && n instanceof Parent) {
 			Parent p = (Parent)n;
 			for (Node nn : p.getChildrenUnmodifiable()) {
 				printNodeTree(sb, level + 1, nn);

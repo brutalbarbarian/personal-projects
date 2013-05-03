@@ -16,15 +16,17 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -150,18 +152,19 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 	}
 	
 	protected void buildControls() {
+		label = new Label();
+		textField = new TextField();
+		textField.tooltipProperty().set(new Tooltip());
+		
 		Pane centralPane;
 		if (orientationProperty().getValue() == Orientation.HORIZONTAL) {
 			// horizontal
 			centralPane = new HBox(5);
+			HBox.setHgrow(textField, Priority.SOMETIMES);
 		} else {
 			// vertical
-			centralPane = new VBox();
-		}
-		
-		label = new Label();
-		textField = new TextField();
-		textField.tooltipProperty().set(new Tooltip());
+			centralPane = new VBox(2);
+		}		
 		
 		centralPane.getChildren().addAll(label, textField);
 		centralPane.setStyle("-fx-background-insets:10");
@@ -173,7 +176,8 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 		
 		setCenter(centralPane);
 		setMargin(centralPane, new Insets(margin));
-		setBottom(ToolBarBuilder.create().items(btnOK, btnCancel).build());
+		setBottom(HBoxBuilder.create().children(btnOK, btnCancel).alignment(Pos.CENTER_RIGHT).
+				spacing(10).padding(new Insets(0, 10, 10, 0)).build());
 	}
 	
 	@Override

@@ -136,7 +136,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		});
 		refresh();
 		
-		columnResizePolicyProperty().set(CONSTRAINED_RESIZE_POLICY);		
+//		columnResizePolicyProperty().set(CONSTRAINED_RESIZE_POLICY);		
 		selected = null;
 		revertingSelection = false;
 		getSelectionModel().selectedItemProperty().addListener(new ChangeListener<R>() {
@@ -149,6 +149,9 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 							try {
 								save();
 							} catch (final BOException e) {
+								// Notify User
+								JavaFXUtil.ShowErrorDialog(getScene().getWindow(), e.getMessage());
+								
 								// Revert back to the previous selection.
 								Platform.runLater(new Runnable(){
 									public void run() {
@@ -814,7 +817,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		}
 		
 		public void commitEdit(Object item) {
-			System.out.println("commiting:... " + combobox);
 			if (combobox != null) {
 				combobox.forceCommit();
 			}

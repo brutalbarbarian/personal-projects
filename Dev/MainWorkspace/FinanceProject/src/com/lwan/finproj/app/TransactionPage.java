@@ -72,7 +72,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 						if (!tranGrid.isEditingProperty().getValue()) {
 							gridCtrl.activate(gridCtrl.getPrimaryButton());
 							
-//							tranGrid.requestFocus();
+							tranGrid.requestFocus();
 						}
 						break;
 					case "s":	// save

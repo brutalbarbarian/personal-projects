@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,9 +20,11 @@ import com.lwan.javafx.app.util.AutocompleteController;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.CollectionUtil.MapRunner;
 import com.lwan.util.GenericsUtil;
+import com.lwan.util.JavaFXUtil;
 import com.lwan.util.StringUtil;
 import com.lwan.util.containers.TrieMap;
 import com.sun.javafx.collections.ObservableListWrapper;
+import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 
 /**
  * Extension of the default ComboBox with support for a display/value map.
@@ -179,23 +182,64 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		
 		autoCompleteController = new AutocompleteController(getEditor(), true);
 		autoCompleteController.allowUniqueProperty().bind(appendUniqueStringsProperty());
+
+		ensuringEditingFocus = false;
+		focusRunner = new Runnable() {
+			@SuppressWarnings("unchecked")
+			public void run() {
+				if (getSkin() == null) {
+					Platform.runLater(focusRunner);
+				} else {
+					ensuringEditingFocus = true;
+					try {
+						// Horrendus workaround...issue is caused by the skin not being created
+						// upon the combobox gaining focus. 						
+						ComboBoxListViewSkin<T> skin = (ComboBoxListViewSkin<T>)getSkin();
+						skin.getDisplayNode().requestFocus();
+						requestFocus();
+					} finally {
+						ensuringEditingFocus = false;
+					}
+				}
+			}
+
+		};
+		focusedProperty().addListener(new ChangeListener<Boolean>() {
+			public void changed(ObservableValue<? extends Boolean> arg0,
+					Boolean arg1, Boolean arg2) {
+				if (!ensuringEditingFocus && arg2) {
+					Platform.runLater(focusRunner);
+				}
+			}
+		});
 		
 		getEditor().textProperty().addListener(new ChangeListener<String>() {
 			public void changed(ObservableValue<? extends String> arg0,
 					String arg1, String arg2) {
-				autoCompleteController.editingProperty().set(true);
-				// counter-intuitive as hell... but eh...
-				requestFocus();
+				if (!autoCompleteController.isEditing()) {
+					ComboBoxItem<T> item = getSelectionModel().getSelectedItem();
+					
+					String effectiveSelectedValue = item == null? "" : item.toString();
+					String effectiveText = arg2 == null? "" : arg2;
+					if (!effectiveSelectedValue.equalsIgnoreCase(effectiveText)) {
+						autoCompleteController.editingProperty().set(true);
+					}
+				}
 			}
 		});
+		
+		JavaFXUtil.setNodeTreeFocusable(getEditor(), false);
+		
 		selectedProperty().addListener(new ChangeListener<T>() {
 			public void changed(ObservableValue<? extends T> arg0, T arg1,
 					T arg2) {
 				autoCompleteController.editingProperty().set(false);
 			}			
 		});
-//		autoCompleteController.editingProperty().bind(getEditor().focusedProperty());
 	}
+	
+	private boolean ensuringEditingFocus;
+	private Runnable focusRunner;
 	
 	@SuppressWarnings("unchecked")
 	protected ComboBoxItem<T> createFromUniqueString(String s) {

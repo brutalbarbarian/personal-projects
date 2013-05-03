@@ -552,7 +552,7 @@ public class BOChartControl <T extends BusinessObject> {
 					int modify = day - firstDayOfWeek;
 					
 					calendar.add(Calendar.DATE, - modify);
-					startDate = date;
+					startDate = calendar.getTime();
 					
 					result.displayValue = formatter.format(startDate);
 					
