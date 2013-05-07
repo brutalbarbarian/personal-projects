@@ -394,7 +394,13 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			setCellValueFactory(new BoundCellValue<Object, R>(fieldPath));
 			setAsTextField();	// Default
 			
-			setPrefWidth(100);	// Minimum? 
+			setPrefWidth(100);	// Minimum?
+			
+			setOnEditCommit(new EventHandler<CellEditEvent<R, Object>>() {
+				public void handle(CellEditEvent<R, Object> arg0) {
+					// do nothing
+				}				
+			});
 		}
 		
 		public Procedure<BoundControl<?>> getCtrlPropertySetter() {
@@ -479,7 +485,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			return (StringBoundProperty) super.getBindingProperty();
 		}
 		
-		public void commitEdit(Object value) {
+		public void doCommitEdit() {
 			try {
 				getBindingProperty().endEdit(true);
 			} catch (BOException e) {
@@ -488,16 +494,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 				return;	
 //				JavaFXUtil.ShowErrorDialog(getScene().getWindow(), e.getMessage());  
 			}
-			BOAttribute<?> attr = getBindingProperty().linkedAttributeProperty().getValue();
-			attr.setNotifications(false);
-//			try {
-				// This will safely trigger all necessary events without modifying
-				// the attribute or throwing unnecessary notifications, as they would have
-				// already been thrown from the above endEdit()
-//				super.commitEdit(attr.getValue());
-//			} finally {
-//				attr.setNotifications(true);	
-//			}
 		}
 		
 		private void createTextField() {
@@ -514,10 +510,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
 				public void changed(ObservableValue<? extends Boolean> arg0, 
 						Boolean arg1, Boolean arg2) {
-					if (!arg2 && textField != null) { 
+					if (!arg2 && textField != null) {						
 						Scene sc = getScene();
-						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
-							commitEdit(textField.getText());
+						// if no owner, or the focus owner isn't a child of the textField...
+						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), textField)) {
+							commitEdit();
 						}
 					}
 				}
@@ -525,7 +522,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			textField.setOnKeyPressed(new EventHandler<KeyEvent>(){
 				public void handle(KeyEvent t) {
 					if (t.getCode() == KeyCode.TAB) {
-						commitEdit(null);
+						commitEdit();
 						gotoNextColumn(!t.isShiftDown());
 					}
 				}
@@ -534,7 +531,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
 				public void handle(KeyEvent t) {
 					if (t.getCode() == KeyCode.ENTER) {
-						commitEdit(null);	// Dosen't matter what I pass in...
+						commitEdit();
 					} else if (t.getCode() == KeyCode.ESCAPE) {
 						// Is this needed? seems to be already implemented in...
 						cancelEdit();
@@ -681,18 +678,31 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			doStartEdit();			
 		}
 		
-		public void commitEdit(Object item) {
-			if (linkIsActive()) {
-				super.commitEdit(bindingProperty.get());
-			}
-			
+		/**
+		 * Commits the edit
+		 * The parameter won't actually do anything.
+		 * Better to just call commitEdit()
+		 * 
+		 */
+		@Deprecated
+		public final void commitEdit(Object item) {
+			doCommitEdit();
+			super.commitEdit(item);
 			cancelEdit();
 		}
 		
+		/**
+		 * Effectively same as calling commitEdit(null)
+		 * as the parameter dosen't matter anyway.
+		 * 
+		 */
+		public final void commitEdit() {
+			commitEdit(null);
+		}
+		
+		protected abstract void doCommitEdit();
+		
 		public void updateItem(Object item, boolean empty) {
-			// Always call false for empty
-//			super.updateItem(item,  false);
-			
 			if (!isEditing()) {
 				super.updateItem(item,  false);
 			}
@@ -816,11 +826,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			return combobox;
 		}
 		
-		public void commitEdit(Object item) {
+		public void doCommitEdit() {
 			if (combobox != null) {
 				combobox.forceCommit();
 			}
-			super.commitEdit(item);
 		}
 
 		private void createCombobox() {
@@ -843,7 +852,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 						Scene sc = getScene();
 						
 						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
-							commitEdit(null);
+							commitEdit();
 						}
 					}
 				}
@@ -853,7 +862,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			combobox.setOnKeyPressed(new EventHandler<KeyEvent>() {
 				public void handle(KeyEvent t) {
 					if (t.getCode() == KeyCode.TAB) {
-						commitEdit(null);
+						commitEdit();
 						
 						gotoNextColumn(!t.isShiftDown());
 					} else if (t.getCode() == KeyCode.HOME || 
@@ -868,7 +877,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 				public void handle(KeyEvent t) {
 					if (t.getCode() == KeyCode.ENTER ||
 							t.getCode() == KeyCode.ESCAPE) {
-						commitEdit(null);
+						commitEdit();
 					}
 				}
 			});
@@ -925,13 +934,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			return datePicker;
 		}
 		
-		public void commitEdit(Object item) {
+		public void doCommitEdit() {
 			if (linkIsActive()) {
 				datePicker.endEdit(true, true);
-				super.commitEdit(getBindingProperty().get());
 			}
-			
-			cancelEdit();
 		}
 		
 		protected void createDatePicker() {
@@ -943,7 +949,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 					if (!arg2) {
 						Scene sc = getScene();
 						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
-							commitEdit(null);
+							commitEdit();
 						}
 					}
 				}				
@@ -952,10 +958,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			datePicker.getTextField().setOnKeyPressed(new EventHandler<KeyEvent>() {
 				public void handle(KeyEvent e) {
 					if (e.getCode() == KeyCode.TAB) {
-						commitEdit(null);
+						commitEdit();
 						gotoNextColumn(!e.isShiftDown());
 					} else if (e.getCode() == KeyCode.ENTER) {
-						commitEdit(null);
+						commitEdit();
 					} else if (e.getCode() == KeyCode.ESCAPE) {
 						cancelEdit();
 					}

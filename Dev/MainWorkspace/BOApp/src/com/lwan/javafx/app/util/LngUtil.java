@@ -6,6 +6,10 @@ import com.lwan.javafx.app.Lng;
 import com.lwan.util.CollectionUtil;
 
 public class LngUtil {
+	public static String[] translateArray(String[] it, String...variables) {
+		return CollectionUtil.toArray(translate(it, variables), String.class);
+	}
+	
 	public static Iterable<String> translate (String[] it, String... variables) {
 		return translate(CollectionUtil.getIterable(it), variables);
 	}

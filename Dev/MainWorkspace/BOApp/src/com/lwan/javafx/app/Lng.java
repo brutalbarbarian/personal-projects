@@ -45,7 +45,7 @@ public class Lng {
 		locale = l;
 		Path p = Paths.get(locale.toLanguageTag() + EXT);
 		if (Files.exists(p)) {
-			List<String> lines = Files.readAllLines(p, Charset.defaultCharset());
+			List<String> lines = Files.readAllLines(p, getCharset());
 			StringTokenizer st;
 			for (String line : lines) {
 				st = new StringTokenizer(line, SEP);
@@ -65,9 +65,13 @@ public class Lng {
 		return NumberFormat.getCurrencyInstance(locale).format(value.doubleValue());
 	}
 	
+	public static Charset getCharset() {
+		return Charset.forName(IOUtil.CHARSET_UTF8);
+	}
+	
 	public static void store() throws IOException {
 		Path p = Paths.get(locale.toLanguageTag() + EXT);
-		IOUtil.storeMap(map, SEP, "", p, Charset.defaultCharset(), 
+		IOUtil.storeMap(map, SEP, "", p, getCharset(), 
 				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 	}
 	

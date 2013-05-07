@@ -1,4 +1,4 @@
-package com.lwan.javafx.controls;
+package com.lwan.javafx.controls.bo;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -63,7 +63,7 @@ import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.State;
 import com.lwan.javafx.app.util.LngUtil;
-import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.controls.ComboBox;
 import com.lwan.javafx.scene.control.DateAxis;
 import com.lwan.javafx.scene.control.SimpleTextInputDialog;
 import com.lwan.util.CollectionUtil;

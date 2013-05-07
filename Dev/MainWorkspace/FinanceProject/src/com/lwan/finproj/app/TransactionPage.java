@@ -12,9 +12,11 @@ import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbSetRef;
 import com.lwan.finproj.bo.BOSource;
 import com.lwan.finproj.bo.BOTransaction;
+import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.app.util.DbUtil;
-import com.lwan.javafx.controls.BOChartControl;
+import com.lwan.javafx.app.util.LngUtil;
+import com.lwan.javafx.controls.bo.BOChartControl;
 import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BODatePicker;
 import com.lwan.javafx.controls.bo.BOGrid;
@@ -114,8 +116,9 @@ public class TransactionPage extends BorderPane implements Disposable{
 	protected void initControls() {
 		// init grid
 		gridLink = new BOLinkEx<>();
-		tranGrid = new BOGrid<>("TransactionPageTranGrid", gridLink, new String[]{"TransactionAmount",
-				"TransactionNotes", "TransactionDate", "SourceName"}, 
+		tranGrid = new BOGrid<>("TransactionPageTranGrid", gridLink, 
+				LngUtil.translateArray(new String[]{"TransactionAmount",
+				"TransactionNotes", "TransactionDate", "SourceName"}), 
 				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate", 
 				"SourceID"}, new boolean[]{true, true, true, true});
 		tranGrid.setEditable(true);
@@ -140,11 +143,11 @@ public class TransactionPage extends BorderPane implements Disposable{
 		param_maxAmount = new BOTextField(gridLink, "AmountMax");
 		
 		paramBar = ToolBarBuilder.create().items(
-				new Label("Source"), param_src,
+				new Label(Lng._("Source")), param_src,
 				new Separator(),				
-				new Label("From"), param_minDate, new Label("To"), param_maxDate,
+				new Label(Lng._("From")), param_minDate, new Label(Lng._("To")), param_maxDate,
 				new Separator(),
-				new Label("Min"), param_minAmount, new Label("To"), param_maxAmount,
+				new Label(Lng._("Min")), param_minAmount, new Label(Lng._("To")), param_maxAmount,
 				new Separator(),
 				gridCtrl.getClearButton()).build();
 		BOCtrlUtil.buildAttributeLinks(paramBar);
@@ -187,10 +190,10 @@ public class TransactionPage extends BorderPane implements Disposable{
 		// set dynamic source		
 		name.setSource(BOSource.getSourceSet(), "SourceID", "SourceName", null);
 		
-		grid.add(new Label("Date"), 0, 0);
-		grid.add(new Label("Source"), 0, 1);
-		grid.add(new Label("Amount"), 0, 2);
-		grid.add(new Label("Notes"), 0, 3);
+		grid.add(new Label(Lng._("Date")), 0, 0);
+		grid.add(new Label(Lng._("Source")), 0, 1);
+		grid.add(new Label(Lng._("Amount")), 0, 2);
+		grid.add(new Label(Lng._("Notes")), 0, 3);
 		
 		grid.add(date, 1, 0);
 		grid.add(name, 1, 1);

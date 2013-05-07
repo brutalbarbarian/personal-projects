@@ -14,8 +14,10 @@ import java.util.Map;
 import java.util.Vector;
 
 public class IOUtil {
+	public static final String CHARSET_UTF8 = "utf-8";
+	
 	public static final String CHARSET_DEFAULT_WINDOWS = "cp1252";
-	public static final String CHARSET_DEFAULT_UBUNTU = "utf-8";
+	public static final String CHARSET_DEFAULT_UBUNTU = CHARSET_UTF8;
 	
 	/**
 	 * Assuming relative path is correct relative to root.

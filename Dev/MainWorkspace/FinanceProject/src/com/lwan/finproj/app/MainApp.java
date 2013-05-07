@@ -11,6 +11,7 @@ import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import com.lwan.javafx.app.App;
+import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.util.wrappers.Disposable;
 
@@ -21,8 +22,8 @@ public class MainApp extends App{
 	BorderPane mainPane;
 	
 	protected void initialiseStage(Stage stage) {
-		btnTrans = new ToggleButton("Transactions");
-		btnSource = new ToggleButton("Source");
+		btnTrans = new ToggleButton(Lng._("Transactions"));
+		btnSource = new ToggleButton(Lng._("Source"));
 		
 		toggleGroup = new ToggleGroup();
 		
@@ -76,6 +77,7 @@ public class MainApp extends App{
 
 		scene.getStylesheets().add("resource/calendarstyle.css");
 		scene.getStylesheets().add("resource/chartcontrol.css");
+		scene.getStylesheets().add("resource/boapp.css");
 		
 		stage.setScene(scene);
 		

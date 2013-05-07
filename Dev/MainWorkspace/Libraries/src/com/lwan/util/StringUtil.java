@@ -185,7 +185,13 @@ public class StringUtil {
 	}
 	
 	public static boolean equals(String s, String other, boolean ignoreCase) {
-		return ignoreCase? s.equalsIgnoreCase(other) : s.equals(other);
+		if (isNullOrBlank(s) && isNullOrBlank(other)) {
+			return true;
+		} else if (s == null || other == null) {
+			return false; 
+		} else {
+			return ignoreCase? s.equalsIgnoreCase(other) : s.equals(other);
+		}
 	}
 	
 	public static String getFileExtension(String s) {

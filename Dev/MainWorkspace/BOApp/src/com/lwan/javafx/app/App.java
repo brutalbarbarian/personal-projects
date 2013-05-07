@@ -21,6 +21,10 @@ import javafx.stage.Stage;
 public abstract class App extends Application{
 	// Application messages
 	public static final int TERMINATE_REQUEST = 0;
+	public static final int RESTART_REQUEST = 1;
+	
+	// Use to space out the messages so there's no collision of messages
+	protected static final int APP_MESSAGE_LAST = RESTART_REQUEST;
 	
 	// File names
 	public static final String KEY_FILENAME = "keys.ini";
@@ -106,7 +110,18 @@ public abstract class App extends Application{
 		switch (state) {
 		case TERMINATE_REQUEST :
 			if (allowTerminate()) {
-				getMainStage().close();
+//				getMainStage().close();
+				Platform.exit();
+			}
+			break;
+		case RESTART_REQUEST:
+			if (allowTerminate()) {
+				Platform.exit();
+				Platform.runLater(new Runnable(){
+					public void run() {
+						launch();					
+					}
+				});			
 			}
 			break;
 		}
@@ -174,7 +189,7 @@ public abstract class App extends Application{
 				}
 			}
 			try {
-				GConnection.initialise(DB_DRIVER, buildConnectionString(dbpath), "", "");	
+				GConnection.initialise(DB_DRIVER, buildConnectionString(dbpath), "", "");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -207,6 +222,6 @@ public abstract class App extends Application{
 	}
 
 	public static void requestRestart() {
-		// TODO
+		notifyState(RESTART_REQUEST);
 	}
 }

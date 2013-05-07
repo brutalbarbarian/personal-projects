@@ -328,6 +328,11 @@ public class StringBoundProperty extends BoundProperty<String>{
 	// Should be called when the control loses focus
 	public void endEdit(boolean commit) throws BOException {
 		if (getEditMode()) {
+			if (commit && !(requireValidationProperty.getValue() &&
+					validate(getValue()))) {
+				throw new BOException(Lng._("Invalid Input"), getLinkedAttribute());
+			}
+				
 			// try set value
 			String err = commit? setEditValue(getValue()) : ""; 
 			if (StringUtil.isNullOrBlank(err)) {

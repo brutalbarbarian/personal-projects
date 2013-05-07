@@ -253,6 +253,10 @@ public class CollectionUtil {
 		return array;
 	}
 	
+	public static <T> T[] toArray(Iterable<T> it, Class<? super T> c) {
+		return toArray(toList(it), c);
+	}
+	
 	public static <T> Iterator <T> getReverseIterator (final ListIterator<T> iter) {
 		return new Iterator<T>(){
 			public boolean hasNext() {

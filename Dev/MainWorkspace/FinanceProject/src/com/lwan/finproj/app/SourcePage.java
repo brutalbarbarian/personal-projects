@@ -9,6 +9,7 @@ import com.lwan.bo.db.BODbSetRef;
 import com.lwan.finproj.bo.BOSource;
 import com.lwan.finproj.bo.BOTransaction;
 import com.lwan.javafx.app.util.DbUtil;
+import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
 import com.lwan.util.wrappers.Disposable;
@@ -38,7 +39,7 @@ public class SourcePage extends BorderPane implements Disposable{
 	protected void initControls() {
 		gridLink = new BOLinkEx<>();
 		srcGrid = new BOGrid<>("SourcePageSourceGrid", gridLink, 
-				new String[]{"Source Name"},//, "Transaction Count"}, 
+				LngUtil.translateArray(new String[]{"Source Name"}),//, "Transaction Count"}, 
 				new String[]{"SourceName"},//, "TransactionCount"}, 
 				new boolean[]{true});//, false});
 		srcGrid.setEditable(true);
@@ -52,7 +53,8 @@ public class SourcePage extends BorderPane implements Disposable{
 		
 		tranSetLink = new BOLinkEx<>();
 		tranGrid = new BOGrid<>("SourcePageTranGrid", tranSetLink, 
-				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate"}, 
+				LngUtil.translateArray(new String[]{
+						"TransactionAmount", "TransactionNotes", "TransactionDate"}), 
 				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate"}, 
 				new boolean[]{false, false, false});
 		tranGrid.setEditable(false);
