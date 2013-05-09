@@ -19,7 +19,7 @@ import javafx.beans.value.ObservableValue;
 public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 	private Property<T> linked_object_property;
 	
-	public Property<T> LinkedObjectProperty () {
+	public Property<T> linkedObjectProperty () {
 		if (linked_object_property == null) {
 			linked_object_property = new SimpleObjectProperty<T>(this, "LinkedObject");
 		}
@@ -27,16 +27,16 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 	}
 	
 	public T getLinkedObject() {
-		return LinkedObjectProperty().getValue();
+		return linkedObjectProperty().getValue();
 	}
 	
 	public void setLinkedObject(T object) {
-		LinkedObjectProperty().setValue(object);
+		linkedObjectProperty().setValue(object);
 	}
 	
 	public BOLinkEx() {
 		super(null, "");
-		LinkedObjectProperty().addListener(new ChangeListener<T>(){
+		linkedObjectProperty().addListener(new ChangeListener<T>(){
 			public void changed(ObservableValue<? extends T> observable,
 					T oldValue, T newValue) {
 				onLinkedObjectChange(oldValue, newValue);
@@ -74,7 +74,7 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 			link.removeListener(this);
 		}
 		// clear link
-		LinkedObjectProperty().setValue(null);
+		linkedObjectProperty().setValue(null);
 		
 		super.dispose();
 	}

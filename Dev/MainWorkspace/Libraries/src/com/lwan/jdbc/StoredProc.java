@@ -118,12 +118,21 @@ public class StoredProc {
 	 */
 	public void execute(Connection con) throws SQLException {
 		result = null;	// clear previous result set
+		
+		printParameters();
 
 		doExecute(con, 0, statements.size());
 	}
 	
 	protected final void doExecute(Connection con, int line) throws SQLException {
 		doExecute(con, line, line+1);
+	}
+	
+	public void printParameters() {
+		System.out.println("Params for " + getClass().getName());
+		for (Parameter param : parameters.values()){
+			System.out.println(param.name() + "(" + param.getType() + "):" + param.get());
+		}
 	}
 	
 	protected final void doExecute(Connection con, int startIndex, int endIndex) throws SQLException {
@@ -133,7 +142,8 @@ public class StoredProc {
 		
 		for (int i = startIndex; i < endIndex; i++) {
 			PreparedStatement statement = con.prepareStatement(statements.get(i));
-
+			
+			
 			// just ignore params if its null. Likely this stored proc has no parameters
 			if (paramMap != null) { 
 				List<Parameter> params = paramMap.get(i);

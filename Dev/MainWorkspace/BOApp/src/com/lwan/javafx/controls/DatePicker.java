@@ -8,7 +8,7 @@ import java.util.Locale;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.art.CalendarArt;
 import com.lwan.util.DateUtil;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 import com.lwan.util.StringUtil;
 import com.thirdparty.javafx.calender.CalendarView;
 
@@ -123,7 +123,7 @@ public class DatePicker extends StackPane{
 		
 		calendarView = new CalendarView(getLocale());
 		// Don't want the calendar view to take any focus from the textfield
-		JavaFXUtil.setNodeTreeFocusable(calendarView, false);
+		FxUtils.setNodeTreeFocusable(calendarView, false);
 		
 		getChildren().addAll(textField, btnEdit);
 		

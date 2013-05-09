@@ -7,10 +7,7 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
-import com.lwan.eaproj.sp.PD_USR;
-import com.lwan.eaproj.sp.PI_USR;
-import com.lwan.eaproj.sp.PS_USR;
-import com.lwan.eaproj.sp.PU_USR;
+import com.lwan.eaproj.bo.cache.BOUserSet;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.property.Validation;
 
@@ -58,15 +55,23 @@ public class BOUser extends BODbObject{
 		if (userName.asString().length() == 0){	// cannot be empty username
 			return "Username cannot have a length of 0";
 		}
+		// check if any other user has the same name
+		for (BOUser user : BOUserSet.get()) {
+			if (user != this &&
+					user.userName.getValue().equals(userName.getValue())) {
+				return "Username already exists";
+			}
+		}
+		
 		return super.doVerifyState();
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(new PS_USR(), BOUser.class, SP_SELECT);
-		setSP(new PI_USR(), BOUser.class, SP_INSERT);
-		setSP(new PU_USR(), BOUser.class, SP_UPDATE);
-		setSP(new PD_USR(), BOUser.class, SP_DELETE);
+		setSP(DbUtil.getStoredProc("PS_USR"), BOUser.class, SP_SELECT);
+		setSP(DbUtil.getStoredProc("PI_USR"), BOUser.class, SP_INSERT);
+		setSP(DbUtil.getStoredProc("PU_USR"), BOUser.class, SP_UPDATE);
+		setSP(DbUtil.getStoredProc("PD_USR"), BOUser.class, SP_DELETE);
 	}
 
 	@Override

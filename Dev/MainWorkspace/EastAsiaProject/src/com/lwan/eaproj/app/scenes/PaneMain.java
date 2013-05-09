@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import com.lwan.eaproj.app.AppMain;
 import com.lwan.eaproj.app.Constants;
+import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.CollectionUtil;
 
@@ -25,9 +26,12 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
-public class MainScene extends BorderPane{
+public class PaneMain extends BorderPane{
 	public static final int PAGE_ALERTS = 0;
 	public static final int PAGE_CUSTOMERS = 1;
 	public static final int PAGE_WORK = 2;
@@ -35,9 +39,9 @@ public class MainScene extends BorderPane{
 	public static final int PAGE_EMPLOYEES = 4;
 	
 	public static final Scene createScene() {
-		MainScene mainapp = new MainScene();
+		PaneMain mainapp = new PaneMain();
 		Scene scene = new Scene(mainapp);
-		scene.getStylesheets().add("styles/mainapp.css");
+		scene.getStylesheets().addAll(App.getStyleshets());
 		
 		return scene;
 	}
@@ -47,7 +51,7 @@ public class MainScene extends BorderPane{
 	private ToggleButton[] navButtons;
 	private ToggleGroup navButtonGroup;
 	private IntegerProperty pageProperty;
-	private AppPage currentPage;
+	private PageBase currentPage;
 	
 	/**
 	 * The page the app is currently displaying.
@@ -80,6 +84,9 @@ public class MainScene extends BorderPane{
 			
 			fadeOut.setOnFinished(new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
+					if (currentPage != null) {
+						currentPage.dispose();
+					}
 					currentPage = getAppPage(page, params);
 					setCenter(currentPage);
 					FadeTransition fadeIn = new FadeTransition(
@@ -100,11 +107,11 @@ public class MainScene extends BorderPane{
 		}
 	}
 	
-	protected AppPage getAppPage(int page, String... params) {
+	protected PageBase getAppPage(int page, String... params) {
 		// We don't cache any app pages... they're always created dynamically...
 		switch(page) {
 		case PAGE_ALERTS:
-			return new AlertsPage();
+			return new PageAlerts();
 		case PAGE_CUSTOMERS:
 
 		case PAGE_EMPLOYEES:
@@ -121,7 +128,7 @@ public class MainScene extends BorderPane{
 		return pageProperty().getValue();
 	}
 	
-	public MainScene() {
+	public PaneMain() {
 
 		initialiseControls();
 		
@@ -164,6 +171,25 @@ public class MainScene extends BorderPane{
 		setLeft(navigationBar);
 	}
 	
+	protected void showUsersScreen() {
+		Stage usr = new Stage(StageStyle.UTILITY);
+		usr.initOwner(getScene().getWindow());
+		usr.initModality(Modality.APPLICATION_MODAL);
+		
+		PaneUser pane = new PaneUser();
+		try {
+			Scene sc = new Scene(pane);
+			sc.getStylesheets().addAll(App.getStyleshets());
+			
+			usr.setScene(sc);
+			usr.setWidth(600);
+			usr.setHeight(500);
+			usr.showAndWait();
+		} finally {
+			pane.dispose();
+		}
+	}
+	
 	protected Collection<Menu> initialiseMenu() {
 		menuHandler = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
@@ -174,6 +200,9 @@ public class MainScene extends BorderPane{
 					break;
 				case "exit" :
 					AppMain.requestTerminate();
+					break;
+				case "users" :
+					showUsersScreen();
 					break;
 				}
 			}
@@ -186,6 +215,10 @@ public class MainScene extends BorderPane{
 		menu.add(MenuBuilder.create().text(Lng._("_File")).items(
 				menuItemBuilder.text(Lng._("Change _Users")).userData("logoff").onAction(menuHandler).build(),
 				menuItemBuilder.text(Lng._("E_xit")).userData("exit").onAction(menuHandler).build()
+				).build());
+		
+		menu.add(MenuBuilder.create().text(Lng._("_Options")).items(
+				menuItemBuilder.text(Lng._("_Users")).userData("users").onAction(menuHandler).build()
 				).build());
 		
 		return menu;

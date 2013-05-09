@@ -15,7 +15,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyEvent;
 
 public class BOGridControl <T extends BusinessObject> implements EventHandler<ActionEvent> {
 	Button btnPrimary, btnSecondary, btnRefresh, btnClearParams;
@@ -62,6 +64,8 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 				if (event.isAttribute() && event.getAttributeOwner() == grid.getSourceSet()
 						&& isAutoRefresh()) {
 					activate(btnRefresh);
+				} else {
+					doDisplayState();
 				}
 			}		
 		});
@@ -76,6 +80,33 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 		doDisplayState();
 	}
 	
+	/**
+	 * Override to limit when create state is allowed
+	 * 
+	 * @return
+	 */
+	protected boolean allowCreate() {
+		return true;
+	}
+	
+	/**
+	 * Override to limit when delete state is allowed
+	 * 
+	 * @return
+	 */
+	protected boolean allowDelete(T item) {
+		return true;
+	}
+	
+	/**
+	 * Override to limit when saving is allowed
+	 * 
+	 * @return
+	 */
+	protected boolean allowSave(T item) {
+		return true;
+	}
+	
 	protected void doDisplayState() {
 		boolean inEditState = inEditState();
 		
@@ -88,12 +119,14 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 			btnPrimary.setText(Lng._("Save"));
 			btnSecondary.setText(Lng._("Cancel"));
 			
+			btnPrimary.setDisable(!allowSave(item));
 			btnSecondary.setDisable(false);
 		} else {
 			btnPrimary.setText(Lng._("Create"));
 			btnSecondary.setText(Lng._("Delete"));
 			
-			btnSecondary.setDisable(item == null);
+			btnPrimary.setDisable(!allowCreate());
+			btnSecondary.setDisable(item == null || !allowDelete(item));
 		}
 		
 		// disable all params if in edit state
@@ -149,60 +182,100 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 	}
 	
 	public void activate(Button btn) {
-		boolean inEditState = inEditState();
-		if (btn == btnPrimary) {
-			if (inEditState) {
-				grid.save();
-			} else {
-				BOSet<T> set = grid.getSourceSet();
-				if (set != null) { 
-					set.createNewChild();
-					// can we gurantee that the child will always be last?... makes sense if it is
-					grid.getSelectionModel().selectLast();
-				}
-			}			
-		} else if (btn == btnSecondary) {
-			T selected = grid.getSelectionModel().getSelectedItem();
-			int index = grid.getSelectionModel().getSelectedIndex();
-			if (inEditState && selected.isFromDataset()) {
-				// reload selected
-				selected.setActive(false);
-				selected.ensureActive();
-				// keep the same selected...
-				select(index);
-			} else {	// either canceling a new record...or deleting an existing one
-				
-				selected.setActive(false);
-				if (selected.isFromDataset()) {
-					selected.trySave();	// this should delete the record...
-				}
-				if (index >= grid.getSourceSet().getActiveCount()) {
-					index = grid.getSourceSet().getActiveCount() - 1;
-				}
-				// select whatever is still avaliable
-				select(index);
+		try {
+			if (btn.isDisabled()) {
+				return;	// Do nothing
 			}
-		} else if (btn == btnRefresh) {
-			grid.getSourceSet().setActive(false);
-			grid.getSourceSet().ensureActive();
-			grid.refresh();
-		} else if (btn == btnClearParams) {
-			grid.getSourceSet().allowNotificationsProperty().setValue(false);
-			try {
-				for (BusinessObject bo : grid.getSourceSet().getChildren()) {
-					if (bo.isAttribute()) {
-						bo.clear();
+			boolean inEditState = inEditState();
+			if (btn == btnPrimary) {
+				if (inEditState) {
+					grid.save();
+				} else {
+					BOSet<T> set = grid.getSourceSet();
+					if (set != null) { 
+						set.createNewChild();
+						// can we gurantee that the child will always be last?... makes sense if it is
+						grid.getSelectionModel().selectLast();
 					}
+				}			
+			} else if (btn == btnSecondary) {
+				T selected = grid.getSelectionModel().getSelectedItem();
+				int index = grid.getSelectionModel().getSelectedIndex();
+				if (inEditState && selected.isFromDataset()) {
+					// reload selected
+					selected.setActive(false);
+					selected.ensureActive();
+					// keep the same selected...
+					select(index);
+				} else {	// either canceling a new record...or deleting an existing one
+					
+					selected.setActive(false);
+					if (selected.isFromDataset()) {
+						selected.trySave();	// this should delete the record...
+					}
+					if (index >= grid.getSourceSet().getActiveCount()) {
+						index = grid.getSourceSet().getActiveCount() - 1;
+					}
+					// select whatever is still avaliable
+					select(index);
 				}
-			} finally {
-				grid.getSourceSet().allowNotificationsProperty().setValue(true);
-				activate(btnRefresh);
+			} else if (btn == btnRefresh) {
+				grid.getSourceSet().setActive(false);
+				grid.getSourceSet().ensureActive();
+				grid.refresh();
+			} else if (btn == btnClearParams) {
+				grid.getSourceSet().allowNotificationsProperty().setValue(false);
+				try {
+					for (BusinessObject bo : grid.getSourceSet().getChildren()) {
+						if (bo.isAttribute()) {
+							bo.clear();
+						}
+					}
+				} finally {
+					grid.getSourceSet().allowNotificationsProperty().setValue(true);
+					activate(btnRefresh);
+				}
 			}
+		} catch (RuntimeException e) {
+			System.out.println("Error:" + e.getMessage());
 		}
 	}
 
 	@Override
 	public void handle(ActionEvent e) {
 		activate((Button)e.getSource());
+	}
+	
+	public void setHotkeyControls(final Node n) {
+		n.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>(){
+			public void handle(KeyEvent arg0) {
+				if (arg0.isControlDown()) {
+					switch (arg0.getText()) {
+					case "n":	// new
+						if (!grid.isEditingProperty().getValue()) {
+							activate(getPrimaryButton());
+							
+							grid.requestFocus();
+						}
+						break;
+					case "s":	// save
+						if (grid.isEditingProperty().getValue()) {
+							// check what's focused
+							Node focused = n.getScene().getFocusOwner();
+							if (focused instanceof BOTextField) {
+								BOTextField txtField = (BOTextField)focused;
+								txtField.dataBindingProperty().endEdit(true);
+							} else if (focused instanceof BOComboBox<?>) {
+								BOComboBox<?> cb = (BOComboBox<?>)focused;
+								cb.forceCommit();
+							}
+							
+							activate(getPrimaryButton());
+							getPrimaryButton().requestFocus();
+						}					
+					}
+				}
+			}			
+		});
 	}
 }

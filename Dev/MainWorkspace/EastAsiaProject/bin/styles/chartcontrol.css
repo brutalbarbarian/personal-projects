@@ -1,0 +1,25 @@
+.chartcontrol-rootpane
+{
+	-fx-padding: 10px;
+}
+
+.chartcontrol-hbox
+{
+	-fx-spacing: 10px;
+}
+
+.chartcontrol-vbox
+{
+	-fx-spacing: 10px;
+}
+
+.chartcontrol-toolbar
+{
+	-fx-spacing: 5px;
+	-fx-padding: 10 0 0 0;
+}
+
+.chartcontrol-optionpane
+{
+	-fx-padding: 0 10 0 0;
+}

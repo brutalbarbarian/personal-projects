@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -41,6 +43,7 @@ public abstract class App extends Application{
 	private static App app;
 	private Stage mainStage;
 	private Locale locale;
+	private Collection<String> stylesheets;
 	
 	public static App getApp() {
 		if (app == null) {
@@ -201,9 +204,14 @@ public abstract class App extends Application{
 		}
 		keyMap.put(KEY_DB_PATH, dbpath);
 		
+		stylesheets = new ArrayList<String>();
+		initStylesheets(stylesheets);
+		
 		// Assign the global variable now that initialise has been completed
 		app = this;
 	}
+	
+	protected abstract void initStylesheets(Collection<String> stylesheets);
 	
 	private String buildConnectionString(String path) {
 		return DB_CON_PREFIX + path;
@@ -223,5 +231,9 @@ public abstract class App extends Application{
 
 	public static void requestRestart() {
 		notifyState(RESTART_REQUEST);
+	}
+	
+	public static Collection<String> getStyleshets() {
+		return getApp().stylesheets;		
 	}
 }

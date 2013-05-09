@@ -8,7 +8,7 @@ import java.util.List;
 import com.lwan.strcom.DiffInfo;
 import com.lwan.strcom.RunnerForLines;
 import com.lwan.util.IOUtil;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -133,7 +133,7 @@ public class StrComFX extends Application implements javafx.event.EventHandler<A
 				btnNext.setDisable(!cpComp.hasNextHighlight());
 				btnPrev.setDisable(!cpComp.hasPrevHighlight());
 			} else {
-				JavaFXUtil.ShowErrorDialog(stgMain, "Cannot read input files");
+				FxUtils.ShowErrorDialog(stgMain, "Cannot read input files");
 			}
 		}
 	}

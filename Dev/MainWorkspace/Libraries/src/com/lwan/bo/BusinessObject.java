@@ -697,7 +697,8 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 			}
 			String err = doVerifyState();
 			if (!StringUtil.isNullOrBlank(err)) {
-				throw new BOException("Failed to verfy child with message '" + err + "'", this);
+//				throw new BOException("Failed to verfy child with message '" + err + "'", this);
+				throw new BOException(err, this);
 			}
 			if (children != null) {
 				for(BusinessObject child : children.values()) {

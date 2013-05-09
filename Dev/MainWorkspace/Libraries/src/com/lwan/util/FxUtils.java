@@ -22,7 +22,11 @@ import javafx.stage.Window;
  * @author Brutalbarbarian
  *
  */
-public class JavaFXUtil {
+public class FxUtils {
+	public static void setVisibleAndManaged(Node n, boolean v) {
+		n.setVisible(v);
+		n.setManaged(v);		
+	}
 	
 	public static void printNodeTree(Node n) {
 		StringBuilder sb = new StringBuilder();

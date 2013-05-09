@@ -12,7 +12,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import com.lwan.strcom.DiffInfo;
 import com.lwan.util.CollectionUtil;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 
 public class ComparisonPaneFX extends BorderPane{
 	//components
@@ -90,7 +90,7 @@ public class ComparisonPaneFX extends BorderPane{
 
 		CollectionUtil.printV(res, "\n");
 
-		JavaFXUtil.printNodeTree(scpOld.getSkin().getNode());
+		FxUtils.printNodeTree(scpOld.getSkin().getNode());
 	}
 
 }

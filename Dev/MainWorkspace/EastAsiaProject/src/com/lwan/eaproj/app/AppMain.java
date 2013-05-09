@@ -1,9 +1,12 @@
 package com.lwan.eaproj.app;
 
-import com.lwan.eaproj.app.scenes.LoginScene;
-import com.lwan.eaproj.app.scenes.MainScene;
+import java.util.Collection;
+
+import com.lwan.eaproj.app.scenes.PaneLogin;
+import com.lwan.eaproj.app.scenes.PaneMain;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
+import com.lwan.javafx.app.util.DbUtil;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -15,9 +18,9 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class AppMain extends App {
-	public static final int STATE_LOGIN_SUCCESS = 1;
-	public static final int STATE_LOGIN_CANCEL = 2;
-	public static final int STATE_LOGOUT = 3;
+	public static final int STATE_LOGIN_SUCCESS = 1 + APP_MESSAGE_LAST;
+	public static final int STATE_LOGIN_CANCEL = 2 + APP_MESSAGE_LAST;
+	public static final int STATE_LOGOUT = 3 + APP_MESSAGE_LAST;
 
 
 	@Override
@@ -31,11 +34,10 @@ public class AppMain extends App {
 	
 	protected void initialiseStage(Stage s) {
 		s.setTitle(Lng._("East Asia Management System"));
-		LoginScene login  = new LoginScene();
+		PaneLogin login  = new PaneLogin();
 		Scene mainScene = new Scene(login);
 		s.setScene(mainScene);
-	}
-	
+	}	
 	
 	protected void processState(int state) throws Exception {
 		
@@ -51,8 +53,7 @@ public class AppMain extends App {
 			fade.setToValue(0.0);
 			fade.setOnFinished(new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent arg0) {
-					Scene scene = MainScene.createScene();
-					System.out.println(scene);
+					Scene scene = PaneMain.createScene();
 					getMainStage().setScene(scene);
 					Task<Void> t = new Task<Void>() {
 						protected Void call() throws Exception {
@@ -80,8 +81,22 @@ public class AppMain extends App {
 			break;
 		}
 	}
+	
+	public void init() throws Exception {
+		super.init();
+		
+		DbUtil.setRootPackage("com.lwan.eaproj.sp");
+	}
 
 	public static void main(String[] args) {
 		AppMain.launch(args);
+	}
+
+	@Override
+	protected void initStylesheets(Collection<String> stylesheets) {
+		stylesheets.add("styles/mainapp.css");
+		stylesheets.add("styles/boapp.css");
+		stylesheets.add("styles/chartcontrol.css");
+		stylesheets.add("styles/calendarstyle.css");
 	}
 }

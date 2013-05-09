@@ -20,7 +20,7 @@ import com.lwan.javafx.controls.bo.binding.BoundCellValue;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
 import javafx.application.Platform;
@@ -128,7 +128,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			}
 		});
 		// Not sure if this is a good idea...
-		link.LinkedObjectProperty().addListener(new ChangeListener<BOSet<R>>() {
+		link.linkedObjectProperty().addListener(new ChangeListener<BOSet<R>>() {
 			public void changed(ObservableValue<? extends BOSet<R>> arg0,
 					BOSet<R> arg1, BOSet<R> arg2) {
 				refresh();
@@ -148,10 +148,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 							// Attempt to trigger save...
 							try {
 								save();
-							} catch (final BOException e) {
-								// Notify User
-								JavaFXUtil.ShowErrorDialog(getScene().getWindow(), e.getMessage());
-								
+							} catch (final RuntimeException e) {
 								// Revert back to the previous selection.
 								Platform.runLater(new Runnable(){
 									public void run() {
@@ -159,9 +156,12 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 										try {
 											getSelectionModel().select(oldValue);
 											// Attempt to focus user on the cell?...
-											GridColumn col = getColumnByField(e.getSource().getName());
-											if (col != null) {
-												edit(getSelectionModel().getSelectedIndex() , col);
+											if (e instanceof BOException) {
+												BOException ex = (BOException)e;
+												GridColumn col = getColumnByField(ex.getSource().getName());
+												if (col != null) {
+													edit(getSelectionModel().getSelectedIndex() , col);
+												}
 											}
 										} finally {
 											revertingSelection = false;
@@ -280,25 +280,58 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 	boolean revertingSelection;
 	private R selected;
 	
-	public void save() throws BOException {
-		// No point continuing if not in edit mode...
-		if (isEditingProperty().getValue()) {
-			if (gridModeProperty().getValue() == MODE_RECORD) {
-				if (selected != null && selected.isActive()) {
-					selected.trySave();
-				}
-			} else if (gridModeProperty().getValue() == MODE_SET) {
-				BOSet<R> set = link.getLinkedObject();
-				if (set != null) {
-					set.trySave();
-				}
-			} else {
-				throw new RuntimeException("Unknown grid mode set.");
+	private Property<Callback<R, Boolean>> onSaveProperty;
+	public Property<Callback<R, Boolean>> onSaveProperty() {
+		if (onSaveProperty == null) {
+			onSaveProperty = new SimpleObjectProperty<>(this, "OnSave", null);
+		}
+		return onSaveProperty;		
+	}
+	public void setOnSave(Callback<R, Boolean> onSave) {
+		onSaveProperty().setValue(onSave);
+	}
+	public Callback<R, Boolean> getOnSave(){
+		if (onSaveProperty == null) {
+			return null;
+		} else {
+			return onSaveProperty().getValue();
+		}
+	}
+	
+	protected void callOnSave(R item) throws RuntimeException {
+		if(getOnSave() != null) {
+			if (!getOnSave().call(item)) {
+				throw new RuntimeException();
 			}
-			
-			// If it makes it up to this point without any exceptions,
-			// set editing state to false.
-			isEditingProperty().setValue(false);
+		}
+	}
+	
+	public void save() throws BOException {
+		try {
+			// No point continuing if not in edit mode...
+			if (isEditingProperty().getValue()) {
+				if (gridModeProperty().getValue() == MODE_RECORD) {
+					if (selected != null && selected.isActive()) {
+						callOnSave(selected);
+						selected.trySave();
+					}
+				} else if (gridModeProperty().getValue() == MODE_SET) {
+					BOSet<R> set = link.getLinkedObject();
+					if (set != null) {
+						callOnSave(selected);
+						set.trySave();
+					}
+				} else {
+					throw new RuntimeException("Unknown grid mode set.");
+				}
+				
+				// If it makes it up to this point without any exceptions,
+				// set editing state to false.
+				isEditingProperty().setValue(false);
+			}
+		} catch (RuntimeException e) {
+			FxUtils.ShowErrorDialog(getScene().getWindow(), e.getMessage());			
+			throw e;
 		}
 	}
 	
@@ -513,7 +546,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 					if (!arg2 && textField != null) {						
 						Scene sc = getScene();
 						// if no owner, or the focus owner isn't a child of the textField...
-						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), textField)) {
+						if (sc == null || !FxUtils.isChildOf(sc.getFocusOwner(), textField)) {
 							commitEdit();
 						}
 					}
@@ -851,7 +884,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 					if (!arg2) {
 						Scene sc = getScene();
 						
-						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
+						if (sc == null || !FxUtils.isChildOf(sc.getFocusOwner(), getTableView())) {
 							commitEdit();
 						}
 					}
@@ -948,7 +981,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 						Boolean arg1, Boolean arg2) {
 					if (!arg2) {
 						Scene sc = getScene();
-						if (sc == null || !JavaFXUtil.isChildOf(sc.getFocusOwner(), getTableView())) {
+						if (sc == null || !FxUtils.isChildOf(sc.getFocusOwner(), getTableView())) {
 							commitEdit();
 						}
 					}

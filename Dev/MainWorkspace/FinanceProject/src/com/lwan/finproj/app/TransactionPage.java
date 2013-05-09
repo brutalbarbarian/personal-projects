@@ -29,13 +29,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -65,35 +63,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 	ToolBar bottomBar;
 	
 	protected TransactionPage() {		
-		initControls();
-		addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>(){
-			public void handle(KeyEvent arg0) {
-				if (arg0.isControlDown()) {
-					switch (arg0.getText()) {
-					case "n":	// new
-						if (!tranGrid.isEditingProperty().getValue()) {
-							gridCtrl.activate(gridCtrl.getPrimaryButton());
-							
-							tranGrid.requestFocus();
-						}
-						break;
-					case "s":	// save
-						if (tranGrid.isEditingProperty().getValue()) {
-							// check what's focused
-							Node n = getScene().getFocusOwner();
-							if (n instanceof BOTextField) {
-								BOTextField txtField = (BOTextField)n;
-								txtField.dataBindingProperty().endEdit(true);
-							}
-							
-							gridCtrl.activate(gridCtrl.getPrimaryButton());
-							gridCtrl.getPrimaryButton().requestFocus();
-						}					
-					}
-				}
-			}			
-		});
-		
+		initControls();		
 		tranGrid.refresh();
 	}
 	
@@ -127,7 +97,8 @@ public class TransactionPage extends BorderPane implements Disposable{
 		gridLink.setLinkedObject(gridSetRef);
 		gridSetRef.ensureActive();
 	
-		gridCtrl = new BOGridControl<>(tranGrid);		
+		gridCtrl = new BOGridControl<>(tranGrid);
+		gridCtrl.setHotkeyControls(this);
 		record = gridCtrl.getSelectedLink();
 		
 		// init param fields
@@ -200,7 +171,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 		grid.add(amount, 1, 2);
 		grid.add(notes, 1, 3);
 		
-		record.LinkedObjectProperty().addListener(new ChangeListener<BOTransaction>() {
+		record.linkedObjectProperty().addListener(new ChangeListener<BOTransaction>() {
 			public void changed(ObservableValue<? extends BOTransaction> arg0,
 					BOTransaction arg1, BOTransaction arg2) {
 				BOCtrlUtil.buildAttributeLinks(grid);

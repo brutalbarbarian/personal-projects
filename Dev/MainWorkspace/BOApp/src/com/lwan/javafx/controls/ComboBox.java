@@ -20,7 +20,7 @@ import com.lwan.javafx.app.util.AutocompleteController;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.CollectionUtil.MapRunner;
 import com.lwan.util.GenericsUtil;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 import com.lwan.util.StringUtil;
 import com.lwan.util.containers.TrieMap;
 import com.sun.javafx.collections.ObservableListWrapper;
@@ -228,7 +228,7 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 			}
 		});
 		
-		JavaFXUtil.setNodeTreeFocusable(getEditor(), false);
+		FxUtils.setNodeTreeFocusable(getEditor(), false);
 		
 		selectedProperty().addListener(new ChangeListener<T>() {
 			public void changed(ObservableValue<? extends T> arg0, T arg1,

@@ -21,7 +21,7 @@ import com.lwan.musicsync.main.Constants;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.EnumUtil;
 import com.lwan.util.GenericsUtil;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
@@ -261,7 +261,7 @@ public abstract class BaseEditingCell <T> extends TableCell<AudioInfo, T> {
 		pane.initialise();
 		
 		stage.initOwner(getScene().getWindow());
-		Point2D cent = JavaFXUtil.screenPositionOf(self());
+		Point2D cent = FxUtils.screenPositionOf(self());
 		stage.setX(cent.getX());
 		stage.setY(cent.getY());
 		

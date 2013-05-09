@@ -22,6 +22,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
@@ -35,7 +36,6 @@ import javafx.scene.chart.PieChart.Data;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -64,11 +64,12 @@ import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.State;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.ComboBox;
+import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.javafx.scene.control.DateAxis;
 import com.lwan.javafx.scene.control.SimpleTextInputDialog;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.GenericsUtil;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.Procedure;
 import com.sun.javafx.collections.ObservableListWrapper;
@@ -785,16 +786,9 @@ public class BOChartControl <T extends BusinessObject> {
 				
 			});
 			
-			mainRow = new HBox();
 			cbItems.setMaxWidth(Double.MAX_VALUE);
-			HBox.setHgrow(cbItems, Priority.SOMETIMES);
-			setFillWidth(true);
-			
-			
-			Label attrLabel = new Label(title);
+			mainRow = new AlignedControlCell(title, cbItems, (Parent)owner);
 			mainRow.getStyleClass().add(CSS_HBOX);
-			
-			mainRow.getChildren().addAll(attrLabel, cbItems);
 			
 			getChildren().add(mainRow);
 			
@@ -831,9 +825,9 @@ public class BOChartControl <T extends BusinessObject> {
 							});
 							cbDate.setSelected(0);
 							
-							HBox dateRow = new HBox();
+							HBox dateRow = new AlignedControlCell(Lng._("Group by:"), cbDate, (Parent)owner);
+							cbDate.setMaxWidth(Double.MAX_VALUE);
 							dateRow.getStyleClass().add(CSS_HBOX);
-							dateRow.getChildren().addAll(new Label(Lng._("Group by:")), cbDate);
 							
 							getChildren().add(dateRow);
 						} else if (type.isNumeric()) {
@@ -866,9 +860,8 @@ public class BOChartControl <T extends BusinessObject> {
 								}								
 							});
 							
-							HBox rangeRow = new HBox();
+							HBox rangeRow = new AlignedControlCell("Range:", textField, (Parent)owner);
 							rangeRow.getStyleClass().add(CSS_HBOX);
-							rangeRow.getChildren().addAll(new Label("Range:"), textField);
 							
 							getChildren().add(rangeRow);
 						} else {
@@ -932,14 +925,14 @@ public class BOChartControl <T extends BusinessObject> {
 								String name = result.textProperty().getValue().trim();
 								// check that the name isn't empty
 								if (name.isEmpty()) {
-									JavaFXUtil.ShowErrorDialog(stage, Lng._("Name cannot be empty."));
+									FxUtils.ShowErrorDialog(stage, Lng._("Name cannot be empty."));
 									return;
 								}
 								
 								// check the name isn't already in use...
 								for (ChartTemplate template : templates) {
 									if (template.name.equalsIgnoreCase(name)) {
-										JavaFXUtil.ShowErrorDialog(
+										FxUtils.ShowErrorDialog(
 												stage, Lng._("Template %1% already exists.", name));
 										return;
 									}
@@ -1078,7 +1071,7 @@ public class BOChartControl <T extends BusinessObject> {
 						}
 					}
 					if (currentTemplate == null) {
-						JavaFXUtil.ShowErrorDialog(stage, Lng._("No template selected."));
+						FxUtils.ShowErrorDialog(stage, Lng._("No template selected."));
 					}
 					//										 
 					initScene(SCENE_DISPLAY);

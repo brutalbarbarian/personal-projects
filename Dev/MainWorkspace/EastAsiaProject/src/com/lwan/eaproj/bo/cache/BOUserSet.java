@@ -8,10 +8,16 @@ import javafx.beans.property.SimpleObjectProperty;
 
 import com.lwan.bo.db.BODbSet;
 import com.lwan.eaproj.bo.BOUser;
-import com.lwan.eaproj.sp.PS_USR;
+import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.StoredProc;
 
+/**
+ * Users is a passive set
+ * 
+ * @author Lu
+ *
+ */
 public class BOUserSet extends BODbSet<BOUser>{
 	private static BOUserSet cache;
 	private static StoredProc spUsername;
@@ -27,6 +33,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 	public static BOUserSet get() {
 		if (cache == null) {
 			cache = new BOUserSet();
+			cache.ensureActive();
 		}
 		return cache;
 	} 
@@ -98,7 +105,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 	 */
 	public static BOUser findUserByUsername(String username) {
 		if (spUsername == null) {
-			spUsername = new PS_USR();
+			spUsername = DbUtil.getStoredProc("PS_USR");
 		}
 		spUsername.clearParameters();
 		spUsername.getParamByName("@usr_name").set(username);
@@ -125,12 +132,12 @@ public class BOUserSet extends BODbSet<BOUser>{
 
 	private BOUserSet() {
 		super(null, "UserCache", "UserID", "usr_id");
-		loadModeProperty().setValue(LOADMODE_CACHE);
+		loadModeProperty().setValue(LOADMODE_PASSIVE);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		existsStoredProcProperty().setValue(new PS_USR());
+		selectStoredProcProperty().setValue(DbUtil.getStoredProc("PS_USR_all"));
 	}
 
 	@Override

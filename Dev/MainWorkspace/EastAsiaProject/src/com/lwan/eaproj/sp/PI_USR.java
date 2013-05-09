@@ -12,7 +12,7 @@ public class PI_USR extends StoredProc{
 	private static final String[] STATEMENTS = {
 		"insert into TM_USR_user " +
 		"(usr_id, usr_name, usr_password, usr_description, usr_timestamp) " +
-		"values(@usr_id, @usr_name, @usr_password, @usr_description, @usr_timestamp)"
+		"values (@usr_id, @usr_name, @usr_password, @usr_description, @usr_timestamp)"
 	};
 	
 	public PI_USR () {

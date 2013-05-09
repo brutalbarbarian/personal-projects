@@ -3,7 +3,7 @@ package com.lwan.javafx.scene.control;
 import java.io.File;
 
 import com.lwan.util.GenericsUtil;
-import com.lwan.util.JavaFXUtil;
+import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.Procedure;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -177,7 +177,7 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 						imageProperty().setValue(img);
 					}
 				} catch (Exception ex) {
-					JavaFXUtil.ShowErrorDialog(stage, "File is not a valid image");
+					FxUtils.ShowErrorDialog(stage, "File is not a valid image");
 					ex.printStackTrace();
 				}
 			}
@@ -185,7 +185,7 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 			if (Clipboard.getSystemClipboard().hasImage()) {
 				imageProperty().setValue(Clipboard.getSystemClipboard().getImage());
 			} else {
-				JavaFXUtil.ShowErrorDialog(stage, "No valid image found in clipboard");
+				FxUtils.ShowErrorDialog(stage, "No valid image found in clipboard");
 			}
 		} else if (src == btnLoadFromURL) {
 			SimpleTextInputDialog dialog = new SimpleTextInputDialog("Load Image from URL...", "URL:",
@@ -200,7 +200,7 @@ public class ImageDialog extends BorderPane implements EventHandler<ActionEvent>
 								imageProperty().setValue(img);
 							}
 						} catch (Exception ex) {
-							JavaFXUtil.ShowErrorDialog(stage, "File is not a valid image");
+							FxUtils.ShowErrorDialog(stage, "File is not a valid image");
 							ex.printStackTrace();
 						}
 					}

@@ -1,5 +1,7 @@
 package com.lwan.finproj.app;
 
+import java.util.Collection;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
@@ -75,9 +77,7 @@ public class MainApp extends App{
 		
 		Scene scene = new Scene(bp);
 
-		scene.getStylesheets().add("resource/calendarstyle.css");
-		scene.getStylesheets().add("resource/chartcontrol.css");
-		scene.getStylesheets().add("resource/boapp.css");
+		scene.getStylesheets().addAll(getStyleshets());
 		
 		stage.setScene(scene);
 		
@@ -100,5 +100,12 @@ public class MainApp extends App{
 		}
 		
 		super.stop();
+	}
+
+	@Override
+	protected void initStylesheets(Collection<String> stylesheets) {
+		stylesheets.add("resource/calendarstyle.css");
+		stylesheets.add("resource/chartcontrol.css");
+		stylesheets.add("resource/boapp.css");	
 	}
 }

@@ -4,8 +4,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
-public class AlertsPage extends AppPage {
-	public AlertsPage(String ... params ) {
+public class PageAlerts extends PageBase {
+	public PageAlerts(String ... params ) {
 		super(params);
 	}	
 	
@@ -29,6 +29,11 @@ public class AlertsPage extends AppPage {
 
 	@Override
 	protected void initialise(String... params) {
+		// TODO
+	}
+
+	@Override
+	public void dispose() {
 		// TODO
 	}
 
