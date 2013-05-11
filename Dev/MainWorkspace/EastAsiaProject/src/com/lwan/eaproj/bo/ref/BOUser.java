@@ -1,4 +1,4 @@
-package com.lwan.eaproj.bo;
+package com.lwan.eaproj.bo.ref;
 
 import javafx.util.Callback;
 
@@ -7,7 +7,6 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
-import com.lwan.eaproj.bo.cache.BOUserSet;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.property.Validation;
 
@@ -56,7 +55,7 @@ public class BOUser extends BODbObject{
 			return "Username cannot have a length of 0";
 		}
 		// check if any other user has the same name
-		for (BOUser user : BOUserSet.get()) {
+		for (BOUser user : BOUserSet.getSet()) {
 			if (user != this &&
 					user.userName.getValue().equals(userName.getValue())) {
 				return "Username already exists";
@@ -76,7 +75,7 @@ public class BOUser extends BODbObject{
 
 	@Override
 	protected void createAttributes() {
-		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", AttributeType.Integer, false, false));
+		userID = addAsChild(new BODbAttribute<Integer>(this, "UserID", "usr_id", AttributeType.ID, false, false));
 		userName = addAsChild(new BODbAttribute<String>(this, "UserName", "usr_name", AttributeType.String, false, true));
 		userName.addValidationListener(new Validation.StringValidator(
 				// Stop usage of white space for the username

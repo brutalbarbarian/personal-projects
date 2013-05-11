@@ -578,15 +578,14 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 			// Don't handle event if this was the object which fired it last
 			if (event.getCaller() != this) {
 				handleModified(event);
+				event = new ModifiedEvent(event, this);
 			}
-			
 			BusinessObject owner = ownerProperty().getValue();
-			ModifiedEvent modEvent = new ModifiedEvent(event, this);
 			if (owner != null) {
-				owner.fireModified(modEvent);
+				owner.fireModified(event);
 			}
 			for(ModifiedEventListener listener : listeners) {
-				listener.handleModified(modEvent);
+				listener.handleModified(event);
 			}
 		}
 	}

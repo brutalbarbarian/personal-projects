@@ -1,4 +1,4 @@
-package com.lwan.eaproj.app.scenes;
+package com.lwan.eaproj.app.panes.pages;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;

@@ -2,8 +2,8 @@ package com.lwan.eaproj.app;
 
 import java.util.Collection;
 
-import com.lwan.eaproj.app.scenes.PaneLogin;
-import com.lwan.eaproj.app.scenes.PaneMain;
+import com.lwan.eaproj.app.panes.PaneLogin;
+import com.lwan.eaproj.app.panes.PaneMain;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.DbUtil;

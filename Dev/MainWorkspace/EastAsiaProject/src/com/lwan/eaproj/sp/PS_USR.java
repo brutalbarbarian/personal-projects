@@ -9,7 +9,7 @@ public class PS_USR extends StoredProc{
 	private static final int[] PARAM_TYPES = {Types.NUMERIC, Types.VARCHAR};
 	private static final String[] STATEMENTS = {
 		"select usr_id, usr_name, usr_password, usr_description, usr_timestamp " +
-		"from TM_USR_user " +
+		"from TR_USR_user " +
 		"where (not ((@usr_id is null) and (@usr_name is null))) and" +
 		"	((@usr_id is null) or (usr_id = @usr_id)) and " +
 		"	((@usr_name is null) or (usr_name = @usr_name))"

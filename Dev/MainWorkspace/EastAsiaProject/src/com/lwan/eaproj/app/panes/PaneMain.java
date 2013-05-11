@@ -1,10 +1,12 @@
-package com.lwan.eaproj.app.scenes;
+package com.lwan.eaproj.app.panes;
 
 import java.util.Collection;
 import java.util.Vector;
 
 import com.lwan.eaproj.app.AppMain;
 import com.lwan.eaproj.app.Constants;
+import com.lwan.eaproj.app.panes.pages.PageAlerts;
+import com.lwan.eaproj.app.panes.pages.PageBase;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.CollectionUtil;
@@ -174,7 +176,7 @@ public class PaneMain extends BorderPane{
 	protected void showUsersScreen() {
 		Stage usr = new Stage(StageStyle.UTILITY);
 		usr.initOwner(getScene().getWindow());
-		usr.initModality(Modality.APPLICATION_MODAL);
+		usr.initModality(Modality.WINDOW_MODAL);
 		
 		PaneUser pane = new PaneUser();
 		try {
@@ -185,6 +187,25 @@ public class PaneMain extends BorderPane{
 			usr.setWidth(600);
 			usr.setHeight(500);
 			usr.showAndWait();
+		} finally {
+			pane.dispose();
+		}
+	}
+	
+	protected void showCompanyScreen(){
+		Stage com = new Stage(StageStyle.UTILITY);
+		com.initOwner(getScene().getWindow());
+		com.initModality(Modality.WINDOW_MODAL);
+		
+		PaneCompany pane = new PaneCompany();
+		try {
+			Scene sc = new Scene(pane);
+			sc.getStylesheets().addAll(App.getStyleshets());
+			
+			com.setScene(sc);
+			com.setWidth(600);
+			com.setHeight(500);
+			com.showAndWait();
 		} finally {
 			pane.dispose();
 		}
@@ -204,6 +225,8 @@ public class PaneMain extends BorderPane{
 				case "users" :
 					showUsersScreen();
 					break;
+				case "companies" :
+					showCompanyScreen();
 				}
 			}
 		};
@@ -217,8 +240,9 @@ public class PaneMain extends BorderPane{
 				menuItemBuilder.text(Lng._("E_xit")).userData("exit").onAction(menuHandler).build()
 				).build());
 		
-		menu.add(MenuBuilder.create().text(Lng._("_Options")).items(
-				menuItemBuilder.text(Lng._("_Users")).userData("users").onAction(menuHandler).build()
+		menu.add(MenuBuilder.create().text(Lng._("_Maintain")).items(
+				menuItemBuilder.text(Lng._("_Users")).userData("users").onAction(menuHandler).build(),
+				menuItemBuilder.text(Lng._("_Companies")).userData("companies").onAction(menuHandler).build()
 				).build());
 		
 		return menu;

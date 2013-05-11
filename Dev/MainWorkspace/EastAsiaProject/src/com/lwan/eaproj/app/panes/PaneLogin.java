@@ -1,7 +1,7 @@
-package com.lwan.eaproj.app.scenes;
+package com.lwan.eaproj.app.panes;
 
 import com.lwan.eaproj.app.AppMain;
-import com.lwan.eaproj.bo.cache.BOUserSet;
+import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.FxUtils;
 

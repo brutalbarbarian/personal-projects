@@ -72,4 +72,26 @@ public class DbUtil {
 		
 		return (T)sp;
 	}
+	
+	public static void printResultSet(ResultSet result) throws SQLException {
+		int columns = result.getMetaData().getColumnCount();
+		for (int i = 1; i <= columns; i++) {
+			System.out.print(result.getMetaData().getColumnName(i));
+			if (i != columns) {
+				System.out.print(", ");
+			}
+		}
+		System.out.println();
+		
+		while(result.next()) {
+			for (int i = 1; i <= columns; i++) {
+				Object o = result.getObject(i);
+				System.out.print(o.toString() + ":" + o.getClass().getName() + ":" + result.getMetaData().getColumnTypeName(i));
+				if (i != columns) {
+					System.out.print(", ");
+				}
+			}
+			System.out.println();
+		}
+	}
 }

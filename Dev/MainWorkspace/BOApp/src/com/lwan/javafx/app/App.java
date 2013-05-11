@@ -83,9 +83,7 @@ public abstract class App extends Application{
 		return getApp().mainStage;
 	}
 	
-	protected void initialiseStage(Stage stage) {
-		// Override for anything to happen...
-	}
+	protected abstract void initialiseStage(Stage stage);
 	
 	public static void notifyState(final int state) {
 		System.out.println("notified:" + state);

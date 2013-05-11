@@ -10,7 +10,7 @@ public class PU_USR extends StoredProc{
 	private static final int[] PARAM_TYPES = {Types.NUMERIC, Types.VARCHAR, Types.VARCHAR,
 		Types.VARCHAR, Types.VARCHAR};
 	private static final String[] STATEMENTS = {
-		"update TM_USR_user " +
+		"update TR_USR_user " +
 		"set usr_name = @usr_name, " +
 		"	usr_password = @usr_password, " +
 		"	usr_description = @usr_description, " +

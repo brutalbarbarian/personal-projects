@@ -1,4 +1,4 @@
-package com.lwan.eaproj.bo.cache;
+package com.lwan.eaproj.bo.ref;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,7 +7,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 
 import com.lwan.bo.db.BODbSet;
-import com.lwan.eaproj.bo.BOUser;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.StoredProc;
@@ -30,7 +29,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 		return activeUser;
 	}
 	
-	public static BOUserSet get() {
+	public static BOUserSet getSet() {
 		if (cache == null) {
 			cache = new BOUserSet();
 			cache.ensureActive();
@@ -44,7 +43,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 	}
 
 	public static BOUser findUserByID(int id) {
-		return get().findChildByID(id);
+		return getSet().findChildByID(id);
 	}
 	
 	/**
@@ -53,7 +52,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 	 * @return
 	 */
 	public static BOUser getActiveUser() {
-		return get().ActiveUser().getValue();
+		return getSet().ActiveUser().getValue();
 	}
 	
 	/**
@@ -71,7 +70,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 	 * 
 	 */
 	public static void clearActiveUser() {
-		get().ActiveUser().setValue(null);
+		getSet().ActiveUser().setValue(null);
 	}
 	
 	/**
@@ -86,7 +85,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 	 */
 	public static boolean setActiveUser(String username, String password) {
 		if (!hasActiveUser() && validateLogin(username, password)) {
-			get().ActiveUser().setValue(findUserByUsername(username));
+			getSet().ActiveUser().setValue(findUserByUsername(username));
 			return true;
 		} else {
 			// Failed to set active user... cannot override existing
@@ -125,7 +124,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 			throw new RuntimeException("Failed to access database to find usr_id from usr_name", e);
 		}
 		if (id > 0) {
-			return get().findChildByID(id);
+			return getSet().findChildByID(id);
 		}
 		return null;
 	}

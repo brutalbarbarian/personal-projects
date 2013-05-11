@@ -1,4 +1,4 @@
-package com.lwan.eaproj.app.scenes;
+package com.lwan.eaproj.app.panes.pages;
 
 import com.lwan.eaproj.app.Constants;
 import com.lwan.util.wrappers.Disposable;

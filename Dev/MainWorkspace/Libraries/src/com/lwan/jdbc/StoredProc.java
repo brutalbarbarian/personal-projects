@@ -119,7 +119,7 @@ public class StoredProc {
 	public void execute(Connection con) throws SQLException {
 		result = null;	// clear previous result set
 		
-		printParameters();
+//		printParameters();
 
 		doExecute(con, 0, statements.size());
 	}
@@ -129,7 +129,6 @@ public class StoredProc {
 	}
 	
 	public void printParameters() {
-		System.out.println("Params for " + getClass().getName());
 		for (Parameter param : parameters.values()){
 			System.out.println(param.name() + "(" + param.getType() + "):" + param.get());
 		}
