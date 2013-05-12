@@ -12,6 +12,7 @@ import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
+import com.lwan.util.wrappers.CallbackEx;
 import com.lwan.util.wrappers.Disposable;
 
 import javafx.scene.control.ToolBar;
@@ -39,16 +40,34 @@ public class SourcePage extends BorderPane implements Disposable{
 	protected void initControls() {
 		gridLink = new BOLinkEx<>();
 		srcGrid = new BOGrid<>("SourcePageSourceGrid", gridLink, 
-				LngUtil.translateArray(new String[]{"Source Name"}),//, "Transaction Count"}, 
-				new String[]{"SourceName"},//, "TransactionCount"}, 
-				new boolean[]{true});//, false});
+				LngUtil.translateArray(new String[]{"Source Name", "Transaction Count"}),//, "Transaction Count"}, 
+				new String[]{"SourceName", BOGrid.PREFIX_CALCULATED + "TransactionCount"},//, "TransactionCount"}, 
+				new boolean[]{true, false});
+		srcGrid.setDisplayValueCallback(new CallbackEx<BOSource, String, String>(){
+			public String call(BOSource a, String b) {
+				int num = 0;
+				for (BOTransaction trans : BOTransaction.getTransactionSet()) {
+					if (trans.sourceID().equalValue(a.sourceID())) {
+						num ++;
+					}
+				}
+				
+				return Integer.toString(num);
+			}			
+		});
 		srcGrid.setEditable(true);
 		
 		gridSetRef = new BOSourceSetRef();
 		gridLink.setLinkedObject(gridSetRef);
 		gridSetRef.ensureActive();
 		
-		gridCtrl = new BOGridControl<>(srcGrid);
+		gridCtrl = new BOGridControl<BOSource>(srcGrid) {
+			@Override
+			protected boolean allowDelete(BOSource item) {
+				return BOTransaction.getTransactionSet().
+						findChildByAttribute("SourceID", item.sourceID().getValue()) == null;
+			}
+		};
 		record = gridCtrl.getSelectedLink();
 		
 		tranSetLink = new BOLinkEx<>();

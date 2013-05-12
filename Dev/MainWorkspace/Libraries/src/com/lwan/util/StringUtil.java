@@ -290,11 +290,17 @@ public class StringUtil {
 	public static String getDelimitedString(String delimiter, String... strings) {
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> it = CollectionUtil.getIterator(strings);
+		boolean isFirst = true;
 		while (it.hasNext()) {
-			sb.append(it.next());
-			if (it.hasNext()) {
+			String next = it.next();
+			if (isNullOrBlank(next)) {
+				continue;
+			}
+			if (!isFirst) {
 				sb.append(delimiter);
 			}
+			sb.append(next);
+			isFirst = false;
 		}
 		return sb.toString();
 	}

@@ -37,7 +37,7 @@ public class Experiment extends Application{
 			public void handle(ActionEvent e) {
 				String in = txtIn.getText();
 				String outString = "";
-				String createString = "";
+//				String createString = "";
 				// look for keyword 'BODbAttribute'
 				int nxtIndex = 0;
 				while(nxtIndex >= 0) {
@@ -72,7 +72,7 @@ public class Experiment extends Application{
 									outString += "public " + declaration + " " + curString + "() {\n" +
 											"	return " + curString + ";\n" +
 											"}\n";
-									createString += "addAsChild(new " + declaration + "(this, \"" + ");";
+//									createString += "addAsChild(new " + declaration + "(this, \"" + ");";
 									curString = "";
 								}
 							}

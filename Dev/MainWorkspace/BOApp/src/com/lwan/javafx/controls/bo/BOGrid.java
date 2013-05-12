@@ -17,10 +17,12 @@ import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.controls.bo.binding.BoundCellValue;
+import com.lwan.javafx.controls.bo.binding.ComputedCellValue;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.FxUtils;
+import com.lwan.util.wrappers.CallbackEx;
 import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
 import javafx.application.Platform;
@@ -50,6 +52,8 @@ import javafx.util.Callback;
  * @param <R>
  */
 public class BOGrid<R extends BusinessObject> extends TableView<R> implements Disposable{
+	public static final String PREFIX_CALCULATED = "$CALC$";
+	
 	/**
 	 * Editing is per record basis.
 	 * What this means is that when leaving a record, to edit a different record, this
@@ -93,6 +97,23 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		return link.getLinkedObject();
 	}
 	
+	private CallbackEx<R, String, String> displayValueCallback;
+	public void setDisplayValueCallback(CallbackEx<R, String, String> callback) {
+		displayValueCallback = callback;
+	}
+	public String getDisplayValue(R item, String fieldName) {
+		if (displayValueCallback == null) {
+			return "";
+		} else {
+			String value = displayValueCallback.call(item, fieldName);
+			if (value == null) {
+				return "";
+			} else {
+				return value;
+			}
+		}
+	}
+	
 	private String key;
 	
 	public BOGrid(String key, BOLinkEx<BOSet<R>> link, 
@@ -103,6 +124,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			throw new RuntimeException("Invalid arguments for column details.");
 		}
 		
+		this.link = link;
 		int cols = columnNames.length;
 		List<GridColumn> columns = new Vector<>();
 		for (int i = 0; i < cols; i++) {
@@ -112,7 +134,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		
 		getColumns().setAll(columns);
 
-		this.link = link;
 		link.addListener(new ModifiedEventListener() {
 			public void handleModified(ModifiedEvent event) {
 				if (event.getType() == ModifiedEvent.TYPE_ACTIVE) {
@@ -422,10 +443,15 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			this.fieldPath = fieldPath;
 			params = new Hashtable<>();
 			
-			setEditable(editable);
-			
-			setCellValueFactory(new BoundCellValue<Object, R>(fieldPath));
-			setAsTextField();	// Default
+			if (fieldPath.startsWith(PREFIX_CALCULATED)) {
+				setCellValueFactory(new ComputedCellValue<R>(BOGrid.this, getLink(), fieldPath));
+				setEditable(false);
+				setAsReadOnlyField();
+			} else {
+				setCellValueFactory(new BoundCellValue<Object, R>(fieldPath));
+				setEditable(editable);
+				setAsTextField();	// Default
+			}
 			
 			setPrefWidth(100);	// Minimum?
 			
@@ -453,6 +479,11 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		public void setAsTextField() {
 			params.clear();
 			setCellFactory(getTextfieldCellFactory());
+		}
+		
+		public void setAsReadOnlyField() {
+			params.clear();
+			setCellFactory(getReadOnlyCellFactory());
 		}
 		
 		public <B extends BusinessObject> void setAsCombobox(BOSet<B> set, String keyPath, String attributePath) {
@@ -487,6 +518,18 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		return textfieldCellFactory;
 	}
 	
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> readOnlyCellFactory;
+	private Callback<TableColumn<R, Object>, TableCell<R, Object>> getReadOnlyCellFactory() {
+		if (readOnlyCellFactory == null) {
+			readOnlyCellFactory = new Callback<TableColumn<R, Object>, TableCell<R, Object>>() {
+				public TableCell<R, Object> call(TableColumn<R, Object> arg0) {
+					return new ReadOnlyGridCell();
+				}				
+			};
+		}
+		return readOnlyCellFactory;
+	}
+	
 	private Callback<TableColumn<R, Object>, TableCell<R, Object>> comboboxCellFactory;
 	private Callback<TableColumn<R, Object>, TableCell<R, Object>> getComboboxCellFactory() {
 		if (comboboxCellFactory == null) {
@@ -509,6 +552,15 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			};
 		}
 		return datePickerCellFactory;
+	}
+	
+	public class ReadOnlyGridCell extends TableCell<R, Object>{		
+		@Override
+		protected void updateItem(Object item, boolean empty) {
+			super.updateItem(item, empty);
+			
+			setText(item == null? "" : item.toString());
+		}
 	}
 	
 	public class TextfieldGridCell extends CustomGridCell {

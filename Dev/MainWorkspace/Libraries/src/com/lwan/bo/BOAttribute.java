@@ -171,6 +171,10 @@ public class BOAttribute <T> extends BusinessObject {
 					" into an integer."); 
 		}
 	}
+	
+	public boolean equalValue(BOAttribute<?> other) {
+		return GenericsUtil.Equals(getValue(), other.getValue());
+	}
 
 	/**
 	 * Effectively 0 if the value is null, or cast as double if the value is

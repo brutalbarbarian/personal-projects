@@ -16,4 +16,5 @@ keys.ini
 baregrep.exe
 
 ## language files
+*/keys.ini
 *.lng
