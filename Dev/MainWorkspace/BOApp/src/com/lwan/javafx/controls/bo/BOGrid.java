@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -25,13 +26,18 @@ import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.CallbackEx;
 import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
+import com.sun.javafx.scene.control.skin.TableViewSkin;
+import com.sun.javafx.scene.control.skin.VirtualScrollBar;
+
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -116,6 +122,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 	
 	private String key;
 	
+	@SuppressWarnings("rawtypes")
 	public BOGrid(String key, BOLinkEx<BOSet<R>> link, 
 			String [] columnNames, String[] fieldPaths, boolean[] editable) {
 		// initialize the grid columns?
@@ -127,9 +134,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		this.link = link;
 		int cols = columnNames.length;
 		List<GridColumn> columns = new Vector<>();
+		double defaultRelativeWidth = 1d / cols;
 		for (int i = 0; i < cols; i++) {
 			columns.add(new GridColumn(columnNames[i], fieldPaths[i], 
-					editable == null? true : editable[i]));
+					editable == null? true : editable[i], defaultRelativeWidth));
 		}
 		
 		getColumns().setAll(columns);
@@ -220,12 +228,229 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		this.key = key;
 		final String layout = App.getKey(key);
 		if (layout != null) {
-			Platform.runLater(new Runnable(){
-				public void run() {
-					displayLayout(layout);		
-				}				
-			});			
+			displayLayout(layout);					
 		}
+		
+		setSkin(new CustomTableViewSkin(this));
+
+		firstRealLayout = true;
+		
+		columnResizePolicyProperty().set(new Callback<ResizeFeatures, Boolean>() {
+			@SuppressWarnings({ "unchecked", "deprecation" })
+			public Boolean call(ResizeFeatures rf) {
+				if (firstRealLayout) {
+					// don't bother respecting min and max widths here.
+					
+					double width = getContentWidth();
+					
+					System.out.println(width);
+
+					if (width <= 0 || getVisibleLeafColumns().isEmpty()) {
+						return true;
+					}
+
+					double totalPercent = 0;
+					double minPercentage = 1 / getVisibleLeafColumns().size();
+					for (TableColumn<R, ?> column : getVisibleLeafColumns()) {
+						GridColumn col = (GridColumn)column;
+						col.relativeWidth = Math.max(col.relativeWidth, minPercentage);
+						
+						totalPercent += col.relativeWidth;
+					}
+
+					double percentMultiplier = 1 / totalPercent;
+					for (TableColumn<R, ?> column : getColumns()) {
+						if (column.isVisible()) {
+							GridColumn col = (GridColumn)column;
+
+							double newWidth = col.relativeWidth * percentMultiplier * width;
+
+							col.impl_setWidth(newWidth);
+						}
+					}
+
+					firstRealLayout = false;
+				} else {
+					// need to respect min and max widths as this is likely to be a user change.
+					double width = getContentWidth();
+					if (width <= 0) {
+						return false;	// wtf
+					}
+					
+					
+					double spaceAvaliable;
+					double actualTotalPercent;
+					List<GridColumn> remainingColumns = new LinkedList<>();
+					
+					if (rf.getColumn() != null) {
+						// need to check if the new size is allowed
+						double oldWidth = rf.getColumn().getWidth();
+						double newWidth = oldWidth + rf.getDelta();
+						if (newWidth < rf.getColumn().getMinWidth()) {
+							newWidth = rf.getColumn().getMinWidth();
+						} else if (newWidth > rf.getColumn().getMaxWidth()) {
+							newWidth = rf.getColumn().getMaxWidth();
+						}
+						double delta = newWidth - oldWidth;	// this will ensure its constraints
+						
+						if (delta == 0) {
+							return false;
+						}
+						
+						// find out how much space is left on the right after this change
+						
+						boolean foundColumn = false;
+						actualTotalPercent = 0;
+						spaceAvaliable = width;
+						for (TableColumn<R, ?> column : getVisibleLeafColumns()) {
+							if (foundColumn) {
+								remainingColumns.add((GridColumn) column);
+								actualTotalPercent += ((GridColumn)column).relativeWidth;
+							} else if (column == rf.getColumn()) {
+								spaceAvaliable -= newWidth;
+								foundColumn = true;
+							} else {
+								spaceAvaliable -= column.getWidth();
+							}
+						}
+						if (spaceAvaliable < 0 || (spaceAvaliable > 0 && remainingColumns.isEmpty())) {
+							return false;	// not enough space left, or too much space left
+						}
+						
+						// check min and max width constraints
+						double totalMin = 0, totalMax = 0;
+						for (GridColumn col : remainingColumns) {
+							totalMin += col.getMinWidth();
+							totalMax += col.getMaxWidth();
+						}
+						
+						if (totalMin > spaceAvaliable || totalMax < totalMax) {
+							return false;	// not enough space to satisfy the space constraints
+						}
+						
+						// from this point on, we know we've definitely got enough space
+						rf.getColumn().impl_setWidth(newWidth);	// can safely do this now
+						((GridColumn)rf.getColumn()).relativeWidth = newWidth / width;
+					} else {
+						// do total rebalancing.
+						remainingColumns = new LinkedList<>();
+						actualTotalPercent = 0;
+						for (TableColumn<R, ?> column : getVisibleLeafColumns()) {
+							GridColumn col = (GridColumn)column;
+							actualTotalPercent += col.relativeWidth;
+							remainingColumns.add((GridColumn)column);
+						}
+						spaceAvaliable = width;
+					}
+					
+					double targetTotalPercent = spaceAvaliable / width;	
+					double multiplier = targetTotalPercent / actualTotalPercent;
+					
+					// update all relative widths here, ignoring constraints.
+					for (GridColumn col : remainingColumns) {
+						col.relativeWidth = col.relativeWidth * multiplier;
+					}
+					
+					int diff = -1;
+					while (diff != 0) {
+						diff = 0;
+						Iterator<GridColumn> it = remainingColumns.iterator();
+						while (it.hasNext()) {
+							GridColumn col = it.next();
+							double targetWidth = col.relativeWidth * multiplier * width;
+							if (targetWidth < col.getMinWidth()) {
+								targetWidth = col.getMinWidth();
+							} else if (targetWidth > col.getMaxWidth()) {
+								targetWidth = col.getMaxWidth();
+							} else {
+								continue;
+							}
+							spaceAvaliable -= targetWidth;
+							targetTotalPercent = spaceAvaliable / width;
+							actualTotalPercent -= col.relativeWidth;
+							
+							multiplier = targetTotalPercent / actualTotalPercent;
+							
+							col.impl_setWidth(targetWidth); 
+							diff++;
+							
+							it.remove();
+						}
+					}
+					
+					// go through each of them assuming the relativeWidth is correct
+					Iterator<GridColumn> it = remainingColumns.iterator();
+					while (it.hasNext()) {
+						if (it.hasNext()) {
+							GridColumn col = it.next();
+							double targetWidth;
+							if (it.hasNext()) {
+								targetWidth = Math.floor(col.relativeWidth * spaceAvaliable / actualTotalPercent);
+								actualTotalPercent -= col.relativeWidth;
+								spaceAvaliable -= targetWidth;
+							} else {
+								targetWidth = spaceAvaliable;
+							}
+							col.impl_setWidth(targetWidth);
+						}
+					}
+				}
+				
+				return true;
+			}						
+		});
+	}
+	
+	private boolean firstRealLayout;
+	
+	private class CustomTableViewSkin extends TableViewSkin<R> {
+		VirtualScrollBar vbar;
+		
+		public CustomTableViewSkin(TableView<R> tableView) {
+			super(tableView);
+			
+			// find the freakin vbar... since its not exposed
+			findVBar(flow);
+		}
+		
+		private boolean findVBar(Node n) {
+			if ((n instanceof VirtualScrollBar)) {
+				VirtualScrollBar scrollbar = (VirtualScrollBar)n;
+				if (scrollbar.getOrientation() == Orientation.VERTICAL) {
+					vbar = scrollbar;
+					return true;	
+				} else {
+					return false;
+				}
+			} else if (n instanceof Parent) {
+				Parent p = (Parent)n;
+				for (Node child : p.getChildrenUnmodifiable()) {
+					if (findVBar(child)) {
+						return true;
+					}
+				}
+				return false;
+			} else {
+				return false;
+			}
+		}
+		
+		
+		protected double getContentWidth() {
+			double width = getWidth();
+			if (vbar.isVisible()) {
+				width = width - vbar.getWidth();
+			}
+			if (getPadding() != null) {
+				width = width - getPadding().getLeft() - getPadding().getRight();
+			}
+			return width;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected double getContentWidth() {
+		return ((CustomTableViewSkin)getSkin()).getContentWidth();
 	}
 	
 	protected void displayLayout(String layout) {
@@ -247,7 +472,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 				SortType st = sort.length() == 0? null : SortType.valueOf(sort);
 				
 				GridColumn column = getColumnByField(field);
-				column.setPrefWidth(width);
+				column.relativeWidth = width;
 				column.setVisible(visible);
 				if (st != null) {
 					column.setSortType(st);
@@ -268,7 +493,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		for (TableColumn<R, ?> c : getColumns()) {			
 			GridColumn col = (GridColumn)c;
 			
-			double width = col.getWidth();
+			double width = col.relativeWidth;
 			String field = col.getField();
 			boolean visible = col.isVisible();
 			SortType st = col.getSortType();
@@ -436,8 +661,9 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		private String fieldPath;
 		private Map<String, Object> params;	// Extra params for the cellFactory
 		private Procedure<BoundControl<?>> ctrlPropertySetter;
+		private double relativeWidth;
 		
-		GridColumn(String caption, String fieldPath, boolean editable) {
+		GridColumn(String caption, String fieldPath, boolean editable, double defaultRelativeWidth) {
 			super(caption);
 			
 			this.fieldPath = fieldPath;
@@ -452,14 +678,26 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 				setEditable(editable);
 				setAsTextField();	// Default
 			}
-			
-			setPrefWidth(100);	// Minimum?
-			
+						
 			setOnEditCommit(new EventHandler<CellEditEvent<R, Object>>() {
 				public void handle(CellEditEvent<R, Object> arg0) {
 					// do nothing
+					// this is intentional as it overrides the default action
 				}				
 			});
+			
+			setPrefWidth(100);
+			relativeWidth = defaultRelativeWidth;
+//			widthProperty().addListener(new ChangeListener<Number>(){
+//				public void changed(ObservableValue<? extends Number> arg0,
+//						Number arg1, Number arg2) {
+//					double gridWidth = BOGrid.this.getWidth();
+//					double width = arg2.doubleValue();
+//					if (gridWidth > 0 && !firstRealLayout) {
+//						relativeWidth = width / gridWidth;	
+//					}
+//				}				
+//			});
 		}
 		
 		public Procedure<BoundControl<?>> getCtrlPropertySetter() {
@@ -788,6 +1026,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		protected abstract void doCommitEdit();
 		
 		public void updateItem(Object item, boolean empty) {
+			if (getRecord() == null) {
+				return;	// do nothing
+			}
+			
 			if (!isEditing()) {
 				super.updateItem(item,  false);
 			}

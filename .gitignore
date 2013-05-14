@@ -18,3 +18,5 @@ baregrep.exe
 ## language files
 */keys.ini
 *.lng
+*/*.lng
+Dev/MainWorkspace/EastAsiaProject/en-US.lng
