@@ -20,14 +20,14 @@ import javafx.stage.Window;
  * 
  * 
  * @author Brutalbarbarian
- *
+ * 
  */
 public class FxUtils {
 	public static void setVisibleAndManaged(Node n, boolean v) {
 		n.setVisible(v);
-		n.setManaged(v);		
+		n.setManaged(v);
 	}
-	
+
 	public static void printNodeTree(Node n) {
 		StringBuilder sb = new StringBuilder();
 		printNodeTree(sb, 0, n);
@@ -37,13 +37,13 @@ public class FxUtils {
 	public static void setNodeTreeFocusable(Node n, boolean focusable) {
 		n.setFocusTraversable(focusable);
 		if (n instanceof Parent) {
-			Parent p = (Parent)n;
+			Parent p = (Parent) n;
 			for (Node nn : p.getChildrenUnmodifiable()) {
 				setNodeTreeFocusable(nn, focusable);
 			}
 		}
 	}
-	
+
 	public static boolean isChildOf(Node child, Node parent) {
 		if (child == null || parent == null) {
 			return false;
@@ -51,23 +51,34 @@ public class FxUtils {
 			return true;
 		} else {
 			Node p = child.getParent();
-			return p == null? false : isChildOf(p, parent);
+			return p == null ? false : isChildOf(p, parent);
 		}
 	}
-	
+
+	public static boolean NodeIsChildOfClass(Node child, Class<? extends Node> c) {
+		if (child == null) {
+			return false;
+		} else if (c.isInstance(child)) {
+			return true;
+		} else {
+			return NodeIsChildOfClass(child.getParent(), c);
+		}
+	}
+
 	protected static void printNodeTree(StringBuilder sb, int level, Node n) {
 		if (level > 0) {
 			sb.append('\n');
 		}
-		sb.append(StringUtil.getRepeatedString("  ", level)).append(n == null? "null" : n.toString());
+		sb.append(StringUtil.getRepeatedString("  ", level)).append(
+				n == null ? "null" : n.toString());
 		if (n != null && n instanceof Parent) {
-			Parent p = (Parent)n;
+			Parent p = (Parent) n;
 			for (Node nn : p.getChildrenUnmodifiable()) {
 				printNodeTree(sb, level + 1, nn);
 			}
 		}
 	}
-	
+
 	/**
 	 * Get the absolute position of the top left corner of the passed in control
 	 * 
@@ -78,16 +89,16 @@ public class FxUtils {
 		Point2D center = control.localToScene(0, 0);
 		Scene s = control.getScene();
 		Window w = s.getWindow();
-		
+
 		return new Point2D(center.getX() + w.getX(), center.getY() + w.getY());
-	} 
-	
+	}
+
 	public static void ShowErrorDialog(Window parent, String errorMessage) {
 		final Stage err = new Stage();
 		err.initModality(Modality.WINDOW_MODAL);
 		err.initOwner(parent);
 		err.setResizable(false);
-		
+
 		VBoxBuilder<?> rt = VBoxBuilder.create();
 		Label lbl = new Label(errorMessage);
 		Button close = new Button("Ok");
@@ -95,14 +106,15 @@ public class FxUtils {
 			public void handle(ActionEvent event) {
 				err.close();
 			}
-		});		
+		});
 		rt.alignment(Pos.CENTER);
 		rt.padding(new Insets(16));
 		rt.children(lbl, close);
 		rt.spacing(10);
-		
+
 		err.setScene(new Scene(rt.build()));
-		err.getScene().getStylesheets().addAll(parent.getScene().getStylesheets());
+		err.getScene().getStylesheets()
+				.addAll(parent.getScene().getStylesheets());
 		err.show();
-	} 
+	}
 }

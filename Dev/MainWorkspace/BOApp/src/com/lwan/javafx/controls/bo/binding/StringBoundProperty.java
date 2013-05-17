@@ -12,6 +12,7 @@ import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
+import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.StringUtil;
 
@@ -187,7 +188,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 		case Date:
 			Date d = (Date)attr.getValue();
 			if (d != null) {
-				return DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+				return DateFormat.getDateInstance(DateFormat.SHORT, App.getLocale()).format(d);
 			} else {
 				return "";
 			}
@@ -236,7 +237,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 		case Date: 
 			Date d = (Date)attr.getValue();
 			if (d != null) {
-				return DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+				return DateFormat.getDateInstance(DateFormat.SHORT, App.getLocale()).format(d);
 			} else {
 				return "";
 			}

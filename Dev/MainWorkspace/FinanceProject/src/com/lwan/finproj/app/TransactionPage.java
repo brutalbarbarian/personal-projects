@@ -15,14 +15,14 @@ import com.lwan.finproj.bo.BOTransaction;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.app.util.DbUtil;
-import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOChartControl;
 import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BODatePicker;
-import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.controls.bo.GridView;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
+import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
 import javafx.beans.value.ChangeListener;
@@ -35,14 +35,13 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.util.Callback;
 
 public class TransactionPage extends BorderPane implements Disposable{
-	BOGrid<BOTransaction> tranGrid;
+	GridView<BOTransaction> tranGridView;
 	BOLinkEx<BOSet<BOTransaction>> gridLink;
 	BOTransactionSetRef gridSetRef;
 	BOGridControl<BOTransaction> gridCtrl;
@@ -53,7 +52,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 	BOTextField param_minAmount, param_maxAmount;
 	ToolBar paramBar;
 	
-	GridPane grid;
+	VBox editPane;
 	BOTextField notes, amount;
 	BODatePicker date;
 	BOComboBox<Integer> name;
@@ -63,8 +62,9 @@ public class TransactionPage extends BorderPane implements Disposable{
 	ToolBar bottomBar;
 	
 	protected TransactionPage() {		
-		initControls();		
-		tranGrid.refresh();
+		initControls();
+		
+		tranGridView.refreshGrid();
 	}
 	
 	protected void finalize() throws Throwable {
@@ -78,26 +78,38 @@ public class TransactionPage extends BorderPane implements Disposable{
 		gridSetRef.dispose();
 		record.dispose();
 		BOCtrlUtil.buildAttributeLinks(paramBar);
-		BOCtrlUtil.buildAttributeLinks(grid);
-		tranGrid.refresh();	// remove?
-		tranGrid.dispose();
+		BOCtrlUtil.buildAttributeLinks(editPane);
+		
+		tranGridView.dispose();
 	}
 	
 	protected void initControls() {
 		// init grid
 		gridLink = new BOLinkEx<>();
-		tranGrid = new BOGrid<>("TransactionPageTranGrid", gridLink, 
-				LngUtil.translateArray(new String[]{"TransactionAmount",
-				"TransactionNotes", "TransactionDate", "SourceName"}), 
+		tranGridView = new GridView<>("TransactionPageTranGrid", gridLink,
 				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate", 
-				"SourceID"}, new boolean[]{true, true, true, true});
-		tranGrid.setEditable(true);
+				"SourceID"}, new Callback<String, String>(){
+					public String call(String arg0) {
+						switch (arg0) {
+						case "TransactionAmount": 
+							return Lng._("Amount");
+						case "TransactionNotes":
+							return Lng._("Notes");
+						case "TransactionDate": 
+							return Lng._("Date");
+						case "SourceID":
+							return Lng._("Source");
+						}
+						return null;
+					}			
+				}, null);
+		tranGridView.setEditable(true);
 		
 		gridSetRef = new BOTransactionSetRef();
 		gridLink.setLinkedObject(gridSetRef);
 		gridSetRef.ensureActive();
 	
-		gridCtrl = new BOGridControl<>(tranGrid);
+		gridCtrl = tranGridView.getGridControl();
 		gridCtrl.setHotkeyControls(this);
 		record = gridCtrl.getSelectedLink();
 		
@@ -124,7 +136,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 		BOCtrlUtil.buildAttributeLinks(paramBar);
 		
 		// init record fields
-		grid = new GridPane();
+		editPane = new VBox();
 		
 		notes = new BOTextField(record, "TransactionNotes");
 		date = new BODatePicker(record, "TransactionDate");
@@ -161,26 +173,22 @@ public class TransactionPage extends BorderPane implements Disposable{
 		// set dynamic source		
 		name.setSource(BOSource.getSourceSet(), "SourceID", "SourceName", null);
 		
-		grid.add(new Label(Lng._("Date")), 0, 0);
-		grid.add(new Label(Lng._("Source")), 0, 1);
-		grid.add(new Label(Lng._("Amount")), 0, 2);
-		grid.add(new Label(Lng._("Notes")), 0, 3);
-		
-		grid.add(date, 1, 0);
-		grid.add(name, 1, 1);
-		grid.add(amount, 1, 2);
-		grid.add(notes, 1, 3);
+		editPane.getChildren().add(new AlignedControlCell(Lng._("Date"), date, editPane));
+		editPane.getChildren().add(new AlignedControlCell(Lng._("Source"), name, editPane));
+		editPane.getChildren().add(new AlignedControlCell(Lng._("Amount"), amount, editPane));
+		editPane.getChildren().add(new AlignedControlCell(Lng._("Notes"), notes, editPane));
 		
 		record.linkedObjectProperty().addListener(new ChangeListener<BOTransaction>() {
 			public void changed(ObservableValue<? extends BOTransaction> arg0,
 					BOTransaction arg1, BOTransaction arg2) {
-				BOCtrlUtil.buildAttributeLinks(grid);
+				BOCtrlUtil.buildAttributeLinks(editPane);
 			}			
 		});
 		
-		tranGrid.getColumnByField("SourceID").setAsCombobox(BOSource.getSourceSet(), "SourceID", "SourceName");
-		tranGrid.getColumnByField("SourceID").setCtrlPropertySetter(initSource);
-		tranGrid.getColumnByField("TransactionDate").setAsDatePicker();
+		
+		tranGridView.getGrid().getColumnByField("SourceID").setAsCombobox(BOSource.getSourceSet(), "SourceID", "SourceName");
+		tranGridView.getGrid().getColumnByField("SourceID").setCtrlPropertySetter(initSource);
+		tranGridView.getGrid().getColumnByField("TransactionDate").setAsDatePicker();
 	
 		Button btnGraph = new Button("Graph");
 		btnGraph.setOnAction(new EventHandler<ActionEvent>(){
@@ -200,11 +208,10 @@ public class TransactionPage extends BorderPane implements Disposable{
 				btnGraph);
 		
 		setTop(paramBar);
-		setCenter(VBoxBuilder.create().children(tranGrid, grid).spacing(2).build());		
+		setCenter(VBoxBuilder.create().children(tranGridView, editPane).spacing(2).build());		
 		setBottom(bottomBar);
 		
-		VBox.setVgrow(tranGrid, Priority.SOMETIMES);
-		VBox.setVgrow(grid, Priority.NEVER);
+		VBox.setVgrow(tranGridView, Priority.SOMETIMES);
 	}
 	
 	protected class BOTransactionSetRef extends BODbSetRef<BOTransaction>{

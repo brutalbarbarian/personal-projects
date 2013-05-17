@@ -6,6 +6,9 @@ import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.StringUtil;
 import com.sun.glass.ui.Application;
+import com.sun.javafx.scene.control.behavior.TextFieldBehavior;
+import com.sun.javafx.scene.control.skin.TextFieldSkin;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -18,11 +21,27 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 public class BOTextField extends TextField implements BoundControl<String> {
 	private StringBoundProperty dataBindingProperty;
 	private BooleanProperty selectAllOnEditProperty;
 	private BooleanProperty externalControlledProperty;
+	private BooleanProperty allowContextMenuProperty;
+	
+	public BooleanProperty allowContextMenuProperty() {
+		if (allowContextMenuProperty == null) {
+			allowContextMenuProperty = new SimpleBooleanProperty(this, "AllowContextMenu", true);
+		}
+		return allowContextMenuProperty;
+	}
+	public boolean allowContextMenu(){
+		return allowContextMenuProperty().getValue();
+	}
+	public void setAllowContextMenu(boolean allowContextMenu) {
+		allowContextMenuProperty().setValue(allowContextMenu);
+	}
 	
 	@Override
 	public StringBoundProperty dataBindingProperty() {
@@ -60,10 +79,12 @@ public class BOTextField extends TextField implements BoundControl<String> {
 		// Focus Listener for managing the edit state of the textfield
 		focusedProperty().addListener(new InvalidationListener() {
 			public void invalidated(Observable observable) {
-				if (!isExternalControlled() &&	// Do nothing if externally controlled. 
+				if (	isEditable() &&		// we don't really want to do anything if this isn't editable
+						!isExternalControlled() &&	// Do nothing if externally controlled. 
 						actualInvalidate &&
 						// We only want to do anything is focus is still on the same form
 						(getParent() == null ||	// Assume null parent means the window is still focused.
+						getScene() == null ||	// Same reasoning as above 
 						getScene().getWindow().isFocused())) {
 					if (isFocused()) {
 						dataBindingProperty().beginEdit();
@@ -128,6 +149,23 @@ public class BOTextField extends TextField implements BoundControl<String> {
 				}
 			}
 		});
+		
+		setSkin(new TextFieldSkin(this, new Behavior()));
+	}
+	
+	private class Behavior extends TextFieldBehavior {
+		public Behavior() {
+			super(BOTextField.this);
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if (e.getButton() == MouseButton.SECONDARY && 
+					!allowContextMenu()) {
+				return;	// don't allow context menu to show
+			}
+			super.mouseReleased(e);
+		}
 	}
 	
 	private boolean actualInvalidate;	// This is to avoid triggering twice invalidation upon failure 

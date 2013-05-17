@@ -307,6 +307,12 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		return bulkUpdateState > 0;
 	}
 	
+	@Override
+	protected double computeMaxWidth(double height) {
+		// let it expand as far as it likes?
+		return Double.MAX_VALUE;
+	}
+	
 	/**
 	 * Call to end the bulk update process. 
 	 * 

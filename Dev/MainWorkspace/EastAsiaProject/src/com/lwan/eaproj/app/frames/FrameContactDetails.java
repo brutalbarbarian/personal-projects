@@ -9,8 +9,10 @@ import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 
 public class FrameContactDetails extends GridPane{
 	public BOLinkEx<BOContactDetail> link;
@@ -65,6 +67,13 @@ public class FrameContactDetails extends GridPane{
 		add(new AlignedControlCell("Mobile", txtMobile, alignNode), 1, 5);
 		add(new AlignedControlCell("Fax", txtFax, alignNode), 0, 6);
 		add(new AlignedControlCell("Site", txtSite, alignNode), 1, 6);
+		
+		for (Node n : getChildren()) {
+			// for some reason... 'add' defaults to Priority.NEVER
+			setHgrow(n, Priority.SOMETIMES);
+		}
+		
+//		setConstraint
 	}
 		
 	protected void doDisplayState() {

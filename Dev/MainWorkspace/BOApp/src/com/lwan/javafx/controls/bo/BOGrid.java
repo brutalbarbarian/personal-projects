@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.lwan.bo.AttributeType;
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
@@ -243,8 +244,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 					
 					double width = getContentWidth();
 					
-					System.out.println(width);
-
 					if (width <= 0 || getVisibleLeafColumns().isEmpty()) {
 						return true;
 					}
@@ -394,14 +393,24 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 							col.impl_setWidth(targetWidth);
 						}
 					}
+					
+					notifyLayout();
 				}
-				
 				return true;
 			}						
 		});
 	}
 	
 	private boolean firstRealLayout;
+	private Callback<BOGrid<R>, Void> onLayoutCallback;
+	protected void setOnLayout(Callback<BOGrid<R>, Void> callback) {
+		onLayoutCallback = callback;
+	}
+	protected void notifyLayout() {
+		if (onLayoutCallback != null) {
+			onLayoutCallback.call(this);
+		}
+	}
 	
 	private class CustomTableViewSkin extends TableViewSkin<R> {
 		VirtualScrollBar vbar;
@@ -411,6 +420,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			
 			// find the freakin vbar... since its not exposed
 			findVBar(flow);
+			// assuming we've found the vbar... make sure we update the layout when vbar visiblity changes
+			vbar.visibleProperty().addListener(new ChangeListener<Boolean>(){
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				public void changed(ObservableValue<? extends Boolean> arg0,
+						Boolean arg1, Boolean arg2) {
+					getColumnResizePolicy().call(new ResizeFeatures(BOGrid.this, null, 0d));
+				}				
+			});
 		}
 		
 		private boolean findVBar(Node n) {
@@ -516,6 +533,8 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 	@Override
 	public void dispose() {
 		saveLayout();
+		
+		getItems().clear();
 	}
 	
 	protected void finalize() throws Throwable {
@@ -687,17 +706,18 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			});
 			
 			setPrefWidth(100);
-			relativeWidth = defaultRelativeWidth;
-//			widthProperty().addListener(new ChangeListener<Number>(){
-//				public void changed(ObservableValue<? extends Number> arg0,
-//						Number arg1, Number arg2) {
-//					double gridWidth = BOGrid.this.getWidth();
-//					double width = arg2.doubleValue();
-//					if (gridWidth > 0 && !firstRealLayout) {
-//						relativeWidth = width / gridWidth;	
-//					}
-//				}				
-//			});
+			relativeWidth = defaultRelativeWidth;			
+		}
+		
+		protected AttributeType getAttributeType() {
+			if (fieldPath.startsWith(PREFIX_CALCULATED)) {
+				return AttributeType.Unknown;
+			} else if (getSourceSet() == null) {
+				return AttributeType.Unknown;
+			} else {
+				return getSourceSet().getExampleChild().
+						findAttributeByPath(fieldPath).getAttributeType();
+			}
 		}
 		
 		public Procedure<BoundControl<?>> getCtrlPropertySetter() {
@@ -836,7 +856,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 					if (!arg2 && textField != null) {						
 						Scene sc = getScene();
 						// if no owner, or the focus owner isn't a child of the textField...
-						if (sc == null || !FxUtils.isChildOf(sc.getFocusOwner(), textField)) {
+						if (sc == null || !FxUtils.isChildOf(sc.getFocusOwner(), getTableView())) {
 							commitEdit();
 						}
 					}

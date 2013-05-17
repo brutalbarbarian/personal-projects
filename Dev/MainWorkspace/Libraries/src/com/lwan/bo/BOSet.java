@@ -140,6 +140,9 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		for (T child : toFree) {
 			child.dispose();
 		}
+		if (exampleChild != null) {
+			exampleChild.dispose();
+		}
 			
 		children.clear();
 		
