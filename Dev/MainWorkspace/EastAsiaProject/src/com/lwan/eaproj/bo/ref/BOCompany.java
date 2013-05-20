@@ -34,7 +34,6 @@ public class BOCompany extends BODbObject{
 		if (companyID.isNull()) {
 			companyID.setValue(DbUtil.getNextID("com_id"));
 		}
-		
 		contactDetailID.assign(contactDetail.contactDetailID());
 	}
 

@@ -162,7 +162,6 @@ public class BOTransaction extends BODbObject{
 		@Override
 		protected BOTransaction createChildInstance(Object id) {
 			return new BOTransaction(this);
-		}
-		
+		}		
 	}
 }

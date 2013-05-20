@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Vector;
 
 import com.lwan.eaproj.app.AppMain;
-import com.lwan.eaproj.app.Constants;
+import com.lwan.eaproj.app.EAConstants;
 import com.lwan.eaproj.app.panes.pages.PageAlerts;
 import com.lwan.eaproj.app.panes.pages.PageBase;
 import com.lwan.javafx.app.App;
@@ -80,7 +80,7 @@ public class PaneMain extends BorderPane{
 			
 			// add new page in
 			FadeTransition fadeOut = new FadeTransition(Duration.millis(
-					currentPage == null? 0 : Constants.FADE_DURATION), currentPage);
+					currentPage == null? 0 : EAConstants.FADE_DURATION), currentPage);
 			fadeOut.setFromValue(1.0);
 			fadeOut.setToValue(0.0);
 			
@@ -92,7 +92,7 @@ public class PaneMain extends BorderPane{
 					currentPage = getAppPage(page, params);
 					setCenter(currentPage);
 					FadeTransition fadeIn = new FadeTransition(
-							Duration.millis(Constants.FADE_DURATION), currentPage);
+							Duration.millis(EAConstants.FADE_DURATION), currentPage);
 					fadeIn.setFromValue(0.0);
 					fadeIn.setToValue(1.0);
 					fadeIn.play();
@@ -177,6 +177,7 @@ public class PaneMain extends BorderPane{
 		Stage usr = new Stage(StageStyle.UTILITY);
 		usr.initOwner(getScene().getWindow());
 		usr.initModality(Modality.WINDOW_MODAL);
+		usr.setTitle(Lng._("Maintain Users"));
 		
 		PaneUser pane = new PaneUser();
 		try {
@@ -196,6 +197,7 @@ public class PaneMain extends BorderPane{
 		Stage com = new Stage(StageStyle.UTILITY);
 		com.initOwner(getScene().getWindow());
 		com.initModality(Modality.WINDOW_MODAL);
+		com.setTitle(Lng._("Maintain Companies"));
 		
 		PaneCompany pane = new PaneCompany();
 		try {
@@ -206,6 +208,26 @@ public class PaneMain extends BorderPane{
 			com.setWidth(600);
 			com.setHeight(500);
 			com.showAndWait();
+		} finally {
+			pane.dispose();
+		}
+	}
+	
+	protected void showSchoolScreen() {
+		Stage sch = new Stage(StageStyle.UTILITY);
+		sch.initOwner(getScene().getWindow());
+		sch.initModality(Modality.WINDOW_MODAL);
+		sch.setTitle(Lng._("Maintain Schools"));
+		
+		PaneSchool  pane = new PaneSchool();
+		try {
+			Scene sc = new Scene(pane);
+			sc.getStylesheets().addAll(App.getStyleshets());
+			
+			sch.setScene(sc);
+			sch.setWidth(600);
+			sch.setHeight(500);
+			sch.showAndWait();
 		} finally {
 			pane.dispose();
 		}
@@ -227,6 +249,8 @@ public class PaneMain extends BorderPane{
 					break;
 				case "companies" :
 					showCompanyScreen();
+				case "school" :
+					showSchoolScreen();
 				}
 			}
 		};
@@ -242,7 +266,8 @@ public class PaneMain extends BorderPane{
 		
 		menu.add(MenuBuilder.create().text(Lng._("_Maintain")).items(
 				menuItemBuilder.text(Lng._("_Users")).userData("users").onAction(menuHandler).build(),
-				menuItemBuilder.text(Lng._("_Companies")).userData("companies").onAction(menuHandler).build()
+				menuItemBuilder.text(Lng._("_Companies")).userData("companies").onAction(menuHandler).build(),
+				menuItemBuilder.text(Lng._("_Schools")).userData("school").onAction(menuHandler).build()
 				).build());
 		
 		return menu;

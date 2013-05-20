@@ -29,6 +29,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
@@ -47,11 +48,6 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 	private BOGrid<B> grid;
 	private GridFooter footer;
 	
-	private static final Callback<String, String> DEFAULT_DISPLAY_CALLBACK = new Callback<String, String>() {
-		public String call(String arg0) {
-			return arg0;	// don't even bother translating it...
-		}		
-	};
 	private static final Callback<String, Boolean> DEFAULT_EDITABLE_CALLBACK = new Callback<String, Boolean>() {
 		public Boolean call(String arg0) {
 			return true;	// assume true
@@ -59,32 +55,22 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 	};
 	
 	public GridView(String key, BOLinkEx<BOSet<B>> link, String[] fields, 
-			Callback<String, String> displayCallback, Callback<String, Boolean> editableCallback) {
-		if (displayCallback == null) {
-			displayCallback = DEFAULT_DISPLAY_CALLBACK;
-		}
+			String[] displayValues, Callback<String, Boolean> editableCallback) {
 		if (editableCallback == null) {
 			editableCallback = DEFAULT_EDITABLE_CALLBACK;
 		}
-		String[] displayValues = new String[fields.length];
 		boolean[] editable = new boolean[fields.length];
 		
 		for (int i = 0; i < fields.length; i++) {
-			displayValues[i] = displayCallback.call(fields[i]);
 			editable[i] = editableCallback.call(fields[i]);
 		}
 		
-		grid = new BOGrid<B>(key, link, displayValues, fields, editable);
-		grid.setOnLayout(new Callback<BOGrid<B>, Void>() {
-			public Void call(BOGrid<B> arg0) {
-				updateLayout();
-				return null;
-			}			
-		});
+		grid = new BOGrid<B>(key, this, link, displayValues, fields, editable);
 		
 		gridControl = new BOGridControl<>(grid);
 		
 		grid.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>(){
+			@SuppressWarnings("unchecked")
 			public void handle(ContextMenuEvent arg0) {
 				// get rid of the existing menu if its still showing
 				if (gridMenu != null) {
@@ -102,6 +88,9 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 								gridControl.activate(gridControl.getSecondaryButton());
 							} else if (item.getUserData().equals("refresh")) {
 								gridControl.activate(gridControl.getRefreshButton());
+							} else if (item.getUserData().toString().startsWith("#")) {
+								grid.getColumnByField(item.getUserData().toString().substring(1)).setVisible(
+										((CheckMenuItem)item).isSelected());
 							}
 						}						
 					};
@@ -149,6 +138,18 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 					cmiFooter.setOnAction(gridMenuHandler);
 					gridMenu.getItems().add(cmiFooter);
 					
+					// initialise customise submenu
+					Menu customise = new Menu(Lng._("Customise"));
+					for (TableColumn<B, ?> column  : grid.getColumns()) {
+						BOGrid<B>.GridColumn col = (BOGrid<B>.GridColumn)column;
+						CheckMenuItem item = new CheckMenuItem(col.getText());
+						item.setSelected(col.isVisible());
+						item.setUserData("#" + col.getField());
+						item.setOnAction(gridMenuHandler);
+						customise.getItems().add(item);
+					}
+					gridMenu.getItems().add(customise);
+					
 					gridMenu.show(grid, arg0.getScreenX(), arg0.getScreenY());
 				}
 				grid.setOnMouseClicked(new EventHandler<MouseEvent>(){
@@ -162,6 +163,9 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 		});
 		
 		footer = new GridFooter();
+		footer.setVisible(false);	// default set to false?
+		
+		grid.displayLayout();
 		
 		setCenter(grid);
 		setBottom(footer);
@@ -169,18 +173,21 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 	
 	private ContextMenu gridMenu;
 	private EventHandler<ActionEvent> gridMenuHandler;
-//	protected void initGridMenu() {
-//		gridMenu = new ContextMenu();
-//		gridMenu.getItems().add(new MenuItem("Show Footer"));
-//		gridMenu.setAutoHide(true);
-//	}
+	
+	public BOLinkEx<B> getSelectedLink() {
+		return getGridControl().getSelectedLink();
+	}
 	
 	public BOGrid<B> getGrid() {
 		return grid;
 	}
 	
-	private void updateLayout() {
+	protected void updateLayout() {
 		footer.updateLayout();
+	}
+	
+	protected GridFooter getFooter() {
+		return footer;
 	}
 	
 	private static final Comparator<GridView<?>.FooterColumn> LAYOUT_COMPARATOR = new Comparator<GridView<?>.FooterColumn>() {
@@ -205,7 +212,7 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 	
 	// the footer may be several layers deep.
 	// there can be a field for everything.
-	class GridFooter extends Pane implements Disposable{
+	protected class GridFooter extends Pane implements Disposable{
 		List<FooterColumn> columns;
 		
 		@SuppressWarnings("unchecked")
@@ -227,6 +234,15 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 		
 		private void updateLayout() {
 			requestLayout();
+		}
+		
+		protected FooterColumn getColumnForField(String field) {
+			for (FooterColumn col : columns) {
+				if (col.field.equals(field)) {
+					return col;
+				}
+			}
+			return null;
 		}
 		
 		@Override
@@ -334,9 +350,7 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 								rows.remove(row);
 								row.dispose();
 							} else {	// not selected
-								FooterColumnRow row = new FooterColumnRow(mode, FooterColumn.this);
-								rows.add(row);
-								getChildren().add(row.controlCell);
+								ensureFooterColumnRowExists(mode);
 							}
 							if (menu != null) {
 								menu.hide();
@@ -412,6 +426,15 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 			menu.show(FooterColumn.this, arg0.getScreenX(), arg0.getScreenY());
 		}
 		
+		protected void ensureFooterColumnRowExists(int mode) {
+			if (footerRowExists(mode)) {
+				return;	// do nothing
+			}
+			FooterColumnRow row = new FooterColumnRow(mode, FooterColumn.this);
+			rows.add(row);
+			getChildren().add(row.controlCell);
+		}
+		
 		protected FooterColumnRow getFooterRow(int mode) {
 			for (FooterColumnRow row : rows) {
 				if (row.footerType == mode) {
@@ -431,6 +454,8 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 				row.dispose();
 			}
 			rows.clear();
+			menuHandler = null;
+			menu = null;
 		}
 	}
 	
@@ -440,6 +465,7 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 		FooterColumn owner;
 		BOTextField field;
 		BOAttribute<?> value;
+		BOLinkEx<BOAttribute<?>> link;
 		
 		FooterColumnRow(int mode, FooterColumn column) {
 			footerType = mode;
@@ -452,7 +478,7 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 				type = column.getColumn().getAttributeType();
 			}
 			value = new BOAttribute<>(null, "", type);
-			BOLinkEx<BOAttribute<?>> link = new BOLinkEx<>();
+			link = new BOLinkEx<>();
 			link.setLinkedObject(value);			
 			field = new BOTextField(link, "");
 			field.setEditable(false);
@@ -473,6 +499,11 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 		@Override
 		public void dispose() {
 			grid.getLink().removeListener(this);
+			link.dispose();
+			value.dispose();
+			field.dataBindingProperty().buildAttributeLinks();
+			
+			owner = null;
 		}
 
 		@Override
@@ -482,6 +513,15 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 			if (set == null) {
 				value.clear();
 			} else {
+				if (value.getAttributeType().equals(AttributeType.Unknown)) {
+					// update the attribute type
+					if (footerType == FOOTER_COUNT) {
+						value.setAttributeType(AttributeType.Integer);
+					} else {
+						value.setAttributeType(owner.getColumn().getAttributeType());
+					}
+				}
+				
 				if (footerType == FOOTER_COUNT) {
 					value.setAsObject(set.getActiveCount());
 				} else {
@@ -522,17 +562,32 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 	public void dispose() {
 		grid.dispose();
 		footer.dispose();
+		gridControl.dispose();
+		
+		grid = null;
+		footer = null;
+		gridControl = null;
+		gridMenuHandler = null;
+		gridMenu = null;
+		
+		getChildren().clear();
 	}
 
 	public void refreshGrid() {
 		grid.refresh();
 	}
 
-	public void setEditable(boolean editable) {
+	/**
+	 * Equivalent to calling getGrid().setEditable(editable);
+	 */
+	public void setGridEditable(boolean editable) {
 		grid.setEditable(true);
 	}
 	
-	public boolean isEditable() {
+	/**
+	 * Equivalent to calling getGrid().getEditable();
+	 */
+	public boolean isGridEditable() {
 		return grid.isEditable();
 	}
 

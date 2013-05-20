@@ -174,9 +174,6 @@ public class BOTextField extends TextField implements BoundControl<String> {
 		initialise();
 	}
 	
-	int lastStart = -1;
-	String lastText = null;	// last successful text?
-	
 	boolean isInvalid = false;
 	boolean allowsInvalid;
 	private static final String STYLE_INVALID = "text-field-invalid";

@@ -12,6 +12,7 @@ import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOGridControl;
+import com.lwan.javafx.controls.bo.GridView;
 import com.lwan.util.wrappers.CallbackEx;
 import com.lwan.util.wrappers.Disposable;
 
@@ -21,7 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 public class SourcePage extends BorderPane implements Disposable{
-	BOGrid<BOSource> srcGrid;
+	GridView<BOSource> srcGridView;
 	BOLinkEx<BOSet<BOSource>> gridLink;
 	BOGridControl<BOSource> gridCtrl;
 	BOSourceSetRef gridSetRef;
@@ -29,7 +30,7 @@ public class SourcePage extends BorderPane implements Disposable{
 	
 	BOLinkEx<BOSet<BOTransaction>> tranSetLink;
 	BOTransactionSubSet transactionSet;
-	BOGrid<BOTransaction> tranGrid;
+	GridView<BOTransaction> tranGridView;
 	
 	ToolBar bottomBar;
 	
@@ -39,11 +40,12 @@ public class SourcePage extends BorderPane implements Disposable{
 	
 	protected void initControls() {
 		gridLink = new BOLinkEx<>();
-		srcGrid = new BOGrid<>("SourcePageSourceGrid", gridLink, 
-				LngUtil.translateArray(new String[]{"Source Name", "Transaction Count"}),//, "Transaction Count"}, 
-				new String[]{"SourceName", BOGrid.PREFIX_CALCULATED + "TransactionCount"},//, "TransactionCount"}, 
-				new boolean[]{true, false});
-		srcGrid.setDisplayValueCallback(new CallbackEx<BOSource, String, String>(){
+		srcGridView = new GridView<>("SourcePageSourceGrid", gridLink,
+				new String[]{"SourceName", BOGrid.PREFIX_CALCULATED + "TransactionCount"},
+				LngUtil.translateArray(new String[]{"Source Name", "Transactions Count"}), 
+				null);
+		
+		srcGridView.getGrid().setDisplayValueCallback(new CallbackEx<BOSource, String, String>(){
 			public String call(BOSource a, String b) {
 				int num = 0;
 				for (BOTransaction trans : BOTransaction.getTransactionSet()) {
@@ -55,28 +57,30 @@ public class SourcePage extends BorderPane implements Disposable{
 				return Integer.toString(num);
 			}			
 		});
-		srcGrid.setEditable(true);
+		srcGridView.setGridEditable(true);
 		
 		gridSetRef = new BOSourceSetRef();
 		gridLink.setLinkedObject(gridSetRef);
 		gridSetRef.ensureActive();
 		
-		gridCtrl = new BOGridControl<BOSource>(srcGrid) {
+		gridCtrl = srcGridView.getGridControl();
+		gridCtrl.setAllowDeleteCallback(new Callback<BOSource, Boolean>() {
+
 			@Override
-			protected boolean allowDelete(BOSource item) {
+			public Boolean call(BOSource item) {
 				return BOTransaction.getTransactionSet().
 						findChildByAttribute("SourceID", item.sourceID().getValue()) == null;
 			}
-		};
+		});
+		
 		record = gridCtrl.getSelectedLink();
 		
 		tranSetLink = new BOLinkEx<>();
-		tranGrid = new BOGrid<>("SourcePageTranGrid", tranSetLink, 
-				LngUtil.translateArray(new String[]{
-						"TransactionAmount", "TransactionNotes", "TransactionDate"}), 
-				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate"}, 
-				new boolean[]{false, false, false});
-		tranGrid.setEditable(false);
+		tranGridView = new GridView<>("SourcePageTranGrid", tranSetLink, 
+				new String[]{"TransactionAmount", "TransactionNotes", "TransactionDate"},
+				LngUtil.translateArray(new String[]{"Amount", "Notes", "Date"}),
+				null);
+		tranGridView.getGridControl().setEditable(false);
 		
 		transactionSet = new BOTransactionSubSet();
 		tranSetLink.setLinkedObject(transactionSet);
@@ -85,13 +89,14 @@ public class SourcePage extends BorderPane implements Disposable{
 			public void handleModified(ModifiedEvent event) {
 				if (event.getType() == ModifiedEvent.TYPE_LINK) {
 					transactionSet.reload();
-					tranGrid.refresh();
+					tranGridView.refreshGrid();
+//					tranGrid.refresh();
 				}
 			}			
 		});
 		
 		VBox main = new VBox(2);
-		main.getChildren().addAll(srcGrid, tranGrid);
+		main.getChildren().addAll(srcGridView, tranGridView);
 		
 		bottomBar = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton());
 		
@@ -131,12 +136,8 @@ public class SourcePage extends BorderPane implements Disposable{
 		
 		tranSetLink.dispose();
 		transactionSet.dispose();
-//		BOCtrlUtil.buildAttributeLinks(paramBar);
-//		BOCtrlUtil.buildAttributeLinks(grid);
-		srcGrid.refresh();
-		tranGrid.refresh();
 		
-		srcGrid.dispose();
-		tranGrid.dispose();
+		srcGridView.dispose();
+		tranGridView.dispose();
 	}
 }

@@ -7,6 +7,7 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.app.Lng;
+import com.lwan.util.wrappers.Disposable;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -18,11 +19,12 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
 
-public class BOGridControl <T extends BusinessObject> implements EventHandler<ActionEvent> {
-	Button btnPrimary, btnSecondary, btnRefresh, btnClearParams;
-	BOGrid<T> grid;
-	BOLinkEx<T> selectedLink;
+public class BOGridControl <T extends BusinessObject> implements EventHandler<ActionEvent>, Disposable, ModifiedEventListener {
+	private Button btnPrimary, btnSecondary, btnRefresh, btnClearParams;
+	private BOGrid<T> grid;
+	private BOLinkEx<T> selectedLink;
 	
 	private BooleanProperty autoRefreshProperty;
 	public BooleanProperty autoRefreshProperty() {
@@ -58,17 +60,7 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 			}
 		});
 		
-		grid.getLink().addListener(new ModifiedEventListener() {
-			public void handleModified(ModifiedEvent event) {
-				// set attributes changed... most likely a param.
-				if (event.isAttribute() && event.getAttributeOwner() == grid.getSourceSet()
-						&& isAutoRefresh()) {
-					activate(btnRefresh);
-				} else {
-					doDisplayState();
-				}
-			}		
-		});
+		grid.getLink().addListener(this);
 		
 		grid.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> arg0,
@@ -79,32 +71,71 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 		
 		doDisplayState();
 	}
-	
+
+	private BooleanProperty editableProperty;
 	/**
-	 * Override to limit when create state is allowed
+	 * The default value for allowCreate, allowDelete and allowSave
+	 * if they are not overriden by a callback.
+	 * The callbacks override this property's value.
 	 * 
 	 * @return
 	 */
+	public BooleanProperty editableProperty() {
+		if (editableProperty == null) {
+			editableProperty = new SimpleBooleanProperty(this, "Editable", true);
+		}
+		return editableProperty;
+	}
+	public void setEditable(boolean editable) {
+		editableProperty().set(editable);
+	}
+	public boolean isEditable() {
+		return editableProperty().get();
+	}
+	
+	/*
+	 * These callbacks allows user to choose when the grid should be editable.
+	 * They override whatever isEditable() says.
+	 * 
+	 */
+	private Callback<BOSet<T>, Boolean> allowCreateCallback;
+	private Callback<T, Boolean> allowDeleteCallback;
+	private Callback<T, Boolean> allowSaveCallback;
+	
+	public void setAllowCreateCallback(Callback<BOSet<T>, Boolean> callback) {
+		allowCreateCallback = callback;
+	}
+	
+	public void setAllowDeleteCallback(Callback<T, Boolean> callback) {
+		allowDeleteCallback = callback;
+	}
+	
+	public void setAllowSaveCallback(Callback<T, Boolean> callback) {
+		allowSaveCallback = callback;
+	}
+	
 	protected boolean allowCreate() {
-		return true;
+		if (allowCreateCallback != null) {
+			return allowCreateCallback.call(grid.getSourceSet());
+		} else {
+			return isEditable();
+		}
 	}
 	
-	/**
-	 * Override to limit when delete state is allowed
-	 * 
-	 * @return
-	 */
 	protected boolean allowDelete(T item) {
-		return true;
+		if (allowDeleteCallback != null) {
+			return allowDeleteCallback.call(item);
+		} else {
+			return isEditable();
+		}
 	}
 	
-	/**
-	 * Override to limit when saving is allowed
-	 * 
-	 * @return
-	 */
 	protected boolean allowSave(T item) {
-		return true;
+		if (allowSaveCallback != null) {
+			return allowSaveCallback.call(item);
+		} else {
+			return isEditable();
+		}
 	}
 	
 	protected void doDisplayState() {
@@ -137,6 +168,17 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 					((BOAttribute<?>)attr).allowUserModifyProperty().setValue(!inEditState);
 				}
 			}
+		}
+	}
+	
+	@Override
+	public void handleModified(ModifiedEvent event) {
+		// set attributes changed... most likely a param.
+		if (event.isAttribute() && event.getAttributeOwner() == grid.getSourceSet()
+				&& isAutoRefresh()) {
+			activate(btnRefresh);
+		} else {
+			doDisplayState();
 		}
 	}
 	
@@ -277,5 +319,10 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 				}
 			}			
 		});
+	}
+	@Override
+	public void dispose() {
+		selectedLink.dispose();
+		grid.getLink().removeListener(this);
 	}
 }

@@ -24,6 +24,7 @@ import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.FxUtils;
+import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.CallbackEx;
 import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
@@ -58,7 +59,7 @@ import javafx.util.Callback;
  *
  * @param <R>
  */
-public class BOGrid<R extends BusinessObject> extends TableView<R> implements Disposable{
+public class BOGrid<R extends BusinessObject> extends TableView<R> implements ModifiedEventListener, Disposable{
 	public static final String PREFIX_CALCULATED = "$CALC$";
 	
 	/**
@@ -122,10 +123,16 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 	}
 	
 	private String key;
+	private GridView<R> view;	// the owning GridView object
+	
+	protected GridView<R> getView() {
+		return view;
+	}
 	
 	@SuppressWarnings("rawtypes")
-	public BOGrid(String key, BOLinkEx<BOSet<R>> link, 
+	protected BOGrid(String key, GridView<R> view, BOLinkEx<BOSet<R>> link, 
 			String [] columnNames, String[] fieldPaths, boolean[] editable) {
+		this.view = view;
 		// initialize the grid columns?
 		if (columnNames == null || fieldPaths == null || 
 				columnNames.length != fieldPaths.length) {
@@ -143,30 +150,9 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		
 		getColumns().setAll(columns);
 
-		link.addListener(new ModifiedEventListener() {
-			public void handleModified(ModifiedEvent event) {
-				if (event.getType() == ModifiedEvent.TYPE_ACTIVE) {
-					refresh();
-				} else if (event.getType() == ModifiedEvent.TYPE_ATTRIBUTE) {
-					if (event.isUserModified() && 
-							// If this is the case, likely the sourceset has params,
-							// as sets should never have any fields. Thus ignore.
-							event.getAttributeOwner() != getSourceSet()) {
-						isEditingProperty().setValue(true);
-					}
-				}
-			}
-		});
-		// Not sure if this is a good idea...
-		link.linkedObjectProperty().addListener(new ChangeListener<BOSet<R>>() {
-			public void changed(ObservableValue<? extends BOSet<R>> arg0,
-					BOSet<R> arg1, BOSet<R> arg2) {
-				refresh();
-			}
-		});
+		link.addListener(this);
 		refresh();
-		
-//		columnResizePolicyProperty().set(CONSTRAINED_RESIZE_POLICY);		
+				
 		selected = null;
 		revertingSelection = false;
 		getSelectionModel().selectedItemProperty().addListener(new ChangeListener<R>() {
@@ -227,15 +213,12 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		});
 		
 		this.key = key;
-		final String layout = App.getKey(key);
-		if (layout != null) {
-			displayLayout(layout);					
-		}
 		
 		setSkin(new CustomTableViewSkin(this));
 
 		firstRealLayout = true;
 		
+		setTableMenuButtonVisible(true);
 		columnResizePolicyProperty().set(new Callback<ResizeFeatures, Boolean>() {
 			@SuppressWarnings({ "unchecked", "deprecation" })
 			public Boolean call(ResizeFeatures rf) {
@@ -393,8 +376,9 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 							col.impl_setWidth(targetWidth);
 						}
 					}
-					
-					notifyLayout();
+					if (getView() != null) {
+						getView().updateLayout();
+					}
 				}
 				return true;
 			}						
@@ -402,16 +386,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 	}
 	
 	private boolean firstRealLayout;
-	private Callback<BOGrid<R>, Void> onLayoutCallback;
-	protected void setOnLayout(Callback<BOGrid<R>, Void> callback) {
-		onLayoutCallback = callback;
-	}
-	protected void notifyLayout() {
-		if (onLayoutCallback != null) {
-			onLayoutCallback.call(this);
-		}
-	}
-	
+
 	private class CustomTableViewSkin extends TableViewSkin<R> {
 		VirtualScrollBar vbar;
 		
@@ -421,13 +396,13 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			// find the freakin vbar... since its not exposed
 			findVBar(flow);
 			// assuming we've found the vbar... make sure we update the layout when vbar visiblity changes
-			vbar.visibleProperty().addListener(new ChangeListener<Boolean>(){
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				public void changed(ObservableValue<? extends Boolean> arg0,
-						Boolean arg1, Boolean arg2) {
-					getColumnResizePolicy().call(new ResizeFeatures(BOGrid.this, null, 0d));
-				}				
-			});
+//			vbar.visibleProperty().addListener(new ChangeListener<Boolean>(){
+//				@SuppressWarnings({ "unchecked", "rawtypes" })
+//				public void changed(ObservableValue<? extends Boolean> arg0,
+//						Boolean arg1, Boolean arg2) {
+//					getColumnResizePolicy().call(new ResizeFeatures(BOGrid.this, null, 0d));
+//				}				
+//			});
 		}
 		
 		private boolean findVBar(Node n) {
@@ -470,18 +445,23 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		return ((CustomTableViewSkin)getSkin()).getContentWidth();
 	}
 	
-	protected void displayLayout(String layout) {
+	protected void displayLayout() {
+		String layout = App.getKey(key);
+		if (StringUtil.isNullOrBlank(layout)) {
+			return;	// nothing to display
+		}
+		
 		String[] cols = layout.split("%");
 		int i = 0;
 		for (String s : cols) {
 			String[] strs = s.split(":");
-			if (i == (cols.length - 1)) {
-				GridColumn col = getColumnByField(s);
+			if (i == (cols.length - 1)) {	// the last...
+				GridColumn col = getColumnByField(strs[0]);
 				if (col != null) {
 					getSortOrder().add(col);
 				}
+				getView().getFooter().setVisible(Boolean.parseBoolean(strs[1]));
 			} else {
-			
 				String field = strs[0];
 				double width = Double.parseDouble(strs[1]);
 				boolean visible = Boolean.parseBoolean(strs[2]);
@@ -495,6 +475,16 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 					column.setSortType(st);
 				}
 				
+				GridView<R>.FooterColumn footerCol = getView().getFooter().getColumnForField(field);
+				String[] footerStrs = strs[4].substring(1, strs[4].length() - 1).split(",");
+				for (String footerStr : footerStrs) {
+					if (footerStr.length() > 0) {
+						int type = Integer.parseInt(footerStr);
+						footerCol.ensureFooterColumnRowExists(type);
+					}
+				}
+//				String footerStrs = footerStr.
+				
 				getColumns().remove(column);
 				getColumns().add(i, column);
 				
@@ -502,6 +492,9 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			}
 		}
 	}
+	
+	// format for layout
+	// fieldname:relativewidth:visible:sort:num_of_footer_visible_displayed, next_num_of_footer_type%**rest_of_field**%fieldname_of_sort_order:footer_visible
 	
 	@SuppressWarnings("unchecked")
 	protected void saveLayout() {
@@ -518,7 +511,18 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			
 			
 			builder.append(field).append(':').append(width).append(':').
-					append(visible).append(':').append(sort);
+					append(visible).append(':').append(sort).append(":[");
+			
+			boolean isFirst = true;
+			GridView<R>.FooterColumn footerColumn = view.getFooter().getColumnForField(field);
+			for (GridView<R>.FooterColumnRow row : footerColumn.rows) {
+				if (!isFirst) {
+					builder.append(',');
+				}
+				builder.append(row.footerType);
+				isFirst = false;
+			}
+			builder.append(']');
 			
 			builder.append('%');
 		}
@@ -526,6 +530,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 		if (getSortOrder().size() > 0) {
 			builder.append(((GridColumn)getSortOrder().get(0)).getField());
 		}
+		builder.append(":").append(view.getFooter().isVisible());
 		
 		App.putKey(key, builder.toString());
 	}
@@ -534,12 +539,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 	public void dispose() {
 		saveLayout();
 		
+		link.removeListener(this);
+
 		getItems().clear();
-	}
-	
-	protected void finalize() throws Throwable {
-		dispose();
-		super.finalize();
+		view = null;
 	}
 	
 	boolean revertingSelection;
@@ -1339,5 +1342,20 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Di
 			return new BoundProperty<Date>(owner, link, null);
 		}
 		
+	}
+
+	@Override
+	public void handleModified(ModifiedEvent event) {
+		if (event.getType() == ModifiedEvent.TYPE_ACTIVE ||
+				event.getType() == ModifiedEvent.TYPE_LINK) {
+			refresh();
+		} else if (event.getType() == ModifiedEvent.TYPE_ATTRIBUTE) {
+			if (event.isUserModified() && 
+					// If this is the case, likely the sourceset has params,
+					// as sets should never have any fields. Thus ignore.
+					event.getAttributeOwner() != getSourceSet()) {
+				isEditingProperty().setValue(true);
+			}
+		}	
 	}
 }

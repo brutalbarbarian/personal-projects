@@ -5,9 +5,9 @@ import com.lwan.bo.BOSet;
 import com.lwan.eaproj.bo.ref.BOUser;
 import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
-import com.lwan.javafx.controls.bo.BOGrid;
-import com.lwan.javafx.controls.bo.BOGridControl;
+import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.controls.bo.GridView;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.FxUtils;
 
@@ -37,13 +37,17 @@ public class PaneUser extends PaneGridBase<BOUser> {
 
 
 	@Override
-	protected BOGrid<BOUser> constructGrid(BOLinkEx<BOSet<BOUser>> gridLink) {
-		BOGrid<BOUser> result =  new BOGrid<>("pane_user", gridLink, 
-				new String[]{"Name", "Description"}, 
-				new String[]{"UserName", "Description"}, 
-				new boolean[] {false, true});
+	protected GridView<BOUser> constructGrid(BOLinkEx<BOSet<BOUser>> gridLink) {
+		GridView<BOUser> result = new GridView<>("pane_user", gridLink,
+				new String[]{"UserName", "Description"},
+				LngUtil.translateArray(new String[]{"User Name", "Description"}),
+				new Callback<String, Boolean>() {
+					public Boolean call(String arg0) {
+						return !arg0.equals("UserName");
+					}
+				});
 		
-		result.setOnSave(new Callback<BOUser, Boolean>() {
+		result.getGrid().setOnSave(new Callback<BOUser, Boolean>() {
 			public Boolean call(BOUser user) {
 				if (user != null && passwordState == VALIDATED) {
 					// make sure the passwords are the same
@@ -59,17 +63,13 @@ public class PaneUser extends PaneGridBase<BOUser> {
 			}			
 		});
 		
-		return result;
-	}
-	
-	@Override
-	protected BOGridControl<BOUser> constructGridControl(BOGrid<BOUser> grid) {
-		return new BOGridControl<BOUser>(grid) {
-			@Override
-			protected boolean allowDelete(BOUser item) {
+		result.getGridControl().setAllowDeleteCallback(new Callback<BOUser, Boolean>() {
+			public Boolean call(BOUser item) {
 				return item != BOUserSet.getActiveUser();
-			}
-		};
+			}			
+		});
+		
+		return result;
 	}
 	
 	@Override
@@ -105,7 +105,7 @@ public class PaneUser extends PaneGridBase<BOUser> {
 		});
 		btnValidateOldPass.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent arg0) {
-				if (gridControl.getSelectedLink().getLinkedObject().checkPassword(pfValidation.getText())) {
+				if (gridView.getSelectedLink().getLinkedObject().checkPassword(pfValidation.getText())) {
 					passwordState = VALIDATED;
 					displayState();
 				} else {
@@ -165,10 +165,10 @@ public class PaneUser extends PaneGridBase<BOUser> {
 		} else if (passwordState == VALIDATED) {
 			FxUtils.setVisibleAndManaged(accNewPass, true);
 			FxUtils.setVisibleAndManaged(accValidateNewPass, true);
-			grid.isEditingProperty().setValue(true);
+			gridView.getGrid().isEditingProperty().setValue(true);
 		}
 		
-		btnChangePassword.setDisable(gridControl.getSelectedLink().getLinkedObject() == null);
+		btnChangePassword.setDisable(gridView.getSelectedLink().getLinkedObject() == null);
 		
 		layout();
 		

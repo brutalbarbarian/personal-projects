@@ -72,8 +72,11 @@ public class BOAttribute <T> extends BusinessObject {
 		return percisionProperty;
 	}
 	
-	public ReadOnlyProperty<AttributeType> attributeTypeProperty () {
-		return _attributeTypeProperty();
+	public Property<AttributeType> attributeTypeProperty() {
+		if (attributeTypeProperty == null) {
+			attributeTypeProperty = new SimpleObjectProperty<AttributeType>(this, "AttributeType", AttributeType.Unknown);
+		}
+		return attributeTypeProperty;
 	}
 	
 	public Property<Boolean> allowUserModifyProperty() {
@@ -106,13 +109,6 @@ public class BOAttribute <T> extends BusinessObject {
 			userSetProperty = new SimpleObjectProperty<Boolean>(this, "UserSet", false);
 		}
 		return userSetProperty;
-	}
-	
-	private Property<AttributeType> _attributeTypeProperty() {
-		if (attributeTypeProperty == null) {
-			attributeTypeProperty = new SimpleObjectProperty<AttributeType>(this, "AttributeType", AttributeType.Unknown);
-		}
-		return attributeTypeProperty;
 	}
 	
 	private Property<Object> _userSetSourceProperty() {
@@ -248,7 +244,7 @@ public class BOAttribute <T> extends BusinessObject {
 	public BOAttribute(BusinessObject parent, String name, AttributeType type, boolean allowNulls, boolean allowUserModify) {
 		super(parent, name);
 		
-		_attributeTypeProperty().setValue(type);
+		attributeTypeProperty().setValue(type);
 		AllowNulls().setValue(allowNulls);
 		allowUserModifyProperty().setValue(allowUserModify);
 		
@@ -378,6 +374,11 @@ public class BOAttribute <T> extends BusinessObject {
 	
 	public AttributeType getAttributeType() {
 		return attributeTypeProperty().getValue();
+	}
+	
+	// not recommended...
+	public void setAttributeType(AttributeType attributeType) {
+		attributeTypeProperty().setValue(attributeType);
 	}
 	
 	/**

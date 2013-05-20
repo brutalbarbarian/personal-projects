@@ -460,4 +460,10 @@ public class CollectionUtil {
 		}
 		return -1;	// Not found
 	}
+	
+	public static <T> T[] concatArrays (T[] a, T[] b) {
+		T[] result = Arrays.copyOf(a, a.length + b.length);
+		System.arraycopy(b, 0, result, a.length, b.length);
+		return result;
+	}
 }

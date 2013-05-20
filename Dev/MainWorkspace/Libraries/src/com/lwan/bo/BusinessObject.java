@@ -74,7 +74,7 @@ import javafx.util.Callback;
  */
 public abstract class BusinessObject implements ModifiedEventListener, Disposable{
 	/* Property Declarations */
-	
+	private long lastEventTimestamp;
 	private Property<BusinessObject> ownerProperty;
 	private Property<Boolean> activeProperty;
 	private Property<String> nameProperty;
@@ -84,6 +84,10 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	private Property<Boolean> isPopulatingProperty;
 	private Property<Boolean> isHandlingActiveProperty;
 	private Property<Boolean> triggersModifyProperty;
+	
+	public long getLastEventTimestamp() {
+		return lastEventTimestamp;
+	}
 	
 	/* Property Accessor Methods */
 	public ReadOnlyProperty<BusinessObject> ownerProperty() {
@@ -288,6 +292,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	
 	public BusinessObject(BusinessObject owner, String name) {
 //		children = new HashMap<>();
+		lastEventTimestamp = 0L;
 		isExample = false;
 		listeners = new Vector<>();
 		nameProperty().setValue(name);
@@ -587,6 +592,9 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 			for(ModifiedEventListener listener : listeners) {
 				listener.handleModified(event);
 			}
+			
+			// finished firing event...save the timestamp
+			lastEventTimestamp = System.currentTimeMillis();
 		}
 	}
 	
@@ -774,7 +782,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 * 
 	 */
 	public String toString() {
-		return toString(0, 1);
+		return toString(0, 0);
 	}
 	
 	/**
@@ -835,6 +843,13 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 */
 	public String toStringEx(int depth) {
 		return toString(0, depth);
+	}
+	
+	public void printListeners() {
+		System.out.println(this + " listeners:" + listeners.size());
+		for (ModifiedEventListener listener : listeners) {
+			System.out.println(listener);
+		}
 	}
 	
 	/**

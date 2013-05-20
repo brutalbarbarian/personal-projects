@@ -10,12 +10,14 @@ import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.controls.bo.GridView;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.CallbackEx;
 
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 public class PaneCompany extends PaneGridBase<BOCompany>{
 	protected BOLinkEx<BOContactDetail> linkCDT;
@@ -25,13 +27,14 @@ public class PaneCompany extends PaneGridBase<BOCompany>{
 	private AlignedControlCell accCompanyName;
 	
 	@Override
-	protected BOGrid<BOCompany> constructGrid(
+	protected GridView<BOCompany> constructGrid(
 			BOLinkEx<BOSet<BOCompany>> gridLink) {
-		BOGrid<BOCompany> result = new BOGrid<> ("pane_company", gridLink,
-				LngUtil.translateArray(new String[] {"CompanyName", "Address"}),
+		GridView<BOCompany> result = new GridView<>("pane_company", gridLink,
 				new String[] {"CompanyName", BOGrid.PREFIX_CALCULATED + "Address"},
-				new boolean[] {true, false});
-		result.setDisplayValueCallback(new CallbackEx<BOCompany, String, String>() {
+				LngUtil.translateArray(new String[]{"Company", "Address"}),
+				null);
+		
+		result.getGrid().setDisplayValueCallback(new CallbackEx<BOCompany, String, String>() {
 			public String call(BOCompany company, String b) {
 				BOContactDetail cdt = company.contactDetail();
 				return StringUtil.getDelimitedString(", ", 

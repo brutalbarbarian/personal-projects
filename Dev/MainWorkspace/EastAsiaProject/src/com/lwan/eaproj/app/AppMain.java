@@ -27,8 +27,8 @@ public class AppMain extends App {
 	public void start(Stage s) throws Exception {
 		super.start(s);		
 		
-		s.setWidth(Constants.INI_WIDTH);
-		s.setHeight(Constants.INI_HEIGHT);
+		s.setWidth(EAConstants.INI_WIDTH);
+		s.setHeight(EAConstants.INI_HEIGHT);
 		s.show();
 	}
 	
@@ -47,7 +47,7 @@ public class AppMain extends App {
 		case STATE_LOGIN_SUCCESS :
 			// Change to main view
 			// fade out...
-			FadeTransition fade = new FadeTransition(Duration.millis(Constants.FADE_DURATION), 
+			FadeTransition fade = new FadeTransition(Duration.millis(EAConstants.FADE_DURATION), 
 					getMainStage().getScene().getRoot());
 			fade.setFromValue(1.0);
 			fade.setToValue(0.0);
@@ -59,8 +59,8 @@ public class AppMain extends App {
 						protected Void call() throws Exception {
 							// Resize and centre on screen
 							Stage stage = getMainStage();
-							stage.setWidth(Constants.MAIN_WIDTH);
-							stage.setHeight(Constants.MAIN_HEIGHT);
+							stage.setWidth(EAConstants.MAIN_WIDTH);
+							stage.setHeight(EAConstants.MAIN_HEIGHT);
 							stage.centerOnScreen();
 							stage.show();
 							

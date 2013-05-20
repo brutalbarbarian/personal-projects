@@ -3,12 +3,15 @@ package com.lwan.javafx.controls.bo;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
-import com.lwan.bo.ModifiedEvent;
-import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.controls.ComboBox;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
@@ -46,15 +49,22 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 		this.nullDisplayValue = nullDisplayValue;
 		
 		populateFromSet();
-		set.addListener(new ModifiedEventListener() {
-			public void handleModified(ModifiedEvent event) {
-				if ((event.getType() == ModifiedEvent.TYPE_ACTIVE ||
-						event.getType() == ModifiedEvent.TYPE_SAVE)  &&
-						event.getSource().getOwner() == BOComboBox.this.set) {
-					populateFromSet();
-				}
+		
+		// not as clean perhaps... but at least its better then 
+		// adding a listener to the source set right?... or is it.
+		dataBindingProperty.addListener(new ChangeListener<T>() {
+			public void changed(ObservableValue<? extends T> arg0, T arg1,
+					T arg2) {
+				populateFromSet();
+			}
+		});
+		setOnShowing(new EventHandler<Event>() {
+			public void handle(Event arg0) {
+				populateFromSet();
 			}			
 		});
+		
+		lastEventRefreshed = -1;
 	}
 	
 	/**
@@ -72,9 +82,14 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 		
 	}
 	
+	private long lastEventRefreshed;
 	@SuppressWarnings("unchecked")
 	protected void populateFromSet() {
 		if (set != null && !StringUtil.isNullOrBlank(attrPath) && !StringUtil.isNullOrBlank(keyPath)) {
+			if (lastEventRefreshed == set.getLastEventTimestamp()) {
+				return;
+			}
+			
 			Map<T, String> values = new HashMap<>();
 			for (BusinessObject bo : set) {
 				BOAttribute<?> attr = bo.findAttributeByPath(attrPath);
@@ -92,6 +107,7 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 				addAllItems(values);
 			} finally {
 				endBulkUpdate();
+				lastEventRefreshed = set.getLastEventTimestamp();
 			}
 		}
 	}

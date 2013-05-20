@@ -1,6 +1,6 @@
 package com.lwan.eaproj.app.panes.pages;
 
-import com.lwan.eaproj.app.Constants;
+import com.lwan.eaproj.app.EAConstants;
 import com.lwan.util.wrappers.Disposable;
 
 import javafx.animation.FadeTransition;
@@ -26,14 +26,14 @@ public abstract class PageBase extends BorderPane implements Disposable{
 				
 //				Thread.sleep(2000);
 				
-				FadeTransition fadeOut = new FadeTransition(Duration.millis(Constants.FADE_DURATION), self);
+				FadeTransition fadeOut = new FadeTransition(Duration.millis(EAConstants.FADE_DURATION), self);
 				fadeOut.setFromValue(1.0);
                 fadeOut.setToValue(0.0);
                 fadeOut.play();
                 
                 fadeOut.onFinishedProperty().set(new EventHandler<ActionEvent>() {
 					public void handle(ActionEvent arg0) {
-						FadeTransition fadeIn = new FadeTransition(Duration.millis(Constants.FADE_DURATION), self);
+						FadeTransition fadeIn = new FadeTransition(Duration.millis(EAConstants.FADE_DURATION), self);
 						setCenter(main);
 						fadeIn.setFromValue(0.0);
 						fadeIn.setToValue(1.0);
