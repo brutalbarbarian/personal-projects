@@ -11,6 +11,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -116,5 +119,21 @@ public class FxUtils {
 		err.getScene().getStylesheets()
 				.addAll(parent.getScene().getStylesheets());
 		err.show();
+	}
+	
+	public static void setColumnHGrow(GridPane pane, int col, Priority rule) {
+		for (Node child : pane.getChildren()) {
+			int colIndex = GridPane.getColumnIndex(child);
+			int colSpan = GridPane.getColumnSpan(child);
+			if (col >= colIndex && col < (colIndex + colSpan)) {
+				GridPane.setHgrow(child, rule);
+			}
+		}
+	}
+	
+	public static void setAllColumnHGrow(GridPane pane, Priority rule) {
+		for (Node child : pane.getChildren()) {
+			GridPane.setHgrow(child, rule);
+		}
 	}
 }

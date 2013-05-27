@@ -7,6 +7,7 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.app.Lng;
+import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.Disposable;
 
 import javafx.application.Platform;
@@ -115,6 +116,11 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 	}
 	
 	protected boolean allowCreate() {
+		BOSet<T> set = grid.getLink().getLinkedObject();
+		if (set == null || !set.allowInsert()) {
+			return false;
+		}
+		
 		if (allowCreateCallback != null) {
 			return allowCreateCallback.call(grid.getSourceSet());
 		} else {
@@ -123,6 +129,11 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 	}
 	
 	protected boolean allowDelete(T item) {
+		BOSet<T> set = grid.getLink().getLinkedObject();
+		if (set == null || !set.allowDelete()) {
+			return false;
+		}
+		
 		if (allowDeleteCallback != null) {
 			return allowDeleteCallback.call(item);
 		} else {
@@ -279,7 +290,8 @@ public class BOGridControl <T extends BusinessObject> implements EventHandler<Ac
 				}
 			}
 		} catch (RuntimeException e) {
-			System.out.println("Error:" + e.getMessage());
+			FxUtils.ShowErrorDialog(grid.getScene().getWindow(), e.getMessage());
+//			System.out.println("Error:" + e.getMessage());
 		}
 	}
 

@@ -60,8 +60,10 @@ public class StringBoundProperty extends BoundProperty<String>{
 	}
 	
 	
-	public void buildAttributeLinks () {
-		super.buildAttributeLinks();
+	public boolean buildAttributeLinks () {
+		if (!super.buildAttributeLinks()) {
+			return false;
+		}
 		
 		if (!(getEditMode() && isEditable())) {
 			// Make sure we're out of edit mode
@@ -69,6 +71,7 @@ public class StringBoundProperty extends BoundProperty<String>{
 				endEdit(false);
 			} catch (BOException e) {}
 		}
+		return true;
 	}
 	
 	protected String getEffectiveValue() {

@@ -125,6 +125,7 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 					
 					// add refresh
 					MenuItem cmiRefresh = new MenuItem(gridControl.getRefreshButton().getText());
+					cmiRefresh.setDisable(gridControl.getRefreshButton().isDisabled());
 					cmiRefresh.setOnAction(gridMenuHandler);
 					cmiRefresh.setUserData("refresh");
 					gridMenu.getItems().add(cmiRefresh);

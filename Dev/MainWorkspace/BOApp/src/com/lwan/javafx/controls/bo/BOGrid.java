@@ -218,7 +218,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 
 		firstRealLayout = true;
 		
-		setTableMenuButtonVisible(true);
+//		setTableMenuButtonVisible(true);
 		columnResizePolicyProperty().set(new Callback<ResizeFeatures, Boolean>() {
 			@SuppressWarnings({ "unchecked", "deprecation" })
 			public Boolean call(ResizeFeatures rf) {

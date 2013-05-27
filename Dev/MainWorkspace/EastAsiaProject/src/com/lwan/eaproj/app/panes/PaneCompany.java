@@ -17,7 +17,6 @@ import com.lwan.util.wrappers.CallbackEx;
 
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 
 public class PaneCompany extends PaneGridBase<BOCompany>{
 	protected BOLinkEx<BOContactDetail> linkCDT;

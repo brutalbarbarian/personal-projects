@@ -8,8 +8,8 @@ import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.scene.control.AlignedControlCell;
+import com.lwan.util.FxUtils;
 
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -54,26 +54,21 @@ public class FrameContactDetails extends GridPane{
 		txtFax = new BOTextField(link, "Fax");
 		txtSite = new BOTextField(link, "Site");
 		
-		add(new AlignedControlCell(Lng._("Address"), txtAddress1, alignNode), 0, 0, 2, 1);
-		add(new AlignedControlCell("", txtAddress2, alignNode), 0, 1, 2, 1);
-		add(new AlignedControlCell("", txtAddress3, alignNode), 0, 2, 2, 1);
+		add(new AlignedControlCell(Lng._("Address"), txtAddress1, alignNode, 0), 0, 0, 2, 1);
+		add(new AlignedControlCell("", txtAddress2, alignNode, 0), 0, 1, 2, 1);
+		add(new AlignedControlCell("", txtAddress3, alignNode, 0), 0, 2, 2, 1);
 		
-		add(new AlignedControlCell("City", txtCity, alignNode), 0, 3);		
-		add(new AlignedControlCell("Post Code", txtPostCode, alignNode), 1, 3);
+		add(new AlignedControlCell("City", txtCity, alignNode, 0), 0, 3);		
+		add(new AlignedControlCell("Post Code", txtPostCode, alignNode, 1), 1, 3);
 		
-		add(new AlignedControlCell("Country", txtCountry, alignNode), 0, 4, 2, 1);
+		add(new AlignedControlCell("Country", txtCountry, alignNode, 0), 0, 4, 2, 1);
 		
-		add(new AlignedControlCell("Phone", txtPhone, alignNode), 0, 5);
-		add(new AlignedControlCell("Mobile", txtMobile, alignNode), 1, 5);
-		add(new AlignedControlCell("Fax", txtFax, alignNode), 0, 6);
-		add(new AlignedControlCell("Site", txtSite, alignNode), 1, 6);
+		add(new AlignedControlCell("Phone", txtPhone, alignNode, 0), 0, 5);
+		add(new AlignedControlCell("Mobile", txtMobile, alignNode, 1), 1, 5);
+		add(new AlignedControlCell("Fax", txtFax, alignNode, 0), 0, 6);
+		add(new AlignedControlCell("Site", txtSite, alignNode, 1), 1, 6);
 		
-		for (Node n : getChildren()) {
-			// for some reason... 'add' defaults to Priority.NEVER
-			setHgrow(n, Priority.SOMETIMES);
-		}
-		
-//		setConstraint
+		FxUtils.setAllColumnHGrow(this, Priority.SOMETIMES);
 	}
 		
 	protected void doDisplayState() {

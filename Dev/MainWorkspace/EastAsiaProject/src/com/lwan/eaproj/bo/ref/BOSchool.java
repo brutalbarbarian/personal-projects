@@ -59,7 +59,7 @@ public class BOSchool extends BODbObject{
 		setSP(DbUtil.getStoredProc("PS_SCH"), BOSchool.class, SP_SELECT);
 		setSP(DbUtil.getStoredProc("PI_SCH"), BOSchool.class, SP_INSERT);
 		setSP(DbUtil.getStoredProc("PU_SCH"), BOSchool.class, SP_UPDATE);
-		setSP(DbUtil.getStoredProc("PS_SCH"), BOSchool.class, SP_DELETE);
+		setSP(DbUtil.getStoredProc("PD_SCH"), BOSchool.class, SP_DELETE);
 	}
 
 	@Override

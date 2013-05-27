@@ -38,15 +38,25 @@ public abstract class PaneGridBase <T extends BusinessObject> extends BorderPane
 		editPane = initEditPane();
 		initToolbar();
 		
-		VBox.setVgrow(gridView, Priority.SOMETIMES);
+		VBox.setVgrow(gridView, getGridGrowth());
 		mainPane = new VBox();
 		mainPane.getChildren().add(gridView);
 		if (editPane != null) {
 			mainPane.getChildren().add(editPane);
+			// by default
+			VBox.setVgrow(editPane, getEditPaneGrowth());
 		}
 		
 		setCenter(mainPane);
 		setBottom(toolbar);
+	}
+	
+	protected Priority getEditPaneGrowth() {
+		return Priority.NEVER;
+	}
+	
+	protected Priority getGridGrowth() {
+		return Priority.SOMETIMES;
 	}
 	
 	protected void initToolbar() {

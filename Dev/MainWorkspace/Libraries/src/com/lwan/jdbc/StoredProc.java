@@ -151,7 +151,13 @@ public class StoredProc {
 					setParam(param.get(), param.getType(), statement, j);
 				}
 			}
-			statement.execute();
+			try {
+				statement.execute();
+			} catch (SQLException e) {
+				System.err.println("SQLError: " + getClass().getName());
+				throw e;
+			}
+					
 			ResultSet res = statement.getResultSet();
 			
 			if (res != null) {

@@ -149,6 +149,17 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		super.dispose();
 	}
 	
+	public boolean allowInsert() {
+		return true;
+	}
+	
+	public boolean allowDelete() {
+		return true;
+	}
+	
+	public boolean allowUpdate() {
+		return true;
+	}
 	
 	
 	/**

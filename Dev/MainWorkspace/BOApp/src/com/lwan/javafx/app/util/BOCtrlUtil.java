@@ -28,7 +28,7 @@ public class BOCtrlUtil {
 			public void call(Node node) {
 				if (node instanceof BoundControl<?>) {
 					((BoundControl<?>)node).dataBindingProperty().buildAttributeLinks();
-				}				
+				}
 			}			
 		});
 	}

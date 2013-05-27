@@ -97,39 +97,57 @@ public class BoundProperty <T> extends SimpleObjectProperty<T> implements Modifi
 		});
 	}
 	
-	public void buildAttributeLinks () {
+	/**
+	 * Will return false if the previous attribute link is the same
+	 * Otherwise, will return true.
+	 * 
+	 * @return
+	 */
+	public boolean buildAttributeLinks () {
+		// try find the new attribute
+		BOAttribute<?> newAttr;
+		BOLinkEx<?> link = getAttributeLink();
+		String path = getPath();
+		if (link != null && path != null) {
+			newAttr = link.findAttributeByPath(path);
+		} else {
+			newAttr = null;
+		}
+		
+		// check this against the old attr
+		BOAttribute<?> oldAttr = getLinkedAttribute();
+		if (oldAttr == newAttr) {
+			return false;	// do nothing.
+		}
+				
 		// Unbind previous attribute if exists
-		if (getLinkedAttribute() != null) {
-			getLinkedAttribute().removeListener(this);
+		if (oldAttr != null) {
+			oldAttr.removeListener(this);
 		}
 		
 		// remove previous links
 		_editableProperty().unbind();
 		
 		// attempt to bind a new attribute
-		BOLinkEx<?> link = getAttributeLink();
-		String path = getPath();
-		if (link != null && path != null) {
-			_linkedAttributeProperty().setValue((BOAttribute<?>) link.findChildByPath(path));
-		} else {
-			_linkedAttributeProperty().setValue(null);
-		}
+		_linkedAttributeProperty().setValue(newAttr);
 		
 		// bind editable
-		if (getLinkedAttribute() != null) {
-			_editableProperty().bind(getLinkedAttribute().allowUserModifyProperty());
+		if (newAttr != null) {
+			_editableProperty().bind(newAttr.allowUserModifyProperty());
 		} else {
 			_editableProperty().setValue(false);
 		}
 				
 		// Bind new attribute
-		if (getLinkedAttribute() != null) {
+		if (newAttr != null) {
 			// Only one way bindings.
-			getLinkedAttribute().addListener(this);
+			newAttr.addListener(this);
 			setModifiedValue(getEffectiveValue());
 		} else {
 			setValue(null);
 		}
+		
+		return true;
 	}
 
 	public void handleModified(ModifiedEvent event) {

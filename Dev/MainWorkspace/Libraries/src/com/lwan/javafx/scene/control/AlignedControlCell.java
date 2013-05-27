@@ -6,6 +6,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
 /**
@@ -23,7 +24,12 @@ public class AlignedControlCell extends HBox{
 	
 	String caption;
 	
+	int gridColumn;
+	
 	public AlignedControlCell(String caption, Node ctrl, Parent parent) {
+		if (parent == null) {
+			parent = this;	// gotta have a limit in case
+		}
 		this.parent = parent;
 		this.caption = caption;
 		control = ctrl;
@@ -31,6 +37,13 @@ public class AlignedControlCell extends HBox{
 		setSpacing(5);	// default
 		
 		getChildren().addAll(label, control);
+		
+		gridColumn = -1;
+	}
+	
+	public AlignedControlCell(String caption, Node ctrl, Parent parent, int column) {
+		this(caption, ctrl, parent);
+		gridColumn = column;
 	}
 
 	private static final double MIN_CONTROL_WIDTH = 40;
@@ -38,8 +51,8 @@ public class AlignedControlCell extends HBox{
 	
 	@Override
 	protected void layoutChildren() {
-		double labelWidth = getMaxPrefWidth(parent);
-		double minTotalWidth = getMaxMinWidth(parent);
+		double labelWidth = getMaxPrefWidth();
+		double minTotalWidth = getMaxMinWidth();
 		Insets padding = getPadding();
 		double actualWidth = getWidth();
 		double actualHeight = getHeight();
@@ -71,43 +84,80 @@ public class AlignedControlCell extends HBox{
 		return super.computePrefHeight(width);
 	}
 	
-	protected double getMaxMinWidth(Node n) {
-		if (!n.isVisible()) {
-			return Double.MAX_VALUE;	// Don't care... its not visible anyway
-		} else if (n instanceof AlignedControlCell) {
-			return ((AlignedControlCell) n).getWidth();
-		} else if (n instanceof Parent) {
-			double result = Double.MAX_VALUE;
-			for (Node child : ((Parent) n).getChildrenUnmodifiable()) {
-				double min = getMaxMinWidth(child);
+	protected double getMaxMinWidth(Node curr, Node ceiling, Node caller, boolean goingUp) {
+		double result = Double.MAX_VALUE;
+		if (!curr.isVisible()) {
+			// do nothing.
+		} else if (curr instanceof AlignedControlCell) {
+			return ((AlignedControlCell) curr).getWidth(); 
+		} else if (curr instanceof Parent) {
+			for (Node child : ((Parent)curr).getChildrenUnmodifiable()) {
+				if (child == caller) {
+					continue;	// this is what called this, don't reiterate down
+				}
+				if (gridColumn >= 0 && curr instanceof GridPane &&
+						GridPane.getColumnIndex(child) != gridColumn) {
+					continue;	// we only accept the correct column
+				}
+				double min = getMaxMinWidth(child, ceiling, curr, false);
 				if (min < result) {
 					result = min;
 				}
 			}
-			return result;
-		} else {
-			return Double.MAX_VALUE;
 		}
+		if (goingUp && curr != ceiling && curr.getParent() != null) {
+			double min = getMaxMinWidth(curr.getParent(), ceiling, curr, true);
+			if (min > result) {
+				result = min;
+			}
+		}
+		return result;
 	}
 	
-	protected double getMaxPrefWidth(Node n) {
-		if (!n.isVisible()) {
-			return -1;	// Don't care... its not visible anyway
-		} else if (n instanceof AlignedControlCell) {
-			AlignedControlCell alignedCell = (AlignedControlCell)n;
-			return alignedCell.label.getComputedPrefWidth();
-		} else if (n instanceof Parent) {
-			double result = -1;
-			for (Node child : ((Parent) n).getChildrenUnmodifiable()) {
-				double max = getMaxPrefWidth(child);
+	protected double getMaxMinWidth() {
+		return getMaxMinWidth(this, parent, null, true);
+	}
+	
+	protected double getMaxPrefWidth() {
+		return getMaxPrefWidth(this, parent, null, true);
+	}
+	
+	// idea behind both getMaxPrefWidth and getMaxMinWidth
+	// the iteration is a reverse post-order traversal
+	// that is, start from a leaf, and go up until you hit the ceiling (or root if ceiling isn't found),
+	// and do a standard recursion ignoring the child the call came from at each step.
+	// this way, even if the tree isn't fully built, i.e. the parent isn't part of the tree yet,
+	// we still get a valid result.
+	
+	protected double getMaxPrefWidth(Node curr, Node ceiling, Node caller, boolean goingUp) {
+		double result = -1;
+		if (!curr.isVisible()) {
+			// do nothing.
+		} else if (curr instanceof AlignedControlCell) {
+			AlignedControlCell alignedCell = (AlignedControlCell)curr;
+			result = alignedCell.label.getComputedPrefWidth(); 
+		} else if (curr instanceof Parent) {
+			for (Node child : ((Parent)curr).getChildrenUnmodifiable()) {
+				if (child == caller) {
+					continue;	// this is what called this, don't reiterate down
+				}
+				if (gridColumn >= 0 && curr instanceof GridPane &&
+						GridPane.getColumnIndex(child) != gridColumn) {
+					continue;	// we only accept the correct column
+				}
+				double max = getMaxPrefWidth(child, ceiling, curr, false);
 				if (max > result) {
 					result = max;
 				}
 			}
-			return result;
-		} else {
-			return -1;
 		}
+		if (goingUp && curr != parent && curr.getParent() != null) {
+			double max = getMaxPrefWidth(curr.getParent(), ceiling, curr, true);
+			if (max > result) {
+				result = max;
+			}
+		}
+		return result;
 	}
 	
 	class AlignedLabel extends Label {
