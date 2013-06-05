@@ -36,10 +36,10 @@ public class BOSource extends BODbObject{
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getStoredProc("PS_SRC"), BOSource.class, SP_SELECT);
-		setSP(DbUtil.getStoredProc("PI_SRC"), BOSource.class, SP_INSERT);
-		setSP(DbUtil.getStoredProc("PU_SRC"), BOSource.class, SP_UPDATE);
-		setSP(DbUtil.getStoredProc("PD_SRC"), BOSource.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_SRC"), BOSource.class, SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_SRC"), BOSource.class, SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_SRC"), BOSource.class, SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_SRC"), BOSource.class, SP_DELETE);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class BOSource extends BODbObject{
 
 		@Override
 		protected void createStoredProcs() {
-			selectStoredProcProperty().setValue(DbUtil.getStoredProc("PS_SRC_for_set"));
+			selectStoredProcProperty().setValue(DbUtil.getDbStoredProc("PS_SRC_for_set"));
 		}
 
 		@Override

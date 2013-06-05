@@ -63,10 +63,10 @@ public class BOTransaction extends BODbObject{
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getStoredProc("PS_TRN"), BOTransaction.class, SP_SELECT);
-		setSP(DbUtil.getStoredProc("PI_TRN"), BOTransaction.class, SP_INSERT);
-		setSP(DbUtil.getStoredProc("PU_TRN"), BOTransaction.class, SP_UPDATE);
-		setSP(DbUtil.getStoredProc("PD_TRN"), BOTransaction.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_TRN"), BOTransaction.class, SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_TRN"), BOTransaction.class, SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_TRN"), BOTransaction.class, SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_TRN"), BOTransaction.class, SP_DELETE);
 	}
 	
 	protected void verifyState() throws BOException{
@@ -102,12 +102,6 @@ public class BOTransaction extends BODbObject{
 	
 	protected void handleActive(boolean active) {		
 		super.handleActive(active);
-		
-//		BOSource src = source();
-//		if (src != null) {			
-//			src.transactionCount().setValue(
-//					src.transactionCount().asInteger() + (active? 1 : -1));
-//		}
 	}
 	
 	@Override
@@ -118,26 +112,7 @@ public class BOTransaction extends BODbObject{
 	}
 
 	@Override
-	public void handleModified(ModifiedEvent source) {
-//		if (isActive()) {
-//			if (source.getType() == ModifiedEvent.TYPE_ATTRIBUTE && 
-//					source.getSource() == sourceID) {
-//				// how do i find out the previous value?...
-//				BOSource prevSrc = BOSource.getSourceSet().findChildByID(
-//						sourceID.previousValueProperty().getValue());
-//				if (prevSrc != null) {
-//					prevSrc.transactionCount().setValue(
-//							prevSrc.transactionCount().asInteger() - 1);
-//				}
-//				
-//				BOSource src = source();
-//				if (src != null) {
-//					src.transactionCount().setValue(
-//							prevSrc.transactionCount().asInteger() + 1);
-//				}
-//			}
-//		}
-	}
+	public void handleModified(ModifiedEvent source) {}
 	
 	private static BOTransactionSet transactionSet;
 	public static BOTransactionSet getTransactionSet() {
@@ -156,7 +131,7 @@ public class BOTransaction extends BODbObject{
 
 		@Override
 		protected void createStoredProcs() {
-			selectStoredProcProperty().setValue(DbUtil.getStoredProc("PS_TRN_for_set"));
+			selectStoredProcProperty().setValue(DbUtil.getDbStoredProc("PS_TRN_for_set"));
 		}
 
 		@Override

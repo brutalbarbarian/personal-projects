@@ -253,6 +253,16 @@ public class CollectionUtil {
 		return array;
 	}
 	
+	public static int[] toIntArray(Collection<Integer>col) {
+		int size = col.size();
+		int[] result = new int[size];
+		int i = 0;
+		for (Integer value : col) {
+			result[i++] = value;
+		}
+		return result;
+	}
+	
 	public static <T> T[] toArray(Iterable<T> it, Class<? super T> c) {
 		return toArray(toList(it), c);
 	}

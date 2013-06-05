@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.Collection;
 
 import javafx.scene.Scene;
@@ -8,8 +9,10 @@ import com.lwan.eaproj.app.frames.FrameContactDetails;
 import com.lwan.eaproj.app.frames.FrameCustomer;
 import com.lwan.eaproj.bo.ref.BOContactDetail;
 import com.lwan.eaproj.bo.ref.BOCustomer;
+import com.lwan.eaproj.sp.PS_CUS_find;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.util.DbUtil;
+import com.lwan.jdbc.GConnection;
 
 
 public class TestFrame extends App{
@@ -31,6 +34,18 @@ public class TestFrame extends App{
 
 	@Override
 	protected void initialiseStage(Stage stage) {
+		PS_CUS_find sp = new PS_CUS_find();
+		try {
+			sp.getParamByName("@allow_inactive").set(true);
+			sp.getParamByName("@student").set(false);
+			sp.execute(GConnection.getConnection());
+			DbUtil.printResultSet(sp.getResult());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
+		
 //		BOLinkEx<BOContactDetail> link = new BOLinkEx<>();
 //		FrameContactDetails frame = new FrameContactDetails(link);
 		

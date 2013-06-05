@@ -3,7 +3,7 @@ package com.lwan.eaproj.app.panes;
 import java.util.Collection;
 import java.util.Vector;
 
-import com.lwan.eaproj.app.AppMain;
+import com.lwan.eaproj.app.AppEastAsia;
 import com.lwan.eaproj.app.EAConstants;
 import com.lwan.eaproj.app.panes.pages.PageAlerts;
 import com.lwan.eaproj.app.panes.pages.PageBase;
@@ -239,10 +239,10 @@ public class PaneMain extends BorderPane{
 				MenuItem src = (MenuItem)e.getSource();
 				switch (src.getUserData().toString()) {
 				case "logoff" :
-					AppMain.notifyState(AppMain.STATE_LOGOUT);
+					AppEastAsia.notifyState(AppEastAsia.STATE_LOGOUT);
 					break;
 				case "exit" :
-					AppMain.requestTerminate();
+					AppEastAsia.requestTerminate();
 					break;
 				case "users" :
 					showUsersScreen();

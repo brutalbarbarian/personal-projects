@@ -12,13 +12,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.jdbc.GConnection;
+import com.lwan.util.FxUtils;
+import com.lwan.util.GenericsUtil;
 import com.lwan.util.IOUtil;
+import com.lwan.util.StringUtil;
+
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public abstract class App extends Application{
 	// Application messages
@@ -33,11 +53,22 @@ public abstract class App extends Application{
 	
 	// Default key values
 	public static final String KEY_LANGUAGE = "LANGUAGE";
-	public static final String KEY_DB_PATH = "DBPATH";
+	public static final String KEY_DB_PATH = "DB_ACCESS_PATH";
+	public static final String KEY_DB_MYSQL_OPENSILENT = "DB_MYSQL_OPENSILENT";	// this will cause the password to be saved...
+	public static final String KEY_DB_MYSQL_USER = "DB_MYSQL_USERNAME";
+	public static final String KEY_DB_MYSQL_PASSWORD = "DB_MYSQL_PASSWORD";
+	public static final String KEY_DB_MYSQL_SERVER = "DB_MYSQL_SERVER";
+	public static final String KEY_DB_MYSQL_DATABASE = "DB_MYSQL_DATABASE";
 	
 	// Static values
-	public static final String DB_DRIVER = "sun.jdbc.odbc.JdbcOdbcDriver";
-	public static final String DB_CON_PREFIX = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=";
+	public static final String DB_ACCESS_DRIVER = "sun.jdbc.odbc.JdbcOdbcDriver";
+	public static final String DB_ACCESS_CON_PREFIX = "jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=";	
+	public static final String DB_MYSQL_DRIVER = "com.mysql.jdbc.Driver";
+	public static final String DB_MYSQL_CON_PREFIX = "jdbc:mysql://";
+	
+//	jdbc:mysql://localhost:3306/
+	
+	// DB_CON_PREFIX + SERVERNAME + DB NAME
 	
 	private Map<String, String> keyMap;
 	private static App app;
@@ -70,6 +101,9 @@ public abstract class App extends Application{
 		
 	@Override
 	public void start(Stage s) throws Exception {
+		// Initialize database
+		initDatabase();
+		
 		mainStage = s;
 		
 		initialiseStage(s);
@@ -135,7 +169,6 @@ public abstract class App extends Application{
 	/**
 	 * Should be run on application startup
 	 * @throws Exception 
-	 * 
 	 */
 	public void init() throws Exception {
 		super.init();
@@ -171,7 +204,18 @@ public abstract class App extends Application{
 		
 		Lng.initialise(loc);
 		
-		// Initialise database
+		stylesheets = new ArrayList<String>();
+		initStylesheets(stylesheets);
+		
+		// Assign the global variable now that initialise has been completed
+		app = this;
+	}
+	
+	protected void initDatabase() {
+		initMySQLDatbase();
+	}
+	
+	protected void initAccessDatabase() {
 		String dbpath = keyMap.get(KEY_DB_PATH);
 		if (dbpath == null) {
 			System.out.println("No DB path provided");
@@ -190,7 +234,7 @@ public abstract class App extends Application{
 				}
 			}
 			try {
-				GConnection.initialise(DB_DRIVER, buildConnectionString(dbpath), "", "");
+				GConnection.initialise(DB_ACCESS_DRIVER, DB_ACCESS_CON_PREFIX + dbpath, "", "");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -200,20 +244,122 @@ public abstract class App extends Application{
 				dbpath = null;
 			}
 		}
+		
 		keyMap.put(KEY_DB_PATH, dbpath);
+	}
+	
+	protected void initMySQLDatbase() {
+		String server = GenericsUtil.Coalice(keyMap.get(KEY_DB_MYSQL_SERVER), "");
+		String database = GenericsUtil.Coalice(keyMap.get(KEY_DB_MYSQL_DATABASE), "");
+		String user = GenericsUtil.Coalice(keyMap.get(KEY_DB_MYSQL_USER), "");
+		String password = GenericsUtil.Coalice(keyMap.get(KEY_DB_MYSQL_PASSWORD), "");
+		String openSilent = keyMap.get(KEY_DB_MYSQL_OPENSILENT);
+		boolean silent = openSilent == null? false : Boolean.parseBoolean(openSilent);
+		boolean savePassword = password.length() > 0;
 		
-		stylesheets = new ArrayList<String>();
-		initStylesheets(stylesheets);
+		while (!GConnection.isInitialised()) {
+			if (!silent) {
+				// bring up the dialog
+				final SimpleBooleanProperty result = new SimpleBooleanProperty();
+				result.set(false);
+				
+				final Stage stage = new Stage(StageStyle.UTILITY);
+//				stage.initModality(Modality.APPLICATION_MODAL);
+				stage.initOwner(null);
+				stage.setTitle(Lng._("Setup Database Connection..."));
+				
+				VBox pane = new VBox(5);
+				TextField txtServer = new TextField();
+				TextField txtDatabase = new TextField();
+				TextField txtUsername = new TextField();
+				PasswordField txtPassword = new PasswordField();
+				CheckBox chkSavePassword = new  CheckBox(Lng._("Save Password"));
+				CheckBox chkOpenSilently = new CheckBox(Lng._("Open Silently"));
+				
+				chkOpenSilently.disableProperty().bind(Bindings.not(chkSavePassword.selectedProperty()));
+				
+				txtServer.setText(server);
+				txtDatabase.setText(database);
+				txtUsername.setText(user);
+				txtPassword.setText(password);
+				chkSavePassword.setSelected(savePassword);
+				chkOpenSilently.setSelected(silent);
+				
+				Button btnOk = new Button(Lng._("Ok"));
+				Button btnCancel = new Button(Lng._("Cancel"));
+				
+				HBox bottom = new HBox(5);
+				bottom.getChildren().addAll(btnOk, btnCancel);
+				
+				Label title = new Label(Lng._("Server Detail..."));
+				title.getStyleClass().add(StyleConstants.LABEL_HEADER);
+				
+				pane.getChildren().addAll(
+						title,
+						new AlignedControlCell(Lng._("Server"), txtServer, pane),
+						new AlignedControlCell(Lng._("Database"), txtDatabase, pane),
+						new AlignedControlCell(Lng._("Username"), txtUsername, pane),
+						new AlignedControlCell(Lng._("Password"), txtPassword, pane),
+						new AlignedControlCell("", chkSavePassword, pane),
+						new AlignedControlCell("", chkOpenSilently, pane),
+						bottom);
+				
+				btnOk.setOnAction(new EventHandler<ActionEvent>() {
+					public void handle(ActionEvent arg0) {
+						result.set(true);
+						stage.close();
+					}				
+				});
+				btnCancel.setOnAction(new EventHandler<ActionEvent>() {
+					public void handle(ActionEvent arg0) {
+						stage.close();
+					}					
+				});
+				
+				pane.setPadding(new Insets(10));
+				Scene sc = new Scene(pane);
+				sc.getStylesheets().addAll(getStyleshets());
+				stage.setScene(sc);
+				stage.setResizable(false);
+				
+				stage.showAndWait();
+				
+				if (result.get()) {
+					server = txtServer.getText();
+					database = txtDatabase.getText();
+					user = txtUsername.getText();
+					password = txtPassword.getText();
+					savePassword = chkSavePassword.isSelected();
+					silent = savePassword && chkOpenSilently.isSelected();
+				} else {
+					// User canceled
+					System.exit(0);
+				}
+			}
+			
+			// attempt to open with the set parameters
+			String conString = DB_MYSQL_CON_PREFIX + server + "/" + database;
+			try {
+				GConnection.initialise(DB_MYSQL_DRIVER, conString, user, password);
+				
+				System.out.print("Successfully initialised with connection string of : ");
+				System.out.println(conString);
+				System.out.println("with username of " + user + " and password of " + StringUtil.getRepeatedString('*', password.length()));
+			} catch (Exception e) {
+				FxUtils.ShowErrorDialog(null, e.getMessage());
+				silent = false;	// failed...
+			}
+		}
 		
-		// Assign the global variable now that initialise has been completed
-		app = this;
+		// open successfully if got to here
+		keyMap.put(KEY_DB_MYSQL_SERVER, server);
+		keyMap.put(KEY_DB_MYSQL_DATABASE, database);
+		keyMap.put(KEY_DB_MYSQL_USER, user);
+		keyMap.put(KEY_DB_MYSQL_OPENSILENT, Boolean.toString(silent));
+		keyMap.put(KEY_DB_MYSQL_PASSWORD, savePassword ? password : "");
 	}
 	
 	protected abstract void initStylesheets(Collection<String> stylesheets);
-	
-	private String buildConnectionString(String path) {
-		return DB_CON_PREFIX + path;
-	}
 
 	public static void putKey(String key, String value) {
 		getApp().keyMap.put(key, value);

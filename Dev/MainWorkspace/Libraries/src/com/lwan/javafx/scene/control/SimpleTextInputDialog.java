@@ -231,4 +231,12 @@ public class SimpleTextInputDialog extends BorderPane implements EventHandler<Ac
 		stage.show();
 		stage.centerOnScreen();
 	}
+	
+	protected void initStage(){
+		
+	}
+	
+	public void show(Window owner) {
+		
+	}
 }

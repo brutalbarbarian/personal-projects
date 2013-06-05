@@ -1,6 +1,6 @@
 package com.lwan.eaproj.app.panes;
 
-import com.lwan.eaproj.app.AppMain;
+import com.lwan.eaproj.app.AppEastAsia;
 import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.FxUtils;
@@ -89,10 +89,10 @@ public class PaneLogin extends StackPane implements EventHandler<ActionEvent> {
 	@Override
 	public void handle(ActionEvent e) {		
 		if (e.getSource() == btnCancel) {
-			AppMain.notifyState(AppMain.STATE_LOGIN_CANCEL);
+			AppEastAsia.notifyState(AppEastAsia.STATE_LOGIN_CANCEL);
 		} else {
 			if (BOUserSet.setActiveUser(txtUser.getText(), txtPassword.getText())) {
-				AppMain.notifyState(AppMain.STATE_LOGIN_SUCCESS);	
+				AppEastAsia.notifyState(AppEastAsia.STATE_LOGIN_SUCCESS);	
 			} else {
 				FxUtils.ShowErrorDialog(getScene().getWindow(), 
 						Lng._("Invalid username or password."));

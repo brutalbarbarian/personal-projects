@@ -15,12 +15,12 @@ public class PA_PKC_new_id extends StoredProc{
 	private static final String[] PARAMS = {"@pkc_name"};
 	private static final int[] PARAM_TYPES = {Types.CHAR};
 	private static final String[] STATEMENTS = {
-		"update TR_PKC_primary_key_counter " +
+		"update TX_PKC_primary_key_counter " +
 		"set pkc_id_next = pkc_id_next + 1 " +
 		"where pkc_name = @pkc_name",
 		
 		"select pkc_id_next " +
-		"from TR_PKC_primary_key_counter " +
+		"from TX_PKC_primary_key_counter " +
 		"where pkc_name = @pkc_name"
 	};
 	

@@ -2,16 +2,12 @@ package com.lwan.eaproj.bo.ref;
 
 import java.util.Date;
 
-import javafx.beans.value.ObservableValue;
-import javafx.util.Callback;
-
 import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
 import com.lwan.javafx.app.util.DbUtil;
-import com.lwan.javafx.property.ValidationListener;
 import com.lwan.util.DateUtil;
 
 public class BOCustomer extends BODbObject{

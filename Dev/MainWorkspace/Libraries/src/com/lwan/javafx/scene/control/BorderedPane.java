@@ -8,7 +8,7 @@ import javafx.scene.layout.StackPane;
 
 public class BorderedPane extends StackPane{
 	private Label label;
-	private Node child;
+//	private Node child;
 	
 	public BorderedPane (Node child, String title, HPos titlePos) {
 		label = new Label(title);

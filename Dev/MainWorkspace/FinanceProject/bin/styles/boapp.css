@@ -1,0 +1,11 @@
+.textfield{
+	-fx-text-fill: RED
+}
+
+.label-header{
+	-fx-font-size: 20
+}
+
+.cell:empty{
+	-fx-background-color: WHITE
+}

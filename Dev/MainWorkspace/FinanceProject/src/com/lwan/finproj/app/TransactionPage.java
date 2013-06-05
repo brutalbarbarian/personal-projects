@@ -221,7 +221,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 		}
 		
 		protected BOTransactionSetRef() {
-			super(BOTransaction.getTransactionSet(), DbUtil.getStoredProc("PS_TRN_for_set"));
+			super(BOTransaction.getTransactionSet(), DbUtil.getDbStoredProc("PS_TRN_for_set"));
 		}
 		
 		protected void createAttributes() {
