@@ -535,7 +535,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 			
 			// If the owner is currently handling its active state, let the parent throw the event
 			if (getOwner() == null || !getOwner().isHandlingActiveProperty().getValue()) {
-				fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_ACTIVE));
+				fireModified(new ModifiedEvent(this, ModifiedEventType.Active));
 			}
 		} finally {
 			_isHandlingActiveProperty().setValue(false);	
@@ -573,10 +573,10 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 */
 	public final void fireModified(ModifiedEvent event) {
 		if (allowNotificationsProperty().getValue()) {
-			if (	event.getType() != ModifiedEvent.TYPE_SAVE &&
+			if (	event.getType() != ModifiedEventType.Save &&
 					!(isHandlingActiveProperty().getValue() && 
 					event.getSource().triggersModifyProperty().getValue() &&					
-					event.getType() == ModifiedEvent.TYPE_ACTIVE)) {
+					event.getType() == ModifiedEventType.Active)) {
 				stateProperty().getValue().add(State.Modified);
 			}
 			
@@ -769,7 +769,7 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 				stateProperty().getValue().remove(State.Dataset);
 			}
 			// Let listeners know about the save
-			fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_SAVE));			
+			fireModified(new ModifiedEvent(this, ModifiedEventType.Save));			
 			return true;
 		} else {
 			return false;

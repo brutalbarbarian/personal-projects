@@ -8,6 +8,14 @@ import javafx.scene.Parent;
 import javafx.scene.control.ToolBar;
 
 public class BOCtrlUtil {
+	public static boolean getDisabled(BoundControl<?> ctrl) {
+		if (ctrl.isEnabled()) {
+			return !ctrl.dataBindingProperty().isEditable();
+		} else {
+			return true;
+		}
+	}
+	
 	public static void iterateControls(Node n, Procedure<Node> callback) {
 		callback.call(n);
 		
@@ -24,12 +32,14 @@ public class BOCtrlUtil {
 	}
 	
 	public static void buildAttributeLinks(Node n) {
-		iterateControls(n, new Procedure<Node>(){
-			public void call(Node node) {
-				if (node instanceof BoundControl<?>) {
-					((BoundControl<?>)node).dataBindingProperty().buildAttributeLinks();
-				}
-			}			
-		});
+		if (n != null) {
+			iterateControls(n, new Procedure<Node>(){
+				public void call(Node node) {
+					if (node instanceof BoundControl<?>) {
+						((BoundControl<?>)node).dataBindingProperty().buildAttributeLinks();
+					}
+				}			
+			});
+		}
 	}
 }

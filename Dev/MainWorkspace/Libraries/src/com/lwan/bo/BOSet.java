@@ -12,13 +12,9 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.Callback;
 
-public abstract class BOSet<T extends BusinessObject> extends BusinessObject implements Iterable<T>{
-	public static final int LOADMODE_ACTIVE = 0;	// Implemented from BOSet
-	public static final int LOADMODE_PASSIVE = 1;	// Implemented from BOSet
-	// Will need to be implemented inside implementation of this in populate attribute
-	public static final int LOADMODE_CACHE = 2;		
+public abstract class BOSet<T extends BusinessObject> extends BusinessObject implements Iterable<T>{		
 	
-	Property<Integer> loadModeProperty;
+	Property<LoadMode> loadModeProperty;
 	
 	// name of the BOattribute which is a direct descendant of the child BOobject
 	// if this is empty, calling 'findByID' will always return with null
@@ -51,9 +47,9 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * 
 	 * @return
 	 */
-	public Property<Integer> loadModeProperty() {
+	public Property<LoadMode> loadModeProperty() {
 		if (loadModeProperty == null) {
-			loadModeProperty = new SimpleObjectProperty<Integer>(this, "LoadMode", LOADMODE_ACTIVE);
+			loadModeProperty = new SimpleObjectProperty<LoadMode>(this, "LoadMode", LoadMode.ACTIVE);
 		}
 		return loadModeProperty;
 	}
@@ -102,7 +98,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 * 
 	 * @param loadMode
 	 */
-	public void initialiseAs(int loadMode) {
+	public void initialiseAs(LoadMode loadMode) {
 		allowNotificationsProperty().setValue(false);
 		try {
 			children.clear();
@@ -294,7 +290,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			}
 			// Dosen't exist in current set... but in cache mode so might still exist in
 			// the actual dataset...
-			if (!datasetOnly && loadModeProperty().getValue() == LOADMODE_CACHE && childExists(id)) {
+			if (!datasetOnly && loadModeProperty().getValue() == LoadMode.CACHE && childExists(id)) {
 				return populateChild(id, ensureActive);
 			}
 		}
@@ -555,7 +551,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 			for (Entry e : children) {
 				// Only actively load upon setActive() if loadmode is active
 				if (isActive) {
-					if (loadModeProperty().getValue() == LOADMODE_ACTIVE) {
+					if (loadModeProperty().getValue() == LoadMode.ACTIVE) {
 						e.child.ensureActive();
 						e.loaded = true;
 					}
@@ -699,7 +695,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 */
 	public void handleModified(ModifiedEvent source) {
 		BusinessObject src = source.getSource();
-		if (source.getType() == ModifiedEvent.TYPE_ACTIVE &&
+		if (source.getType() == ModifiedEventType.Active &&
 				src == this) {
 			for (Entry e : children) {
 				if (e.child == src) {

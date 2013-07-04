@@ -5,16 +5,21 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
+import com.lwan.eaproj.app.EAConstants;
+import com.lwan.eaproj.bo.common.ContactDetailOwner;
 import com.lwan.javafx.app.util.DbUtil;
 
 public class BOContactDetail extends BODbObject{
-	private BODbAttribute<Integer> contactDetailID;
+	private BODbAttribute<Integer> contactDetailID, sourceType;
 	private BODbAttribute<String> address1, address2, address3,
 			city, country, postCode, phone, mobile, fax,
 			site;
 	
 	public BODbAttribute<Integer> contactDetailID() {
 		return contactDetailID;
+	}
+	public BODbAttribute<Integer> sourceType() {
+		return sourceType;
 	}
 	public BODbAttribute<String> address1() {
 		return address1;
@@ -53,22 +58,26 @@ public class BOContactDetail extends BODbObject{
 	
 	@Override
 	protected void ensureIDExists() {
-		if (contactDetailID().isNull()) {
+		if (sourceType.asInteger() != EAConstants.CDT_SOURCE_TYPE_MISC) {
+			contactDetailID().assign(((ContactDetailOwner)getOwner()).getID());
+		} else if (contactDetailID().isNull()) {	// is misc... use internal ID
 			contactDetailID().setValue(DbUtil.getNextID("cdt_id"));
 		}
 	}
 	
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getStoredProc("PS_CDT"), BOContactDetail.class, SP_SELECT);
-		setSP(DbUtil.getStoredProc("PI_CDT"), BOContactDetail.class, SP_INSERT);
-		setSP(DbUtil.getStoredProc("PU_CDT"), BOContactDetail.class, SP_UPDATE);
-		setSP(DbUtil.getStoredProc("PD_CDT"), BOContactDetail.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_CDT"), BOContactDetail.class, SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_CDT"),	 BOContactDetail.class, SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_CDT"), BOContactDetail.class, SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_CDT"), BOContactDetail.class, SP_DELETE);
 	}
 	
 	@Override
 	protected void createAttributes() {
 		contactDetailID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailID", "cdt_id", AttributeType.ID, false, false));
+		sourceType = addAsChild(new BODbAttribute<Integer>(this, "SourceType", "cdt_source_type", AttributeType.ID, false, false));
+		
 		address1 = addAsChild(new BODbAttribute<String>(this, "Address1", "cdt_address_1", AttributeType.String));
 		address2 = addAsChild(new BODbAttribute<String>(this, "Address2", "cdt_address_2", AttributeType.String));
 		address3 = addAsChild(new BODbAttribute<String>(this, "Address3", "cdt_address_3", AttributeType.String));
@@ -83,6 +92,14 @@ public class BOContactDetail extends BODbObject{
 	
 	@Override
 	public void clearAttributes() {
+		int srcType;
+		if (getOwner() instanceof ContactDetailOwner) {
+			srcType = ((ContactDetailOwner)getOwner()).getSourceType(this);
+		} else {
+			srcType = EAConstants.CDT_SOURCE_TYPE_MISC;
+		}
+		sourceType.setValue(srcType);
+		
 		address1.clear();
 		address2.clear();
 		address3.clear();
@@ -94,6 +111,21 @@ public class BOContactDetail extends BODbObject{
 		fax.clear();
 		site.clear();
 	}
+	
+	@Override
+	protected boolean populateAttributes() {
+		// ensure the correct parameters are populated prior to attempting to load
+		if (getOwner() instanceof ContactDetailOwner && getOwner().isFromDataset()) {
+			ContactDetailOwner owner = (ContactDetailOwner)getOwner();
+			sourceType.setValue(owner.getSourceType(this));
+			contactDetailID.assign(owner.getID());
+		} else {
+			sourceType.setValue(EAConstants.CDT_SOURCE_TYPE_MISC);
+		}
+		
+		return super.populateAttributes();
+	}
+	
 	@Override
 	public void handleModified(ModifiedEvent source) {}	
 }

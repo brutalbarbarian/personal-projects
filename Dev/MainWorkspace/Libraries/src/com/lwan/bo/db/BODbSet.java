@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
+import com.lwan.bo.LoadMode;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
@@ -94,7 +95,7 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 
 	@Override
 	protected boolean populateAttributes() {
-		if (loadModeProperty().getValue() != LOADMODE_CACHE) {
+		if (loadModeProperty().getValue() != LoadMode.CACHE) {
 			// if the SelectStoredProc requires any parameters...
 			// go looking in the direct parent's attributes
 			StoredProc sp = selectStoredProcProperty().getValue();
@@ -154,7 +155,7 @@ public abstract class BODbSet<T extends BODbObject> extends BOSet<T> {
 			}
 			result = findChildByAttribute(attr.nameProperty().getValue(), value, childNum, false);
 		}
-		if (result == null && loadModeProperty().getValue() == LOADMODE_CACHE) {
+		if (result == null && loadModeProperty().getValue() == LoadMode.CACHE) {
 			//... how would this work... is this a good idea?...will need a special stored
 			// proc to be able to find a field like this... one that can take any
 			// param..eww.. and what if we want to go 

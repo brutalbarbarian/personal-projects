@@ -5,8 +5,9 @@ import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
+import com.lwan.bo.ModifiedEventType;
 import com.lwan.javafx.app.util.BOCtrlUtil;
-import com.lwan.javafx.controls.bo.GridView;
+import com.lwan.javafx.controls.other.GridView;
 import com.lwan.util.wrappers.Disposable;
 
 import javafx.beans.value.ChangeListener;
@@ -24,6 +25,7 @@ public abstract class PaneGridBase <T extends BusinessObject> extends BorderPane
 	
 	private VBox mainPane;	
 	private Node editPane;
+	private Node paramPane;
 	
 	public PaneGridBase () {
 		initControls();
@@ -36,6 +38,7 @@ public abstract class PaneGridBase <T extends BusinessObject> extends BorderPane
 	private void initControls() {
 		initGrid();
 		editPane = initEditPane();
+		paramPane = initParamPane();
 		initToolbar();
 		
 		VBox.setVgrow(gridView, getGridGrowth());
@@ -47,6 +50,7 @@ public abstract class PaneGridBase <T extends BusinessObject> extends BorderPane
 			VBox.setVgrow(editPane, getEditPaneGrowth());
 		}
 		
+		setTop(paramPane);
 		setCenter(mainPane);
 		setBottom(toolbar);
 	}
@@ -70,8 +74,14 @@ public abstract class PaneGridBase <T extends BusinessObject> extends BorderPane
 		link = new BOLinkEx<>();
 		gridView = constructGrid(link);
 		gridView.getGridControl().setHotkeyControls(this);
-//		gridControl = constructGridControl(grid);	
-//		gridControl.setHotkeyControls(this);
+
+		link.addListener(new ModifiedEventListener() {
+			public void handleModified(ModifiedEvent event) {
+				if (event.getType() == ModifiedEventType.Link) {
+					BOCtrlUtil.buildAttributeLinks(paramPane);
+				}
+			}			
+		});
 		
 		gridView.getGridControl().getSelectedLink().addListener(new ModifiedEventListener() {
 			public void handleModified(ModifiedEvent event) {
@@ -89,6 +99,8 @@ public abstract class PaneGridBase <T extends BusinessObject> extends BorderPane
 				displayState();
 			}			
 		});
+		
+		BOCtrlUtil.buildAttributeLinks(paramPane);
 	}
 	
 	protected void onNewSelection(T selection) {}
@@ -101,6 +113,7 @@ public abstract class PaneGridBase <T extends BusinessObject> extends BorderPane
 	// init menu?
 	// init filters?
 	protected abstract Node initEditPane();
+	protected abstract Node initParamPane();
 	protected abstract void initGridLink(BOLinkEx<BOSet<T>> gridLink);	
 	protected abstract GridView<T> constructGrid(BOLinkEx<BOSet<T>> gridLink);
 

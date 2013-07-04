@@ -3,10 +3,12 @@ package com.lwan.eaproj.app.frames;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
+import com.lwan.bo.ModifiedEventType;
 import com.lwan.eaproj.bo.ref.BOContactDetail;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.interfaces.BoundFrame;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.FxUtils;
 
@@ -14,7 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-public class FrameContactDetails extends GridPane{
+public class FrameContactDetails extends GridPane implements BoundFrame<BOContactDetail>{
 	public BOLinkEx<BOContactDetail> link;
 	private Parent alignNode;
 	
@@ -28,14 +30,14 @@ public class FrameContactDetails extends GridPane{
 		
 		link.addListener(new ModifiedEventListener() {
 			public void handleModified(ModifiedEvent event) {
-				if (event.getType() == ModifiedEvent.TYPE_LINK) {
-					doDisplayState();
+				if (event.getType() == ModifiedEventType.Link) {
+					doBuildAttributeLinks();
 				}
 			}
 		});
 		
 		initControls();
-		doDisplayState();
+		doBuildAttributeLinks();
 	}
 	
 	BOTextField txtAddress1, txtAddress2, txtAddress3,
@@ -52,7 +54,7 @@ public class FrameContactDetails extends GridPane{
 		txtPhone = new BOTextField(link, "Phone");
 		txtMobile = new BOTextField(link, "Mobile");
 		txtFax = new BOTextField(link, "Fax");
-		txtSite = new BOTextField(link, "Site");
+		txtSite = new BOTextField(link, "Email");
 		
 		add(new AlignedControlCell(Lng._("Address"), txtAddress1, alignNode, 0), 0, 0, 2, 1);
 		add(new AlignedControlCell("", txtAddress2, alignNode, 0), 0, 1, 2, 1);
@@ -71,8 +73,20 @@ public class FrameContactDetails extends GridPane{
 		FxUtils.setAllColumnHGrow(this, Priority.SOMETIMES);
 	}
 		
-	protected void doDisplayState() {
+	public void doDisplayState() {
+		// do nothing
+	}
+
+	@Override
+	public void doBuildAttributeLinks() {
 		BOCtrlUtil.buildAttributeLinks(this);
+		
+		doDisplayState();
+	}
+
+	@Override
+	public BOLinkEx<BOContactDetail> getMainLink() {
+		return link;
 	}
 	
 }

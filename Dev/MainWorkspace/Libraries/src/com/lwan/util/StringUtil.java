@@ -9,6 +9,18 @@ import com.sun.javafx.binding.StringFormatter;
 import javafx.util.Callback;
 
 public class StringUtil {
+	
+    public static String trimRight(String value) {
+    	char[] val = value.toCharArray();
+        int len = val.length;
+        int st = 0;
+
+        while ((st < len) && (val[len - 1] <= ' ')) {
+            len--;
+        }
+        return ((st > 0) || (len < value.length())) ? value.substring(st, len) : value;
+    }
+	
 	public static String getRepeatedString (String s, int num){
 		StringBuilder sb = new StringBuilder(s.length() * num);
 		for (int i = 0; i < num; i++) {

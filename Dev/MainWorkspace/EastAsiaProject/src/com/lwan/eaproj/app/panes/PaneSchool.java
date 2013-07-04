@@ -18,7 +18,7 @@ import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOTextArea;
 import com.lwan.javafx.controls.bo.BOTextField;
-import com.lwan.javafx.controls.bo.GridView;
+import com.lwan.javafx.controls.other.GridView;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.FxUtils;
@@ -51,7 +51,7 @@ public class PaneSchool extends PaneGridBase<BOSchool>{
 		
 		paneContact = new VBox();
 		tfContactName = new BOTextField(getSelectedLink(), "ContactName");
-		accContactName = new AlignedControlCell(Lng._("Name"), tfContactName, paneContact);
+		accContactName = new AlignedControlCell(Lng._("Contact"), tfContactName, paneContact, 0);
 		linkCDT = new BOLinkEx<>();
 		frContactDetails = new FrameContactDetails(paneContact, linkCDT);
 		paneContact.getChildren().addAll(accContactName, frContactDetails);
@@ -105,6 +105,12 @@ public class PaneSchool extends PaneGridBase<BOSchool>{
 		super.dispose();
 		
 		linkCDT.dispose();
+	}
+
+	@Override
+	protected Node initParamPane() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

@@ -67,10 +67,10 @@ public class BOUser extends BODbObject{
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getStoredProc("PS_USR"), BOUser.class, SP_SELECT);
-		setSP(DbUtil.getStoredProc("PI_USR"), BOUser.class, SP_INSERT);
-		setSP(DbUtil.getStoredProc("PU_USR"), BOUser.class, SP_UPDATE);
-		setSP(DbUtil.getStoredProc("PD_USR"), BOUser.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_USR"), BOUser.class, SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_USR"), BOUser.class, SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_USR"), BOUser.class, SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_USR"), BOUser.class, SP_DELETE);
 	}
 
 	@Override

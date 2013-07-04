@@ -4,7 +4,7 @@ import com.lwan.eaproj.app.EAConstants;
 import com.lwan.util.wrappers.Disposable;
 
 import javafx.animation.FadeTransition;
-import javafx.concurrent.Task;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ProgressBar;
@@ -18,13 +18,11 @@ public abstract class PageBase extends BorderPane implements Disposable{
 		initialiseLoadingScreen();
 
 		final PageBase self = this;
-		Thread th = new Thread(new Task<Void>() {
+		Runnable run = new Runnable(){
 			@Override
-			protected Void call() throws Exception {
+			public void run() {
 				final Pane main = buildPage();
 				initialise(params);
-				
-//				Thread.sleep(2000);
 				
 				FadeTransition fadeOut = new FadeTransition(Duration.millis(EAConstants.FADE_DURATION), self);
 				fadeOut.setFromValue(1.0);
@@ -41,11 +39,10 @@ public abstract class PageBase extends BorderPane implements Disposable{
 					}		                
                 });
 				
-				return null;
+				
 			}			
-		});
-		
-		th.start();
+		};
+		Platform.runLater(run);
 	}
 	
 	private void initialiseLoadingScreen() {

@@ -14,7 +14,14 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 public class CalendarArt extends ArtBase{
-	@Override
+	public CalendarArt() {
+		this(100, 100);
+	}
+	
+	public CalendarArt(double defWidth, double defHeight) {
+		super(defWidth, defHeight);
+	}
+	
 	protected Bounds getDrawCanvasBounds() {
 		return new BoundingBox(0, 0, 100, 100);
 	}

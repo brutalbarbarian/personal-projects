@@ -1,8 +1,11 @@
 package com.lwan.bo;
 
+import java.util.Date;
+
 import com.lwan.javafx.property.ValidatedProperty;
 import com.lwan.javafx.property.ValidationListener;
 import com.lwan.util.GenericsUtil;
+import com.lwan.util.StringUtil;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
@@ -11,7 +14,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.util.Callback;
 
-public class BOAttribute <T> extends BusinessObject {
+public class BOAttribute <T> extends BusinessObject implements Callback<T, T> {
 	/* Properties Declarations */
 	private Property<Boolean> allowNullsProperty;
 	private Property<Boolean> allowUserModifyProperty;
@@ -36,6 +39,7 @@ public class BOAttribute <T> extends BusinessObject {
 	public ValidatedProperty<T> valueProperty() {
 		if (valueProperty == null) {
 			valueProperty = new ValidatedProperty<>(this, "Value");
+			valueProperty.setNullCheck(this);
 		}
 		return valueProperty;
 	}
@@ -277,7 +281,7 @@ public class BOAttribute <T> extends BusinessObject {
 	 */
 	public void doChanged(T oldValue, T newValue) {
 		_previousValueProperty().setValue(oldValue);	// reference...
-		fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_ATTRIBUTE));
+		fireModified(new ModifiedEvent(this, ModifiedEventType.Attribute));
 	}	
 	
 	/**
@@ -426,4 +430,26 @@ public class BOAttribute <T> extends BusinessObject {
 	protected boolean populateAttributes() {return false;}
 	protected void createAttributes() {}
 	public void handleModified(ModifiedEvent source) {}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public T call(T value) {	// nullcheck call
+		if (value == null) {
+			// continue;
+		} else if (getAttributeType().isNumeric()) {
+			if (((Number)value).doubleValue() == 0) {
+				value = null;
+			}
+		} else if (getAttributeType().isDateTime()) {
+			if (((Date)value).getTime() == 0L) {
+				value = null;
+			}
+		} else if (getAttributeType() == AttributeType.String) {
+			value = (T) StringUtil.trimRight((String)value);
+			if (((String) value).length() == 0) {
+				value = null;
+			}
+		}
+		return value;
+	}
 }

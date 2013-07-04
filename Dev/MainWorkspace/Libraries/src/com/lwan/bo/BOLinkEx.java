@@ -64,7 +64,7 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 		if (newLink != null) {
 			newLink.addListener(this);
 		}
-		fireModified(new ModifiedEvent(this, ModifiedEvent.TYPE_LINK));
+		fireModified(new ModifiedEvent(this, ModifiedEventType.Link));
 	}
 	
 	public void dispose() {

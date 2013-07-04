@@ -9,23 +9,23 @@ import com.lwan.util.GenericsUtil;
  *
  */
 public class ModifiedEvent {
-	public static final int TYPE_UNKNOWN = 0;
-	public static final int TYPE_ATTRIBUTE = 1;	// attribute value change
+//	public static final int TYPE_UNKNOWN = 0;
+//	public static final int TYPE_ATTRIBUTE = 1;	// attribute value change
 //	public static final int TYPE_SET = 2;
-	public static final int TYPE_ACTIVE = 2;	// object active state change
-	public static final int TYPE_LINK = 3;	// link
-	public static final int TYPE_SAVE = 4;	// save
+//	public static final int TYPE_ACTIVE = 2;	// object active state change
+//	public static final int TYPE_LINK = 3;	// link
+//	public static final int TYPE_SAVE = 4;	// save
 	
 	private BusinessObject source;
 	private String tags;
 	private BusinessObject directChild;
-	private int type;
+	private ModifiedEventType type;
 	
-	public ModifiedEvent(BusinessObject source, int type) {
+	public ModifiedEvent(BusinessObject source, ModifiedEventType type) {
 		this(source, type, null);
 	}
 	
-	public ModifiedEvent(BusinessObject source, int type, String tags) {
+	public ModifiedEvent(BusinessObject source, ModifiedEventType type, String tags) {
 		this(source, source, type, tags);
 	}
 	
@@ -47,7 +47,7 @@ public class ModifiedEvent {
 		return parent.isChildByName(source, attributeName);
 	}
 	
-	public int getType() {
+	public ModifiedEventType getType() {
 		return type;
 	}
 	
@@ -78,7 +78,7 @@ public class ModifiedEvent {
 		}
 	}
 	
-	private ModifiedEvent(BusinessObject source, BusinessObject caller, int type, String tags) {
+	private ModifiedEvent(BusinessObject source, BusinessObject caller, ModifiedEventType type, String tags) {
 		this.type = type;
 		this.source = source;
 		directChild = caller;

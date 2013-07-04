@@ -7,6 +7,7 @@ import com.lwan.eaproj.app.AppEastAsia;
 import com.lwan.eaproj.app.EAConstants;
 import com.lwan.eaproj.app.panes.pages.PageAlerts;
 import com.lwan.eaproj.app.panes.pages.PageBase;
+import com.lwan.eaproj.app.panes.pages.PageCustomer;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.CollectionUtil;
@@ -75,9 +76,6 @@ public class PaneMain extends BorderPane{
 		if (page != getPage() && // only change if the page is actually different.
 				// check save state of current page
 				(currentPage == null || !currentPage.requiresSave() || currentPage.requestSave())) {
-			// remove previous page..
-			getChildren().remove(currentPage);
-			
 			// add new page in
 			FadeTransition fadeOut = new FadeTransition(Duration.millis(
 					currentPage == null? 0 : EAConstants.FADE_DURATION), currentPage);
@@ -85,8 +83,10 @@ public class PaneMain extends BorderPane{
 			fadeOut.setToValue(0.0);
 			
 			fadeOut.setOnFinished(new EventHandler<ActionEvent>() {
-				public void handle(ActionEvent e) {
+				public void handle(ActionEvent e) {					
 					if (currentPage != null) {
+						// remove previous page..
+						getChildren().remove(currentPage);
 						currentPage.dispose();
 					}
 					currentPage = getAppPage(page, params);
@@ -115,7 +115,7 @@ public class PaneMain extends BorderPane{
 		case PAGE_ALERTS:
 			return new PageAlerts();
 		case PAGE_CUSTOMERS:
-
+			return new PageCustomer();
 		case PAGE_EMPLOYEES:
 			
 		case PAGE_INVOICES:
@@ -249,8 +249,10 @@ public class PaneMain extends BorderPane{
 					break;
 				case "companies" :
 					showCompanyScreen();
+					break;
 				case "school" :
 					showSchoolScreen();
+					break;
 				}
 			}
 		};

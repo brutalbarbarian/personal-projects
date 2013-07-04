@@ -105,7 +105,7 @@ public class AlignedControlCell extends HBox{
 				}
 			}
 		}
-		if (goingUp && curr != ceiling && curr.getParent() != null) {
+		if (goingUp && ceiling != null && curr != ceiling && curr.getParent() != null) {
 			double min = getMaxMinWidth(curr.getParent(), ceiling, curr, true);
 			if (min > result) {
 				result = min;
@@ -151,7 +151,7 @@ public class AlignedControlCell extends HBox{
 				}
 			}
 		}
-		if (goingUp && curr != parent && curr.getParent() != null) {
+		if (goingUp && ceiling != null && curr != ceiling && curr.getParent() != null) {
 			double max = getMaxPrefWidth(curr.getParent(), ceiling, curr, true);
 			if (max > result) {
 				result = max;

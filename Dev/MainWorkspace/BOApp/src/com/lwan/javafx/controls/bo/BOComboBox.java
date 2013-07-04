@@ -2,7 +2,11 @@ package com.lwan.javafx.controls.bo;
 
 import java.util.HashMap;
 import java.util.Map;
-import javafx.beans.binding.Bindings;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
@@ -12,6 +16,7 @@ import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
+import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.controls.ComboBox;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
@@ -28,15 +33,48 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 	public BOComboBox(BOLinkEx<?> link, String path) {
 		dataBindingProperty = new BoundProperty<>(this, link, path);
 		
-		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
-		selectedProperty().bindBidirectional(dataBindingProperty);
+		initialise();
 	}
 	
 	public BOComboBox(BoundProperty<T> boundProperty) {
 		dataBindingProperty = boundProperty;
 		
-		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
+		initialise();
+	}
+	
+	protected void initialise() {
+		dataBindingProperty.editableProperty().addListener(new InvalidationListener() {
+			public void invalidated(Observable arg0) {
+				updateDisableState();
+			}
+		});
+		updateDisableState();
+		
 		selectedProperty().bindBidirectional(dataBindingProperty);
+	}
+	
+	private BooleanProperty enabledProperty;
+	public BooleanProperty enabledProperty() {
+		if (enabledProperty == null) {
+			enabledProperty = new SimpleBooleanProperty(this, "Enabled", true);
+			enabledProperty.addListener(new InvalidationListener() {				
+				public void invalidated(Observable arg0) {
+					updateDisableState();
+				}
+			});
+		}
+		return enabledProperty;
+	}
+	
+	protected void updateDisableState() {
+		setDisable(BOCtrlUtil.getDisabled(this));
+	}
+	
+	public void setEnabled(boolean enabled) {
+		enabledProperty().set(enabled);
+	}
+	public boolean isEnabled() {
+		return enabledProperty().get();
 	}
 	
 	private BOSet<?> set;
@@ -125,4 +163,6 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 			selectedProperty().bindBidirectional(dataBindingProperty);
 		}
 	}
+	
+	
 }

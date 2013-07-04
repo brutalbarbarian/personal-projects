@@ -5,14 +5,15 @@ import com.lwan.bo.BOSet;
 import com.lwan.bo.BOSetRef;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
+import com.lwan.bo.ModifiedEventType;
 import com.lwan.bo.db.BODbSetRef;
 import com.lwan.finproj.bo.BOSource;
 import com.lwan.finproj.bo.BOTransaction;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.app.util.LngUtil;
-import com.lwan.javafx.controls.bo.BOGrid;
-import com.lwan.javafx.controls.bo.BOGridControl;
-import com.lwan.javafx.controls.bo.GridView;
+import com.lwan.javafx.controls.other.BOGrid;
+import com.lwan.javafx.controls.other.BOGridControl;
+import com.lwan.javafx.controls.other.GridView;
 import com.lwan.util.wrappers.CallbackEx;
 import com.lwan.util.wrappers.Disposable;
 
@@ -87,7 +88,7 @@ public class SourcePage extends BorderPane implements Disposable{
 		
 		record.addListener(new ModifiedEventListener(){
 			public void handleModified(ModifiedEvent event) {
-				if (event.getType() == ModifiedEvent.TYPE_LINK) {
+				if (event.getType() == ModifiedEventType.Link) {
 					transactionSet.reload();
 					tranGridView.refreshGrid();
 //					tranGrid.refresh();

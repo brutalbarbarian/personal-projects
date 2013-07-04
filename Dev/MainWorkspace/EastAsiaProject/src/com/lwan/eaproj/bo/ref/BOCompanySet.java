@@ -10,7 +10,7 @@ public class BOCompanySet extends BODbSet<BOCompany>{
 
 	@Override
 	protected void createStoredProcs() {
-		selectStoredProcProperty().setValue(DbUtil.getStoredProc("PS_COM_all"));
+		selectStoredProcProperty().setValue(DbUtil.getDbStoredProc("PS_COM_all"));
 	}
 
 	@Override

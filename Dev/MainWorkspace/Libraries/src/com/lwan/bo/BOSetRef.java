@@ -156,7 +156,7 @@ public class BOSetRef<T extends BusinessObject> extends BOSet<T> {
 			}
 		} else { // MOD_SUBSET..
 			BOSet<T> set = getSource();
-			boolean ownerIsCache = set.loadModeProperty().getValue() == LOADMODE_CACHE; 
+			boolean ownerIsCache = set.loadModeProperty().getValue() == LoadMode.CACHE; 
 			for (int i : getSubset()) {
 				T child;
 				if (ownerIsCache) {

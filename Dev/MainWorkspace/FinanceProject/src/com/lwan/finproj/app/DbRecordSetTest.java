@@ -10,7 +10,7 @@ import com.lwan.bo.BOSet;
 import com.lwan.bo.db.DbRecord;
 import com.lwan.bo.db.DbRecordSet;
 import com.lwan.javafx.app.App;
-import com.lwan.javafx.controls.bo.GridView;
+import com.lwan.javafx.controls.other.GridView;
 import com.lwan.jdbc.StoredProc;
 
 public class DbRecordSetTest extends App{

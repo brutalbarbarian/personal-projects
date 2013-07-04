@@ -7,7 +7,7 @@ import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
-import com.lwan.javafx.controls.bo.GridView;
+import com.lwan.javafx.controls.other.GridView;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.FxUtils;
 
@@ -172,5 +172,10 @@ public class PaneUser extends PaneGridBase<BOUser> {
 		
 		layout();
 		
+	}
+
+	@Override
+	protected Node initParamPane() {
+		return null;
 	}
 }

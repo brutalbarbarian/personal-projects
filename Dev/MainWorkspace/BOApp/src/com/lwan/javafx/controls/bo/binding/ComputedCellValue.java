@@ -16,7 +16,7 @@ import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
-import com.lwan.javafx.controls.bo.BOGrid;
+import com.lwan.javafx.controls.other.BOGrid;
 
 public class ComputedCellValue <B extends BusinessObject> implements Callback<CellDataFeatures<B, Object>, ObservableValue<Object>>, ModifiedEventListener{
 	private String field;

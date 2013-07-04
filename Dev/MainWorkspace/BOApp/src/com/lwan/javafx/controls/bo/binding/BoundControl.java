@@ -1,5 +1,7 @@
 package com.lwan.javafx.controls.bo.binding;
 
+import javafx.beans.property.BooleanProperty;
+
 /**
  * A common interface used by all controls bound to a BusinessObject.
  * 
@@ -18,4 +20,7 @@ public interface BoundControl <T> {
 	 * @return
 	 */
 	public BoundProperty<T> dataBindingProperty();
+	
+	public BooleanProperty enabledProperty();
+	public boolean isEnabled();
 }

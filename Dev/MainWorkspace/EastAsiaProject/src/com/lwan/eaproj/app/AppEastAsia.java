@@ -6,8 +6,6 @@ import com.lwan.eaproj.app.panes.PaneLogin;
 import com.lwan.eaproj.app.panes.PaneMain;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
-import com.lwan.javafx.app.util.DbUtil;
-
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -80,12 +78,6 @@ public class AppEastAsia extends App {
 			
 			break;
 		}
-	}
-	
-	public void init() throws Exception {
-		super.init();
-		
-		DbUtil.setRootPackage("com.lwan.eaproj.sp");
 	}
 
 	public static void main(String[] args) {

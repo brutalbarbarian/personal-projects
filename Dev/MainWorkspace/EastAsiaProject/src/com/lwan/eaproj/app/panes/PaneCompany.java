@@ -8,9 +8,9 @@ import com.lwan.eaproj.bo.ref.BOCompanySet;
 import com.lwan.eaproj.bo.ref.BOContactDetail;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.LngUtil;
-import com.lwan.javafx.controls.bo.BOGrid;
 import com.lwan.javafx.controls.bo.BOTextField;
-import com.lwan.javafx.controls.bo.GridView;
+import com.lwan.javafx.controls.other.BOGrid;
+import com.lwan.javafx.controls.other.GridView;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.CallbackEx;
@@ -60,7 +60,7 @@ public class PaneCompany extends PaneGridBase<BOCompany>{
 		VBox detail = new VBox();
 		
 		txtCompanyName = new BOTextField(getSelectedLink(), "CompanyName");
-		accCompanyName = new AlignedControlCell(Lng._("Name"), txtCompanyName, detail);
+		accCompanyName = new AlignedControlCell(Lng._("Name"), txtCompanyName, detail, 0);
 		
 		linkCDT = new BOLinkEx<>();
 		frameContactDetail = new FrameContactDetails(detail, linkCDT);
@@ -73,5 +73,10 @@ public class PaneCompany extends PaneGridBase<BOCompany>{
 	@Override
 	protected void initGridLink(BOLinkEx<BOSet<BOCompany>> gridLink) {
 		gridLink.setLinkedObject(BOCompanySet.getSet());
+	}
+
+	@Override
+	protected Node initParamPane() {
+		return null;
 	}	
 }

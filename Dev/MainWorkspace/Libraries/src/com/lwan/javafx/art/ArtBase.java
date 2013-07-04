@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
@@ -21,6 +22,10 @@ public abstract class ArtBase extends Pane{
 	private static final int Y = 5;
 	private static final int WIDTH = 6;
 	private static final int HEIGHT = 7;
+	
+	private double defaultWidth, defaultHeight;
+	
+	protected Object[] params;
 	
 	private class ArtShape {
 		Shape shape;
@@ -70,7 +75,12 @@ public abstract class ArtBase extends Pane{
 		retainAspectProperty().set(retainAspect);
 	}
 	
-	ArtBase() {
+	protected ArtBase(double defWidth, double defHeight, Object... params) {
+		defaultWidth = defWidth;
+		defaultHeight = defHeight;
+		
+		this.params = params;
+		
 		retainAspectProperty = new SimpleBooleanProperty(this, "RetainAspect", true);
 		
 		draw();
@@ -94,9 +104,66 @@ public abstract class ArtBase extends Pane{
 		}
 	}
 	
-	protected abstract Bounds getDrawCanvasBounds();
+	protected Bounds getDrawCanvasBounds() {
+		return new BoundingBox(0, 0, defaultWidth, defaultHeight);
+	}
 	
 	protected abstract List<Shape> doDraw();
+	
+	@Override
+	protected double computePrefWidth(double height) {
+		if (height == -1) {
+			return defaultHeight;
+		} else {
+			return height * defaultAspect;
+		}
+	}
+	
+	@Override
+	protected double computePrefHeight(double width) {
+		if (width == -1) {
+			return defaultWidth;
+		} else {
+			return width / defaultAspect;
+		}
+	}
+	
+	@Override
+	protected double computeMinHeight(double width) {
+		if (width == -1) {
+			return 1;
+		} else {
+			return computePrefHeight(width);
+		}
+	}
+	
+	@Override
+	protected double computeMinWidth(double height) {
+		if (height == -1) {
+			return 1;
+		} else {
+			return computePrefWidth(height);
+		}
+	}
+	
+	@Override
+	protected double computeMaxHeight(double width) {
+		if (width == -1) {
+			return Double.MAX_VALUE;
+		} else {
+			return computePrefHeight(width);
+		}
+	}
+	
+	@Override
+	protected double computeMaxWidth(double height) {
+		if (height == -1) {
+			return Double.MAX_VALUE;
+		} else {
+			return computePrefWidth(height);
+		}
+	}
+	
 	
 	public void layoutChildren() {
 		double width = getWidth();

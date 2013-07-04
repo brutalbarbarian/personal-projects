@@ -3,15 +3,18 @@ package com.lwan.eaproj.bo.ref;
 import java.util.Date;
 
 import com.lwan.bo.AttributeType;
+import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
+import com.lwan.eaproj.app.EAConstants;
+import com.lwan.eaproj.bo.common.ContactDetailOwner;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.util.DateUtil;
 
-public class BOCustomer extends BODbObject{
-	private BODbAttribute<Integer> customerID, contactDetailID;
+public class BOCustomer extends BODbObject implements ContactDetailOwner{
+	private BODbAttribute<Integer> customerID;
 	private BODbAttribute<String> firstName, lastName, notes;
 	private BODbAttribute<Date> dateCreated;
 	private BODbAttribute<Boolean> active, isStudent;
@@ -19,9 +22,6 @@ public class BOCustomer extends BODbObject{
 	
 	public BODbAttribute<Integer> customerID() {
 		return customerID;
-	}
-	public BODbAttribute<Integer> contactDetailID() {
-		return contactDetailID;
 	}
 	public BODbAttribute<String> firstName() {
 		return firstName;
@@ -54,21 +54,19 @@ public class BOCustomer extends BODbObject{
 		if (customerID.isNull()) {
 			customerID.setValue(DbUtil.getNextID("cus_id"));
 		}
-		contactDetailID.assign(contactDetail.contactDetailID());
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getStoredProc("PS_CUS"), BOCustomer.class, SP_SELECT);
-		setSP(DbUtil.getStoredProc("PI_CUS"), BOCustomer.class, SP_INSERT);
-		setSP(DbUtil.getStoredProc("PU_CUS"), BOCustomer.class, SP_UPDATE);
-		setSP(DbUtil.getStoredProc("PD_CUS"), BOCustomer.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_CUS"), BOCustomer.class, SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_CUS"), BOCustomer.class, SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_CUS"), BOCustomer.class, SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_CUS"), BOCustomer.class, SP_DELETE);
 	}
 
 	@Override
 	protected void createAttributes() {
 		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", AttributeType.ID));
-		contactDetailID = addAsChild(new BODbAttribute<Integer>(this, "ContactDetailID", "cdt_id", AttributeType.ID));
 		firstName = addAsChild(new BODbAttribute<String>(this, "FirstName", "cus_name_first", AttributeType.String));
 		lastName = addAsChild(new BODbAttribute<String>(this, "LastName", "cus_name_last", AttributeType.String));
 		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "cus_notes", AttributeType.String));
@@ -91,21 +89,19 @@ public class BOCustomer extends BODbObject{
 
 		contactDetail.clearAttributes();
 	}
-	
-	protected boolean populateAttributes() {
-		boolean result = super.populateAttributes();
-		if (result) {
-			contactDetail.contactDetailID().assign(contactDetailID);
-		} else {
-			contactDetail.contactDetailID().clear();
-		}
-		return result;
-	}
 
 	@Override
 	public void handleModified(ModifiedEvent source) {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public int getSourceType(BOContactDetail cdt) {
+		return EAConstants.CDT_SOURCE_TYPE_CUSTOMER;
+	}
+	@Override
+	public BOAttribute<Integer> getID() {
+		return customerID;
 	}
 	
 }

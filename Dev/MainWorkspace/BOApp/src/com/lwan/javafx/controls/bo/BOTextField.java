@@ -2,6 +2,7 @@ package com.lwan.javafx.controls.bo;
 
 import com.lwan.bo.BOException;
 import com.lwan.bo.BOLinkEx;
+import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.util.StringUtil;
@@ -11,7 +12,6 @@ import com.sun.javafx.scene.control.skin.TextFieldSkin;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -71,9 +71,40 @@ public class BOTextField extends TextField implements BoundControl<String> {
 		initialise();
 	}
 	
+	private BooleanProperty enabledProperty;
+	public BooleanProperty enabledProperty() {
+		if (enabledProperty == null) {
+			enabledProperty = new SimpleBooleanProperty(this, "Enabled", true);
+			enabledProperty.addListener(new InvalidationListener() {				
+				public void invalidated(Observable arg0) {
+					updateDisableState();
+				}
+			});
+		}
+		return enabledProperty;
+	}
+	
+	protected void updateDisableState() {
+		setDisable(BOCtrlUtil.getDisabled(this));
+	}
+	
+	public void setEnabled(boolean enabled) {
+		enabledProperty().set(enabled);
+	}
+	
+	public boolean isEnabled() {
+		return enabledProperty().get();
+	}
+	
 	protected void initialise() {
 		textProperty().bindBidirectional(dataBindingProperty);
-		disableProperty().bind(Bindings.not(dataBindingProperty.editableProperty()));
+		dataBindingProperty.editableProperty().addListener(new InvalidationListener() {
+			public void invalidated(Observable arg0) {
+				updateDisableState();
+			}
+		});
+		updateDisableState();
+		
 		actualInvalidate = true;
 		
 		// Focus Listener for managing the edit state of the textfield

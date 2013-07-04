@@ -11,7 +11,7 @@ public class BOSchoolSet extends BODbSet<BOSchool>{
 
 	@Override
 	protected void createStoredProcs() {
-		selectStoredProcProperty().setValue(DbUtil.getStoredProc("PS_SCH_all"));
+		selectStoredProcProperty().setValue(DbUtil.getDbStoredProc("PS_SCH_all"));
 	}
 
 	@Override

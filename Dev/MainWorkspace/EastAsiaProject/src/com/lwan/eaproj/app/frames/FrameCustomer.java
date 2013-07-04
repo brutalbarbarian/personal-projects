@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
+import com.lwan.bo.ModifiedEventType;
 import com.lwan.eaproj.bo.ref.BOContactDetail;
 import com.lwan.eaproj.bo.ref.BOCustomer;
 import com.lwan.javafx.app.Lng;
@@ -17,11 +18,12 @@ import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.controls.bo.BOCheckBox;
 import com.lwan.javafx.controls.bo.BOTextArea;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.interfaces.BoundFrame;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.Disposable;
 
-public class FrameCustomer extends GridPane implements Disposable, ModifiedEventListener{
+public class FrameCustomer extends GridPane implements Disposable, ModifiedEventListener, BoundFrame<BOCustomer>{
 	private BOLinkEx<BOCustomer> link;
 	private BOLinkEx<BOContactDetail> cdtLink;
 	VBox pGeneral;
@@ -86,10 +88,9 @@ public class FrameCustomer extends GridPane implements Disposable, ModifiedEvent
 	
 	@Override
 	public void handleModified(ModifiedEvent event) {
-		if (event == null || event.getType() == ModifiedEvent.TYPE_LINK) {
-			doDisplayState();
-		} else if (event.getType() == ModifiedEvent.TYPE_ATTRIBUTE) {
-			System.out.println(event.getSource().getName());
+		if (event == null || event.getType() == ModifiedEventType.Link) {
+			doBuildAttributeLinks();
+		} else if (event.getType() == ModifiedEventType.Attribute) {
 			switch (event.getSource().getName()) {
 			case "IsStudent":
 				doDisplayState();
@@ -102,17 +103,26 @@ public class FrameCustomer extends GridPane implements Disposable, ModifiedEvent
 		}
 	}
 	
-	protected void doDisplayState() {
+	public void doDisplayState() {
 		if (link.getLinkedObject() == null) {
-			cdtLink.setLinkedObject(null);
 			tStudentDetail.setDisable(true);
 		} else {
-			cdtLink.setLinkedObject(link.getLinkedObject().contactDetail());
 			tStudentDetail .setDisable(!link.getLinkedObject().isStudent().getValue());
 		}
+	}
+	
+	public void doBuildAttributeLinks() {
 		BOCtrlUtil.buildAttributeLinks(pGeneral);
 		BOCtrlUtil.buildAttributeLinks(pDetails);
 		taNotes.dataBindingProperty().buildAttributeLinks();
+		
+		if (link.getLinkedObject() == null) {
+			cdtLink.setLinkedObject(null);
+		} else {
+			cdtLink.setLinkedObject(link.getLinkedObject().contactDetail());	
+		}
+		
+		doDisplayState();
 	}
 
 	@Override
@@ -120,5 +130,10 @@ public class FrameCustomer extends GridPane implements Disposable, ModifiedEvent
 		link.removeListener(this);
 		
 		cdtLink.dispose();
+	}
+
+	@Override
+	public BOLinkEx<BOCustomer> getMainLink() {
+		return link;
 	}
 }

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 
+import com.lwan.bo.LoadMode;
 import com.lwan.bo.db.BODbSet;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.jdbc.GConnection;
@@ -104,7 +105,7 @@ public class BOUserSet extends BODbSet<BOUser>{
 	 */
 	public static BOUser findUserByUsername(String username) {
 		if (spUsername == null) {
-			spUsername = DbUtil.getStoredProc("PS_USR");
+			spUsername = DbUtil.getDbStoredProc("PS_USR");
 		}
 		spUsername.clearParameters();
 		spUsername.getParamByName("@usr_name").set(username);
@@ -131,12 +132,12 @@ public class BOUserSet extends BODbSet<BOUser>{
 
 	private BOUserSet() {
 		super(null, "UserCache", "UserID", "usr_id");
-		loadModeProperty().setValue(LOADMODE_PASSIVE);
+		loadModeProperty().setValue(LoadMode.PASSIVE);
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		selectStoredProcProperty().setValue(DbUtil.getStoredProc("PS_USR_all"));
+		selectStoredProcProperty().setValue(DbUtil.getDbStoredProc("PS_USR_for_grid"));
 	}
 
 	@Override

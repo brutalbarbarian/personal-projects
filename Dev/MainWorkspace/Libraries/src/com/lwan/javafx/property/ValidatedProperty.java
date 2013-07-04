@@ -9,6 +9,7 @@ import javafx.util.Callback;
 public class ValidatedProperty <T> extends SimpleObjectProperty<T> {
 	List<ValidationListener<T>> validationListeners;
 	Callback<T, T> beforeSetValue;
+	Callback<T, T> nullCheck;
 	
 	
 	public ValidatedProperty (Object parent, String name) {
@@ -24,6 +25,14 @@ public class ValidatedProperty <T> extends SimpleObjectProperty<T> {
 	public Callback<T, T> getBeforeSetValue() {
 		return beforeSetValue;
 	}
+	
+	public void setNullCheck(Callback<T, T> callback) {
+		nullCheck = callback;
+	}
+	
+	public Callback<T, T> getNullCheck() {
+		return nullCheck;
+	}
 
 	public void addListener(ValidationListener<T> listener) {
 		validationListeners.add(listener);
@@ -38,6 +47,9 @@ public class ValidatedProperty <T> extends SimpleObjectProperty<T> {
 			// Allow validation first??? or validation after...
 			if (beforeSetValue != null) {
 				value = beforeSetValue.call(value);
+			}
+			if (nullCheck != null) {
+				value = nullCheck.call(value);
 			}
 			super.set(value);
 		}
