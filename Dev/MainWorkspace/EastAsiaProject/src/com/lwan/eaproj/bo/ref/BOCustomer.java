@@ -93,8 +93,8 @@ public class BOCustomer extends BODbObject implements ContactDetailOwner{
 	@Override
 	public void handleModified(ModifiedEvent source) {
 		// TODO Auto-generated method stub
-		
 	}
+	
 	@Override
 	public int getSourceType(BOContactDetail cdt) {
 		return EAConstants.CDT_SOURCE_TYPE_CUSTOMER;

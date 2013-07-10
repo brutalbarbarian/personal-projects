@@ -4,6 +4,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -30,10 +31,10 @@ public class FrameCustomer extends GridPane implements Disposable, ModifiedEvent
 	VBox pDetails;
 	FrameContactDetails pContactDetail;
 	
-	BOTextField txtFirstName, txtLastName, txtDateCreated;
+	BOTextField txtCustomerID, txtFirstName, txtLastName, txtDateCreated;
 	BOCheckBox chkActive, chkStudent;
 	BOTextArea taNotes;
-	AlignedControlCell accFirstName, accLastName, accDateCreated, accActive, accStudent;
+	AlignedControlCell accCustomerID, accFirstName, accLastName, accDateCreated, accStudent;
 	
 	TabPane pTabs;
 	Tab tNotes, tStudentDetail;
@@ -43,16 +44,25 @@ public class FrameCustomer extends GridPane implements Disposable, ModifiedEvent
 		
 		pGeneral = new VBox();
 		
+		txtCustomerID = new BOTextField(link, "CustomerID");
 		txtFirstName = new BOTextField(link, "FirstName");
 		txtLastName = new BOTextField(link, "LastName");
 		txtDateCreated = new BOTextField(link, "DateCreated");
 		chkActive = new BOCheckBox(Lng._("Is Active"), link, "Active");
 		
+		txtCustomerID.setEnabled(false);
+		
+		accCustomerID = new AlignedControlCell(Lng._("ID"), txtCustomerID, this, 0);
 		accFirstName = new AlignedControlCell(Lng._("First Name"), txtFirstName, this, 0);
 		accLastName = new AlignedControlCell(Lng._("Last Name"), txtLastName, this, 0);
-		accDateCreated = new AlignedControlCell(Lng._("Created on"), txtDateCreated, this, 0);
-		accActive = new AlignedControlCell("", chkActive, this, 0);
-		pGeneral.getChildren().addAll(accFirstName, accLastName, accDateCreated, accActive);
+		accDateCreated = new AlignedControlCell(Lng._("Created on"), txtDateCreated, this, 1);
+		
+		HBox pGeneralLine = new HBox(5);
+		pGeneralLine.getChildren().addAll(accCustomerID, accDateCreated, chkActive);
+		pGeneral.getChildren().addAll(pGeneralLine, accFirstName, accLastName);
+		HBox.setHgrow(chkActive, Priority.NEVER);
+//		txtCustomerID.setPrefColumnCount(4);
+//		HBox.setHgrow(accCustomerID, Priority.NEVER);
 		
 		pDetails = new VBox();
 		chkStudent = new BOCheckBox(Lng._("Is Student"), link, "IsStudent");

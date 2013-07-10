@@ -1,4 +1,4 @@
-package com.lwan.eaproj.app.panes;
+package com.lwan.eaproj.app.panes.base;
 
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;

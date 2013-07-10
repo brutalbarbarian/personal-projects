@@ -3,6 +3,7 @@ package com.lwan.eaproj.app.panes;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.eaproj.app.frames.FrameContactDetails;
+import com.lwan.eaproj.app.panes.base.PaneGridBase;
 import com.lwan.eaproj.bo.ref.BOCompany;
 import com.lwan.eaproj.bo.ref.BOCompanySet;
 import com.lwan.eaproj.bo.ref.BOContactDetail;

@@ -14,12 +14,15 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.app.Lng;
+import com.lwan.util.FxUtils;
+import com.lwan.util.wrappers.Disposable;
 
-public abstract class BOSetControl<T extends BusinessObject> implements EventHandler<ActionEvent>, ModifiedEventListener {
+public class BOSetControl<T extends BusinessObject> implements EventHandler<ActionEvent>, ModifiedEventListener, Disposable {
 	private Button btnPrimary, btnSecondary, btnRefresh, btnClearParams;
-	private BOLinkEx<T> selectedLink;
-	private BOLinkEx<BOSet<T>> setLink;
 	private BOSetControlTarget<T> target;
+	
+	protected BOLinkEx<T> selectedLink;
+	protected BOLinkEx<BOSet<T>> setLink;
 	
 	public BOSetControl(BOLinkEx<BOSet<T>> setLink, BOLinkEx<T> selectedLink,
 			BOSetControlTarget<T> target) {
@@ -120,8 +123,8 @@ public abstract class BOSetControl<T extends BusinessObject> implements EventHan
 		}
 	}
 	
-	protected void doDisplayState() {
-		boolean inEditState = true;//inEditState();
+	public void doDisplayState() {
+		boolean inEditState = inEditState();
 		
 		T item = selectedLink.getLinkedObject();
 		
@@ -249,8 +252,14 @@ public abstract class BOSetControl<T extends BusinessObject> implements EventHan
 				}
 			}
 		} catch (RuntimeException e) {
-//			FxUtils.ShowErrorDialog(grid.getScene().getWindow(), e.getMessage());
+			FxUtils.ShowErrorDialog(target.getWindow(), e.getMessage());
 //			System.out.println("Error:" + e.getMessage());
 		}
+	}
+	
+
+	@Override
+	public void dispose() {
+		setLink.removeListener(this);
 	}
 }

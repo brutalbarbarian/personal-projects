@@ -20,7 +20,7 @@ else if not coalesce($cus_name, '') = '' then
 else if not coalesce($cus_address, '') = '' then
 	select cus_id 
 	from TM_CUS_customer cus
-	inner join TR_CDT_contact_detail cdt
+	inner join TR_CDT_contact_details cdt
 	on cdt_id = cus_id and cdt_source_type = 2
 	where concat_ws(', ', if(cdt_address_1 = '', null, cdt_address_1), if(cdt_address_2 = '', null, cdt_address_2), if(cdt_address_3 = '', null, cdt_address_3),
 		if(cdt_city = '', null, cdt_city), if(cdt_postcode = '', null, cdt_postcode), if(cdt_country = '', null, cdt_country)) like concat('%',$cus_address,'%')
@@ -28,7 +28,7 @@ else if not coalesce($cus_address, '') = '' then
 else if not coalesce($cus_contact, '') = '' then
 	select cus_id 
 	from TM_CUS_customer
-inner join TR_CDT_contact_detail cdt
+inner join TR_CDT_contact_details cdt
 	on cdt_id = cus_id and cdt_source_type = 2
 	where 	(cdt_phone like concat('%', $cus_contact, '%')
 		or	cdt_mobile like concat('%', $cus_contact, '%')

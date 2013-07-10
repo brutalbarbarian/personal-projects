@@ -203,6 +203,17 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		children.clear();
 	}
 	
+	public int indexOfActiveChild(BusinessObject object) {
+		int i = 0;
+		for (T child : this) {
+			if (child == object) {
+				return i;
+			}
+			i++;
+		}
+		return -1;
+	}
+	
 	public BusinessObject findChildByPath(String path) {
 		BusinessObject result = super.findChildByPath(path);
 		if (result == null && path != null) {

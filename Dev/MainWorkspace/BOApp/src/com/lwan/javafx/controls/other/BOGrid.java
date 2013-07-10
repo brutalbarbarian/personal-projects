@@ -53,6 +53,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Window;
 import javafx.util.Callback;
 
 /**
@@ -63,7 +64,7 @@ import javafx.util.Callback;
  *
  * @param <R>
  */
-public class BOGrid<R extends BusinessObject> extends TableView<R> implements ModifiedEventListener, Disposable{
+public class BOGrid<R extends BusinessObject> extends TableView<R> implements ModifiedEventListener, Disposable, BOSetControlTarget<R>{
 	public static final String PREFIX_CALCULATED = "$CALC$";
 	
 	/**
@@ -128,6 +129,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 	
 	private String key;
 	private GridView<R> view;	// the owning GridView object
+	private BOLinkEx<R> selectedLink;
 	
 	protected GridView<R> getView() {
 		return view;
@@ -144,6 +146,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 		}
 		
 		this.link = link;
+		selectedLink = new BOLinkEx<>();
 		int cols = columnNames.length;
 		List<GridColumn> columns = new Vector<>();
 		double defaultRelativeWidth = 1d / cols;
@@ -157,7 +160,6 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 		link.addListener(this);
 		refresh();
 				
-		selected = null;
 		revertingSelection = false;
 		getSelectionModel().selectedItemProperty().addListener(new ChangeListener<R>() {
 			public void changed(ObservableValue<? extends R> arg0, final R oldValue,
@@ -197,7 +199,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 						}
 					}
 				}
-				selected = newValue;	// Keep a local copy of the last selected item.
+				selectedLink.setLinkedObject(newValue);
 			}
 		});
 		
@@ -547,10 +549,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 
 		getItems().clear();
 		view = null;
+		selectedLink.dispose();
 	}
 	
 	boolean revertingSelection;
-	private R selected;
 	
 	private Property<Callback<R, Boolean>> onSaveProperty;
 	public Property<Callback<R, Boolean>> onSaveProperty() {
@@ -581,6 +583,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 	public void save() throws BOException {
 		try {
 			// No point continuing if not in edit mode...
+			R selected = selectedLink.getLinkedObject();
 			if (isEditingProperty().getValue()) {
 				if (gridModeProperty().getValue() == MODE_RECORD) {
 					if (selected != null && selected.isActive()) {
@@ -1361,5 +1364,34 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 				isEditingProperty().setValue(true);
 			}
 		}	
+	}
+
+	@Override
+	public int getSelectedIndex() {
+		return getSelectionModel().getSelectedIndex();
+	}
+
+	@Override
+	public void select(R item) {
+		getSelectionModel().select(item);
+	}
+
+	@Override
+	public void select(int index) {
+		getSelectionModel().select(index);
+	}
+
+	@Override
+	public boolean inEditState() {
+		return isEditingProperty().getValue();
+	}
+
+	@Override
+	public Window getWindow() {
+		return getScene().getWindow();
+	}
+
+	public BOLinkEx<R> getSelectedLink() {
+		return selectedLink;
 	}
 }
