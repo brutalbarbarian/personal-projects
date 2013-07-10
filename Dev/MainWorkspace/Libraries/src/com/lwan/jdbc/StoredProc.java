@@ -154,7 +154,11 @@ public class StoredProc {
 			try {
 				statement.execute();
 			} catch (SQLException e) {
-				System.err.println("SQLError: " + getClass().getName());
+				if (getClass() == StoredProc.class) {
+					System.err.println("SQLError: " + statements.get(i));
+				} else {
+					System.err.println("SQLError: " + getClass().getName());
+				}
 				throw e;
 			}
 					

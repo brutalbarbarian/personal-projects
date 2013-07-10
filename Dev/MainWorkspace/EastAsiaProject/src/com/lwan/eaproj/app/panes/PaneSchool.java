@@ -11,6 +11,7 @@ import com.lwan.bo.BOSet;
 import com.lwan.eaproj.app.EAConstants;
 import com.lwan.eaproj.app.EAUtils;
 import com.lwan.eaproj.app.frames.FrameContactDetails;
+import com.lwan.eaproj.app.panes.base.PaneGridBase;
 import com.lwan.eaproj.bo.ref.BOContactDetail;
 import com.lwan.eaproj.bo.ref.BOSchool;
 import com.lwan.eaproj.bo.ref.BOSchoolSet;

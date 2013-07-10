@@ -2,6 +2,7 @@ package com.lwan.eaproj.app.panes;
 
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
+import com.lwan.eaproj.app.panes.base.PaneGridBase;
 import com.lwan.eaproj.bo.ref.BOUser;
 import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
