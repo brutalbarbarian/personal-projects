@@ -8,8 +8,11 @@ import com.lwan.eaproj.app.EAConstants;
 import com.lwan.eaproj.app.panes.pages.PageAlerts;
 import com.lwan.eaproj.app.panes.pages.PageBase;
 import com.lwan.eaproj.app.panes.pages.PageCustomer;
+import com.lwan.eaproj.app.panes.pages.PageWork;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
+import com.lwan.javafx.controls.panes.TBorderPane;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.util.CollectionUtil;
 
 import javafx.animation.FadeTransition;
@@ -27,14 +30,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.MenuItemBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
-public class PaneMain extends BorderPane{
+public class PaneMain extends TBorderPane{
 	public static final int PAGE_ALERTS = 0;
 	public static final int PAGE_CUSTOMERS = 1;
 	public static final int PAGE_WORK = 2;
@@ -121,6 +122,7 @@ public class PaneMain extends BorderPane{
 		case PAGE_INVOICES:
 			
 		case PAGE_WORK:
+			return new PageWork();
 		}
 		
 		return null;
@@ -143,9 +145,10 @@ public class PaneMain extends BorderPane{
 		setTop(menubar);
 		
 		// create the navigation bar
-		VBox navigationBar = new VBox();
+		TVBox navigationBar = new TVBox();
 		navigationBar.setMaxHeight(Double.MAX_VALUE);
-		navigationBar.setId("navigation-bar");
+		navigationBar.getStyleClass().add("navigation-bar");
+//		navigationBar.setId("navigation-bar");
 		
 		navHandler = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
@@ -162,7 +165,7 @@ public class PaneMain extends BorderPane{
 		for (String title : navButtonLabels) {
 			ToggleButton btn = new ToggleButton(Lng._(title));
 			btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			btn.setId("navigation-button");
+			btn.getStyleClass().add("navigation-bar-button");
 			btn.setUserData(title);
 			btn.setOnAction(navHandler);
 			btn.setToggleGroup(navButtonGroup);
@@ -233,6 +236,26 @@ public class PaneMain extends BorderPane{
 		}
 	}
 	
+	protected void showProductScreen() {
+		Stage sch = new Stage(StageStyle.UTILITY);
+		sch.initOwner(getScene().getWindow());
+		sch.initModality(Modality.WINDOW_MODAL);
+		sch.setTitle(Lng._("Maintain Products"));
+		
+		PaneProduct  pane = new PaneProduct();
+		try {
+			Scene sc = new Scene(pane);
+			sc.getStylesheets().addAll(App.getStyleshets());
+			
+			sch.setScene(sc);
+			sch.setWidth(600);
+			sch.setHeight(500);
+			sch.showAndWait();
+		} finally {
+			pane.dispose();
+		}		
+	}
+	
 	protected Collection<Menu> initialiseMenu() {
 		menuHandler = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
@@ -253,6 +276,8 @@ public class PaneMain extends BorderPane{
 				case "school" :
 					showSchoolScreen();
 					break;
+				case "products" :
+					showProductScreen();
 				}
 			}
 		};
@@ -267,6 +292,7 @@ public class PaneMain extends BorderPane{
 				).build());
 		
 		menu.add(MenuBuilder.create().text(Lng._("_Maintain")).items(
+				menuItemBuilder.text(Lng._("_Products")).userData("products").onAction(menuHandler).build(),
 				menuItemBuilder.text(Lng._("_Users")).userData("users").onAction(menuHandler).build(),
 				menuItemBuilder.text(Lng._("_Companies")).userData("companies").onAction(menuHandler).build(),
 				menuItemBuilder.text(Lng._("_Schools")).userData("school").onAction(menuHandler).build()

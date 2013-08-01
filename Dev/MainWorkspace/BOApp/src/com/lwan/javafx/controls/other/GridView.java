@@ -16,6 +16,8 @@ import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.other.BOGrid.GridColumn;
+import com.lwan.javafx.controls.panes.TBorderPane;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.Disposable;
@@ -39,13 +41,11 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
-public class GridView <B extends BusinessObject> extends BorderPane implements Disposable{
+public class GridView <B extends BusinessObject> extends TBorderPane implements Disposable{
 	private BOGrid<B> grid;
 	private GridFooter footer;
 	
@@ -314,7 +314,7 @@ public class GridView <B extends BusinessObject> extends BorderPane implements D
 		{"#", "⌋", "⌈", "Σ", "μ"};
 	
 	
-	class FooterColumn extends VBox implements EventHandler<ContextMenuEvent>, Disposable {
+	class FooterColumn extends TVBox implements EventHandler<ContextMenuEvent>, Disposable {
 		String field;
 		List<FooterColumnRow> rows;
 		EventHandler<ActionEvent> menuHandler;

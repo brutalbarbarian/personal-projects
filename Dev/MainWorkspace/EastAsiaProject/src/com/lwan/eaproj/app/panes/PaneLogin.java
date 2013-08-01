@@ -3,6 +3,10 @@ package com.lwan.eaproj.app.panes;
 import com.lwan.eaproj.app.AppEastAsia;
 import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
+import com.lwan.javafx.controls.panes.TGridPane;
+import com.lwan.javafx.controls.panes.THBox;
+import com.lwan.javafx.controls.panes.TStackPane;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.util.FxUtils;
 
 import javafx.event.ActionEvent;
@@ -14,14 +18,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
-public class PaneLogin extends StackPane implements EventHandler<ActionEvent> {
+public class PaneLogin extends TStackPane implements EventHandler<ActionEvent> {
 	public PaneLogin() {
 		initialiseControls();
 		
@@ -37,7 +37,7 @@ public class PaneLogin extends StackPane implements EventHandler<ActionEvent> {
 		lblTitle.setTextAlignment(TextAlignment.CENTER);
 		lblTitle.setFont(new Font(22));
 		
-		GridPane grid = new GridPane();
+		TGridPane grid = new TGridPane();
 		grid.setHgap(20);
 		grid.setVgap(5);
 		txtUser = new TextField();
@@ -51,7 +51,7 @@ public class PaneLogin extends StackPane implements EventHandler<ActionEvent> {
 		
 //		Line line = new Line();
 		
-		HBox buttons = new HBox();
+		THBox buttons = new THBox();
 		buttons.setPadding(new Insets(10, 0, 0, 0));
 		buttons.setSpacing(5);
 		
@@ -62,7 +62,7 @@ public class PaneLogin extends StackPane implements EventHandler<ActionEvent> {
 		buttons.getChildren().addAll(btnLogin, btnCancel);		
 		
 		
-		VBox main = new VBox();
+		TVBox main = new TVBox();
 		
 		main.getChildren().setAll(lblTitle, grid, buttons);
 		main.setSpacing(5);

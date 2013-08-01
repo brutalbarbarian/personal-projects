@@ -10,18 +10,18 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.DbUtil;
+import com.lwan.javafx.controls.panes.TBorderPane;
 import com.lwan.util.wrappers.Disposable;
 
 public class AppFinance extends App{
 	ToggleButton btnTrans, btnSource;
 	ToggleGroup toggleGroup;
 	boolean toggling;
-	BorderPane mainPane;
+	TBorderPane mainPane;
 	
 	protected void initialiseStage(Stage stage) {
 		btnTrans = new ToggleButton(Lng._("Transactions"));
@@ -31,9 +31,9 @@ public class AppFinance extends App{
 		
 		ToolBar bar = ToolBarBuilder.create().items(btnTrans, btnSource).build();
 		
-		mainPane = new BorderPane();
+		mainPane = new TBorderPane();
 		
-		BorderPane bp = new BorderPane();
+		TBorderPane bp = new TBorderPane();
 		bp.setTop(bar);
 		bp.setCenter(mainPane);
 

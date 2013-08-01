@@ -52,10 +52,17 @@ public class CollectionUtil {
 	}
 	
 	public static Integer[] getIndexArray(int length) {
+		return getIndexArray(0, length - 1);
+	}
+	
+	public static Integer[] getIndexArray(int start, int end) {
+		int length = end - start + 1;
 		Integer[] result = new Integer[length];
+		
 		for (int i = 0; i < length; i++) {
-			result[i] = i;
+			result[i] = i + start;
 		}
+		
 		return result;
 	}
 	

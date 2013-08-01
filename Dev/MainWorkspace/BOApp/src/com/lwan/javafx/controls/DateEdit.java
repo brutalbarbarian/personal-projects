@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.art.CalendarArt;
+import com.lwan.javafx.controls.panes.TStackPane;
 import com.lwan.util.DateUtil;
 import com.lwan.util.FxUtils;
 import com.lwan.util.StringUtil;
@@ -27,11 +28,10 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 import javafx.stage.WindowEvent;
 
-public class DatePicker extends StackPane{
+public class DateEdit extends TStackPane{
 	private IntegerProperty dateFormatProperty;
 	public IntegerProperty dateFormatProperty() {
 		if (dateFormatProperty == null) {
@@ -107,28 +107,25 @@ public class DatePicker extends StackPane{
 	private Popup popup;
 	private boolean isSetingText;
 	
-	public DatePicker() {
+	public DateEdit() {
 		isSetingText = false;
 		textField = new TextField();
 		btnEdit = new Button();
-//		Image img = new Image(getClass().getResourceAsStream("/resource/calendar.png"));
-		CalendarArt graphic = new CalendarArt();
-		graphic.setPrefSize(20, 20);
+		CalendarArt graphic = new CalendarArt(16, 16);
+		btnEdit.setAlignment(Pos.CENTER_RIGHT);
+		
 		btnEdit.setGraphic(graphic);
 		
 		btnEdit.setFocusTraversable(false);
 		btnEdit.getStyleClass().add("datepicker-editbutton");
 		
-		StackPane.setAlignment(btnEdit, Pos.CENTER_RIGHT);
+		TStackPane.setAlignment(btnEdit, Pos.CENTER_RIGHT);
 		
 		calendarView = new CalendarView(getLocale());
 		// Don't want the calendar view to take any focus from the textfield
 		FxUtils.setNodeTreeFocusable(calendarView, false);
 		
 		getChildren().addAll(textField, btnEdit);
-		
-//		getStylesheets().add("resource/calendarstyle.css");
-//		setStyle("resource/calendarstyle.css");
 
 		textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
 			public void changed(ObservableValue<? extends Boolean> arg0,

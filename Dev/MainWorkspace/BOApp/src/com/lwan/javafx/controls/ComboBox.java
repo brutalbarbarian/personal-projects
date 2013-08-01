@@ -34,6 +34,9 @@ import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
  * @param <T>
  */
 public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>> {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static final ComboBoxItem NULL_ITEM = new ComboBoxItem("", null);
+	
 	protected List<ComboBoxItem<T>> items;
 	protected TrieMap<ComboBoxItem<T>> autocompleteList;	// String as this is for editing only
 	private Property<T> selectedProperty;
@@ -177,7 +180,6 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 					invalidating = false;
 				}
 			}
-		
 		});
 		
 		autoCompleteController = new AutocompleteController(getEditor(), true);
@@ -350,6 +352,7 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 	 * the end of all bulk updates.
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	protected void ensureSyncSelection() {
 		if (bulkUpdateState == 0) {
 			refreshItems();
@@ -368,7 +371,7 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 				}
 				if (!found) {
 					// Can't find... just select nothing.
-					getSelectionModel().select(null);
+					getSelectionModel().select(NULL_ITEM);
 				}
 			}
 			// update the autocomplete controller			

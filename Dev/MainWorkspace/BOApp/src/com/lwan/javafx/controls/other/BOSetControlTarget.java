@@ -10,4 +10,5 @@ public interface BOSetControlTarget<T extends BusinessObject> {
 	public void select(int index);
 	public boolean inEditState();
 	public Window getWindow();
+	public BOSetControl<T> getController();
 }

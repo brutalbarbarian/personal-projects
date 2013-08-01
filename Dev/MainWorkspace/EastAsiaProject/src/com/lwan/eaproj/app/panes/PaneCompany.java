@@ -12,12 +12,12 @@ import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.other.BOGrid;
 import com.lwan.javafx.controls.other.GridView;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.CallbackEx;
 
 import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 public class PaneCompany extends PaneGridBase<BOCompany>{
 	protected BOLinkEx<BOContactDetail> linkCDT;
@@ -58,9 +58,9 @@ public class PaneCompany extends PaneGridBase<BOCompany>{
 	
 	@Override
 	protected Node initEditPane() {
-		VBox detail = new VBox();
+		TVBox detail = new TVBox();
 		
-		txtCompanyName = new BOTextField(getSelectedLink(), "CompanyName");
+		txtCompanyName = new BOTextField(getMainLink(), "CompanyName");
 		accCompanyName = new AlignedControlCell(Lng._("Name"), txtCompanyName, detail, 0);
 		
 		linkCDT = new BOLinkEx<>();

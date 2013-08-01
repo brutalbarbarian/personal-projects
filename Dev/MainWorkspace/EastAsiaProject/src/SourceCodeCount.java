@@ -7,8 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import com.lwan.util.CollectionUtil;
-
 
 public class SourceCodeCount implements FileVisitor<Path>{
 	public SourceCodeCount() {

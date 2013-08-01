@@ -51,8 +51,7 @@ primary key (com_id)
 create table TM_CUS_customer 
 (
 cus_id int,
-cus_name_first varchar(50),
-cus_name_last varchar(50),
+cus_name varchar(50),
 cus_notes text,
 cus_date_created date,
 cus_is_active boolean,

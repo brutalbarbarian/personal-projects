@@ -2,6 +2,7 @@ package com.lwan.bo;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -150,8 +151,45 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 			children = null;	// not needed anymore
 		}
 		
+		// remove all link records
+		if (childLinks != null) {
+			childLinks.clear();
+			childLinks = null;	// not needed anymore
+		}
+		if (childLinkedAttributes != null) {
+			childLinkedAttributes.clear();
+			childLinkedAttributes = null;
+		}
+		
 		// stop anyone from listening to this object
 		listeners.clear();
+	}
+	
+	class LinkRecord {
+		String linkName, attributeName;
+		BOSet<?> referencedSet;
+		
+		LinkRecord(String linkName, BOSet<?> referencedSet, String attributeName) {
+			this.linkName = linkName;
+			this.referencedSet = referencedSet;
+			this.attributeName = attributeName;
+		}
+	}
+	
+	private Map<String, LinkRecord> childLinks, childLinkedAttributes;
+	protected <T extends BusinessObject> BOLink<T> addAsChildLink(BOLink<T> link, BOSet<T> referencedSet, String attributeName) {
+		addAsChild(link);
+		LinkRecord record = new LinkRecord(link.getName(), referencedSet, attributeName);
+		if (childLinks == null) {
+			childLinks = new HashMap<>();
+		}
+		if (childLinkedAttributes == null) {
+			childLinkedAttributes = new HashMap<>();
+		}
+		childLinks.put(record.linkName, record);
+		childLinkedAttributes.put(record.attributeName.toLowerCase(), record);
+		
+		return link;
 	}
 	
 	public ReadOnlyProperty<Set<State>> stateProperty(){
@@ -223,7 +261,6 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	public boolean isSet() {
 		return false;
 	}
-	
 	
 	private boolean isExample;
 	public boolean isExample() {
@@ -417,12 +454,10 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 		}
 	}
 	
-	/**
-	 * Effectively the same as called equivilentTo(other, null).
-	 */
 	public boolean equals(Object other) {
+		// Will be rather expensive otherwise, and equal should be simple.
 		if (other instanceof BusinessObject) {
-			return equivalentTo((BusinessObject)other, null);
+			return this == other;
 		} else {
 			return false;
 		}
@@ -435,9 +470,19 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 * @param link
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	protected <T extends BusinessObject> T getLinkedChild(BOLink<T> link) {
-		// By default just return null... 
-		return null;
+		BusinessObject result = null;
+		// By default just return null...
+		if (childLinks != null) {
+			LinkRecord record = childLinks.get(link.getName());
+			if (record.referencedSet != null) {
+				result = record.referencedSet.findChildByID(
+						findAttributeByName(record.attributeName).getValue());
+			}
+		}
+			
+		return (T)result;
 	}
 	
 	/**
@@ -533,6 +578,10 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 			// Ensure all children are of the same active state
 			setActiveChildren(isActive);
 			
+			// This is necessary as fireModified is only called if this is this is
+			// the top level object being set active.
+			afterActiveHandled();	
+			
 			// If the owner is currently handling its active state, let the parent throw the event
 			if (getOwner() == null || !getOwner().isHandlingActiveProperty().getValue()) {
 				fireModified(new ModifiedEvent(this, ModifiedEventType.Active));
@@ -540,6 +589,10 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 		} finally {
 			_isHandlingActiveProperty().setValue(false);	
 		}
+	}
+	
+	protected void afterActiveHandled() {
+		// Override to do anything
 	}
 	
 	protected void setActiveChildren(boolean isActive) {
@@ -584,6 +637,13 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 			if (event.getCaller() != this) {
 				handleModified(event);
 				event = new ModifiedEvent(event, this);
+				
+				if (childLinkedAttributes != null && event.getAttributeOwner() == this) {
+					LinkRecord record = childLinkedAttributes.get(event.getSource().getName().toLowerCase());
+					if (record != null) {
+						fireModified(new ModifiedEvent(findChildByName(record.linkName), ModifiedEventType.Link));
+					}
+				}
 			}
 			BusinessObject owner = ownerProperty().getValue();
 			if (owner != null) {

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.lwan.javafx.controls.panes.THBox;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.jdbc.GConnection;
 import com.lwan.util.FxUtils;
@@ -34,8 +36,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -268,7 +268,7 @@ public abstract class App extends Application{
 				stage.initOwner(null);
 				stage.setTitle(Lng._("Setup Database Connection..."));
 				
-				VBox pane = new VBox(5);
+				TVBox pane = new TVBox(5);
 				TextField txtServer = new TextField();
 				TextField txtDatabase = new TextField();
 				TextField txtUsername = new TextField();
@@ -288,7 +288,7 @@ public abstract class App extends Application{
 				Button btnOk = new Button(Lng._("Ok"));
 				Button btnCancel = new Button(Lng._("Cancel"));
 				
-				HBox bottom = new HBox(5);
+				THBox bottom = new THBox(5);
 				bottom.getChildren().addAll(btnOk, btnCancel);
 				
 				Label title = new Label(Lng._("Server Detail..."));

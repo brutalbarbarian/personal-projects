@@ -19,11 +19,13 @@ import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOComboBox;
-import com.lwan.javafx.controls.bo.BODatePicker;
+import com.lwan.javafx.controls.bo.BODateEdit;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.other.BOChartControl;
 import com.lwan.javafx.controls.other.GridView;
+import com.lwan.javafx.controls.panes.TBorderPane;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
@@ -34,13 +36,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.util.Callback;
 
-public class TransactionPage extends BorderPane implements Disposable{
+public class TransactionPage extends TBorderPane implements Disposable{
 	GridView<BOTransaction> tranGridView;
 	BOLinkEx<BOSet<BOTransaction>> gridLink;
 	BOTransactionSetRef gridSetRef;
@@ -48,13 +48,13 @@ public class TransactionPage extends BorderPane implements Disposable{
 //	BOLinkEx<BOTransaction> record; 
 	
 	BOComboBox<BOSource> param_src;
-	BODatePicker param_minDate, param_maxDate;
+	BODateEdit param_minDate, param_maxDate;
 	BOTextField param_minAmount, param_maxAmount;
 	ToolBar paramBar;
 	
-	VBox editPane;
+	TVBox editPane;
 	BOTextField notes, amount;
-	BODatePicker date;
+	BODateEdit date;
 	BOComboBox<Integer> name;
 	
 	Procedure<BoundControl<?>> initSource;
@@ -102,8 +102,8 @@ public class TransactionPage extends BorderPane implements Disposable{
 		param_src.setSource(BOSource.getSourceSet(), "SourceID", "SourceName", "");
 		param_src.setAppendUniqueStrings(false);
 		
-		param_minDate = new BODatePicker(gridLink, "DateStart");
-		param_maxDate = new BODatePicker(gridLink, "DateEnd");
+		param_minDate = new BODateEdit(gridLink, "DateStart");
+		param_maxDate = new BODateEdit(gridLink, "DateEnd");
 		
 		param_minAmount = new BOTextField(gridLink, "AmountMin");
 		param_maxAmount = new BOTextField(gridLink, "AmountMax");
@@ -119,10 +119,10 @@ public class TransactionPage extends BorderPane implements Disposable{
 		BOCtrlUtil.buildAttributeLinks(paramBar);
 		
 		// init record fields
-		editPane = new VBox();
+		editPane = new TVBox();
 		
 		notes = new BOTextField(tranGridView.getSelectedLink(), "TransactionNotes");
-		date = new BODatePicker(tranGridView.getSelectedLink(), "TransactionDate");
+		date = new BODateEdit(tranGridView.getSelectedLink(), "TransactionDate");
 		amount = new BOTextField(tranGridView.getSelectedLink(), "TransactionAmount");
 		name = new BOComboBox<>(tranGridView.getSelectedLink(), "SourceID");
 		
@@ -168,7 +168,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 		});
 		
 		
-		tranGridView.getGrid().getColumnByField("SourceID").setAsCombobox(BOSource.getSourceSet(), "SourceID", "SourceName");
+		tranGridView.getGrid().getColumnByField("SourceID").setAsCombobox(BOSource.getSourceSet(), "SourceID", "SourceName", true);
 		tranGridView.getGrid().getColumnByField("SourceID").setCtrlPropertySetter(initSource);
 		tranGridView.getGrid().getColumnByField("TransactionDate").setAsDatePicker();
 	
@@ -194,7 +194,7 @@ public class TransactionPage extends BorderPane implements Disposable{
 		setCenter(VBoxBuilder.create().children(tranGridView, editPane).spacing(2).build());		
 		setBottom(bottomBar);
 		
-		VBox.setVgrow(tranGridView, Priority.SOMETIMES);
+		TVBox.setVgrow(tranGridView, Priority.SOMETIMES);
 	}
 	
 	protected class BOTransactionSetRef extends BODbSetRef<BOTransaction>{

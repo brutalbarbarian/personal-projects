@@ -282,7 +282,7 @@ public class BOAttribute <T> extends BusinessObject implements Callback<T, T> {
 	public void doChanged(T oldValue, T newValue) {
 		_previousValueProperty().setValue(oldValue);	// reference...
 		fireModified(new ModifiedEvent(this, ModifiedEventType.Attribute));
-	}	
+	}
 	
 	/**
 	 * Convenience method for getting the value. 
@@ -420,7 +420,7 @@ public class BOAttribute <T> extends BusinessObject implements Callback<T, T> {
 		return "Value:" + getValue();
 	}
 	
-	public void assign(BOAttribute<T> otherAttribute) {
+	public void assign(BOAttribute<?> otherAttribute) {
 		setAsObject(otherAttribute.getValue());
 	}
 	

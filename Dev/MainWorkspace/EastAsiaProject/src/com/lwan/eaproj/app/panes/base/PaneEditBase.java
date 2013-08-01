@@ -15,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Window;
 
 import com.lwan.bo.AttributeType;
@@ -33,12 +32,13 @@ import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.javafx.controls.other.BOSetControl;
 import com.lwan.javafx.controls.other.BOSetControlTarget;
+import com.lwan.javafx.controls.panes.TBorderPane;
 import com.lwan.javafx.interfaces.BoundBasePane;
 import com.lwan.javafx.interfaces.PaneState;
 import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.Disposable;
 
-public abstract class PaneEditBase <B extends BusinessObject> extends BorderPane implements BoundBasePane<B>,
+public abstract class PaneEditBase <B extends BusinessObject> extends TBorderPane implements BoundBasePane<B>,
 		ModifiedEventListener, BOSetControlTarget<B>, EventHandler<ActionEvent>, Disposable{
 	private IntegerProperty selectedIndexProperty;
 	public ReadOnlyIntegerProperty selectedIndexProperty() {
@@ -159,6 +159,8 @@ public abstract class PaneEditBase <B extends BusinessObject> extends BorderPane
 			throw new RuntimeException("Invalid child of PaneEditBase - no detail node returne from initDetail()");
 		}
 		
+		setControl.setHotkeyControls(this);
+		
 		setTop(tbNavigation);
 		setCenter(center);
 		setBottom(tbControls);
@@ -167,6 +169,17 @@ public abstract class PaneEditBase <B extends BusinessObject> extends BorderPane
 	protected abstract void initSearchFields(ComboBox<String> cb);
 	protected abstract void initSetLink(BOLinkEx<BOSet<B>> link);
 	protected abstract Node initEditPane();
+	
+	public void setSearchField(String paramName) {
+		cbSearchFields.setSelected(paramName);
+	}
+	
+	public void setParamValue(Object value) {
+		BOAttribute<?> attr = tfSearchInput.dataBindingProperty().getLinkedAttribute();
+		if (attr != null) {
+			attr.setAsObject(value);
+		}
+	}
 	
 	protected int getRecordCount() {
 		if (linkSet.getLinkedObject() == null) {
@@ -219,7 +232,10 @@ public abstract class PaneEditBase <B extends BusinessObject> extends BorderPane
 	@Override
 	public void handleModified(ModifiedEvent event) {
 		if (event.getCaller() == linkSelected) {
-			if (event.getType() == ModifiedEventType.Attribute) {
+			if (event.getType() == ModifiedEventType.Attribute ||
+					// a child set of the selected
+					(event.getType() == ModifiedEventType.Active) &&
+					event.getSource() != linkSelected.getLinkedObject()) {
 				if (!getState().isEditState()) {
 					stateProperty().setValue(PaneState.Editing);
 				}
@@ -243,7 +259,7 @@ public abstract class PaneEditBase <B extends BusinessObject> extends BorderPane
 		}
 	}
 	
-	protected void reopenDataset() {
+	public void reopenDataset() {
 		select(-1);
 		
 		BOSet<B> set = linkSet.getLinkedObject();
@@ -282,6 +298,10 @@ public abstract class PaneEditBase <B extends BusinessObject> extends BorderPane
 	@Override
 	public BOLinkEx<B> getMainLink() {
 		return linkSelected;
+	}
+	
+	public BOLinkEx<BOSet<B>> getSetLink() {
+		return linkSet;
 	}
 
 	@Override
@@ -334,5 +354,9 @@ public abstract class PaneEditBase <B extends BusinessObject> extends BorderPane
 	@Override
 	public Window getWindow() {
 		return getScene().getWindow();
+	}
+	
+	public BOSetControl<B> getController() {
+		return setControl;
 	}
 }

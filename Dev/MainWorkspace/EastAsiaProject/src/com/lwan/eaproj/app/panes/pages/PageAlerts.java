@@ -1,8 +1,9 @@
 package com.lwan.eaproj.app.panes.pages;
 
+import com.lwan.javafx.controls.panes.TStackPane;
+
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 
 public class PageAlerts extends PageBase {
 	public PageAlerts(String ... params ) {
@@ -21,7 +22,7 @@ public class PageAlerts extends PageBase {
 
 	@Override
 	protected Pane buildPage() {
-		StackPane sp = new StackPane();
+		TStackPane sp = new TStackPane();
 		sp.getChildren().add(new Label("ALERTS"));
 		
 		return sp;

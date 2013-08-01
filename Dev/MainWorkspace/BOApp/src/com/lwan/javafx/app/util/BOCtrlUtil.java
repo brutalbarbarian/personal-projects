@@ -1,6 +1,7 @@
 package com.lwan.javafx.app.util;
 
 import com.lwan.javafx.controls.bo.binding.BoundControl;
+import com.lwan.javafx.controls.panes.TTitledPane;
 import com.lwan.util.wrappers.Procedure;
 
 import javafx.scene.Node;
@@ -17,6 +18,8 @@ public class BOCtrlUtil {
 	}
 	
 	public static void iterateControls(Node n, Procedure<Node> callback) {
+		if (n == null) return;
+		
 		callback.call(n);
 		
 		if (n instanceof Parent) {
@@ -28,6 +31,9 @@ public class BOCtrlUtil {
 			for (Node m : ((ToolBar)n).getItems()) {
 				iterateControls(m, callback);
 			}
+		}
+		if (n instanceof TTitledPane) {
+			iterateControls(((TTitledPane)n).getContent(), callback);
 		}
 	}
 	

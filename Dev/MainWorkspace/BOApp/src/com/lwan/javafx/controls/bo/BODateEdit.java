@@ -10,20 +10,20 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 import com.lwan.bo.BOLinkEx;
 import com.lwan.javafx.app.util.BOCtrlUtil;
-import com.lwan.javafx.controls.DatePicker;
+import com.lwan.javafx.controls.DateEdit;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 
-public class BODatePicker extends DatePicker implements BoundControl<Date>{
+public class BODateEdit extends DateEdit implements BoundControl<Date>{
 	private BoundProperty<Date> dataBindingProperty;
 	
-	public BODatePicker (BOLinkEx<?> link, String path) {
+	public BODateEdit (BOLinkEx<?> link, String path) {
 		dataBindingProperty = new BoundProperty<>(this, link, path);
 		
 		initialise();
 	}
 	
-	public BODatePicker (BoundProperty<Date> boundProperty){
+	public BODateEdit (BoundProperty<Date> boundProperty){
 		dataBindingProperty = boundProperty;
 		
 		initialise();

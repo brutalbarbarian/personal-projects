@@ -3,16 +3,11 @@ package com.lwan.javafx.controls.other;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
-import com.lwan.javafx.controls.bo.BOComboBox;
-import com.lwan.javafx.controls.bo.BOTextField;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.input.KeyEvent;
 
 public class BOGridControl<T extends BusinessObject> extends BOSetControl<T> {
 	private BOGrid<T> grid;
@@ -26,6 +21,15 @@ public class BOGridControl<T extends BusinessObject> extends BOSetControl<T> {
 	}
 	public void setAutoRefresh(boolean value) {
 		autoRefreshProperty().set(value);
+	}
+	
+	@Override
+	protected boolean inEditState() {
+		if (grid != null && grid.gridModeProperty().getValue() == BOGrid.MODE_SET) {
+			return false;
+		} else {
+			return super.inEditState();
+		}
 	}
 	
 	public BOGridControl(BOGrid<T> grid) {
@@ -68,7 +72,11 @@ public class BOGridControl<T extends BusinessObject> extends BOSetControl<T> {
 	@Override
 	protected void operationSave() {
 		// let grid handle the saving
-		grid.save();
+		if (grid.gridModeProperty().getValue() == BOGrid.MODE_SET) {
+			// do nothing
+		} else {
+			grid.save();
+		}
 	}
 	
 	protected void select(final int index) {
@@ -85,39 +93,6 @@ public class BOGridControl<T extends BusinessObject> extends BOSetControl<T> {
 
 				grid.getSelectionModel().select(item);							
 			}						
-		});
-	}
-
-	public void setHotkeyControls(final Node n) {
-		n.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>(){
-			public void handle(KeyEvent arg0) {
-				if (arg0.isControlDown()) {
-					switch (arg0.getText()) {
-					case "n":	// new
-						if (!grid.isEditingProperty().getValue()) {
-							activate(getPrimaryButton());
-							
-							grid.requestFocus();
-						}
-						break;
-					case "s":	// save
-						if (grid.isEditingProperty().getValue()) {
-							// check what's focused
-							Node focused = n.getScene().getFocusOwner();
-							if (focused instanceof BOTextField) {
-								BOTextField txtField = (BOTextField)focused;
-								txtField.dataBindingProperty().endEdit(true);
-							} else if (focused instanceof BOComboBox<?>) {
-								BOComboBox<?> cb = (BOComboBox<?>)focused;
-								cb.forceCommit();
-							}
-							
-							activate(getPrimaryButton());
-							getPrimaryButton().requestFocus();
-						}
-					}
-				}
-			}			
 		});
 	}
 }

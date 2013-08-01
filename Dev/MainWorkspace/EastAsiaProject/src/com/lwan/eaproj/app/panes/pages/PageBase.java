@@ -1,19 +1,20 @@
 package com.lwan.eaproj.app.panes.pages;
 
 import com.lwan.eaproj.app.EAConstants;
+import com.lwan.javafx.controls.panes.TBorderPane;
+import com.lwan.javafx.controls.panes.TStackPane;
 import com.lwan.util.wrappers.Disposable;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
-public abstract class PageBase extends BorderPane implements Disposable{	
+public abstract class PageBase extends TBorderPane implements Disposable{	
 	public PageBase(final String...params) {
 		initialiseLoadingScreen();
 
@@ -46,14 +47,15 @@ public abstract class PageBase extends BorderPane implements Disposable{
 	}
 	
 	private void initialiseLoadingScreen() {
-		// TODO make a prettier loading animation...
-		final StackPane grp = new StackPane();
+		final TStackPane grp = new TStackPane();
 		
-		ProgressBar bar = new ProgressBar();
-		bar.setPrefWidth(200);
-		
-		
-		grp.getChildren().addAll(bar);
+        ProgressIndicator prog = new ProgressIndicator();
+        
+        prog.maxWidthProperty().bind(Bindings.divide(grp.widthProperty(), 4));
+        prog.maxHeightProperty().bind(Bindings.divide(grp.heightProperty(), 4));
+
+		grp.getChildren().addAll(prog);
+        
 		setCenter(grp);
 	}
 	

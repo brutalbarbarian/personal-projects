@@ -14,15 +14,15 @@ import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.other.BOGrid;
 import com.lwan.javafx.controls.other.BOGridControl;
 import com.lwan.javafx.controls.other.GridView;
+import com.lwan.javafx.controls.panes.TBorderPane;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.util.wrappers.CallbackEx;
 import com.lwan.util.wrappers.Disposable;
 
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
-public class SourcePage extends BorderPane implements Disposable{
+public class SourcePage extends TBorderPane implements Disposable{
 	GridView<BOSource> srcGridView;
 	BOLinkEx<BOSet<BOSource>> gridLink;
 	BOGridControl<BOSource> gridCtrl;
@@ -96,7 +96,7 @@ public class SourcePage extends BorderPane implements Disposable{
 			}			
 		});
 		
-		VBox main = new VBox(2);
+		TVBox main = new TVBox();
 		main.getChildren().addAll(srcGridView, tranGridView);
 		
 		bottomBar = new ToolBar(gridCtrl.getPrimaryButton(), gridCtrl.getSecondaryButton(), gridCtrl.getRefreshButton());

@@ -15,7 +15,7 @@ if not coalesce($cus_id, 0) = 0 then
 else if not coalesce($cus_name, '') = '' then
 	select cus_id 
 	from TM_CUS_customer
-	where concat_ws(', ', if(cus_name_last = '', null, cus_name_last), if(cus_name_first = '', null, cus_name_first)) like concat('%', $cus_name, '%')
+	where cus_name like concat('%', $cus_name, '%')
 	and cus_is_active;
 else if not coalesce($cus_address, '') = '' then
 	select cus_id 

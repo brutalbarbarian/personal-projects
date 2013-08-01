@@ -2,6 +2,7 @@ package com.lwan.bo;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
@@ -18,6 +19,9 @@ import javafx.beans.value.ObservableValue;
  */
 public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 	private Property<T> linked_object_property;
+	private Property<BOLinkEx<?>> owner_link_property;
+	private Property<String> owner_link_path_property;
+	private ChangeListener<BusinessObject> ownerChangeListener; 
 	
 	public Property<T> linkedObjectProperty () {
 		if (linked_object_property == null) {
@@ -26,12 +30,67 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 		return linked_object_property;
 	}
 	
+	public Property<BOLinkEx<?>> ownerLinkProperty () {
+		if (owner_link_property == null) {
+			owner_link_property = new SimpleObjectProperty<>(this, "OwnerLink");
+			ownerChangeListener = new ChangeListener<BusinessObject>() {
+				@SuppressWarnings("unchecked")
+				public void changed(
+						ObservableValue<? extends BusinessObject> arg0,
+						BusinessObject oldValue, BusinessObject newValue) {
+					if (newValue != null && owner_link_path_property != null) {
+						setLinkedObject((T)newValue.findChildByPath(ownerLinkPathProperty().getValue()));
+					} else {
+						setLinkedObject(null);
+					}
+				}
+			};
+			owner_link_property.addListener(new ChangeListener<BOLinkEx<?>>() {
+				public void changed(
+						ObservableValue<? extends BOLinkEx<?>> arg0,
+						BOLinkEx<?> oldValue, BOLinkEx<?> newValue) {
+					if (oldValue != null) {
+						oldValue.linkedObjectProperty().removeListener(ownerChangeListener);
+					}
+					if (newValue != null) {
+						newValue.linkedObjectProperty().addListener(ownerChangeListener);
+					}
+				}				
+			});
+		}
+		return owner_link_property;
+	}
+	
+	public Property<String> ownerLinkPathProperty() {
+		if (owner_link_path_property == null) {
+			owner_link_path_property = new SimpleStringProperty(this, "OwnerLinkPath");
+
+		}
+		return owner_link_path_property;
+	}
+	
+	public BusinessObject getLinkedOwner() {
+		if (owner_link_property == null || owner_link_path_property.getValue() == null) {
+			return null;
+		} else {
+			return owner_link_property.getValue();
+		}
+	}
+	
+	public void setLinkOwner(BOLinkEx<?> ownerLink) {
+		ownerLinkProperty().setValue(ownerLink);
+	}
+	
 	public T getLinkedObject() {
 		return linkedObjectProperty().getValue();
 	}
 	
 	public void setLinkedObject(T object) {
 		linkedObjectProperty().setValue(object);
+	}
+	
+	public void setOwnerLinkPath(String path) {
+		ownerLinkPathProperty().setValue(path);
 	}
 	
 	public BOLinkEx() {
@@ -75,6 +134,11 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 		}
 		// clear link
 		linkedObjectProperty().setValue(null);
+		
+		// clear listener to parent if needed
+		if (owner_link_property != null && owner_link_property.getValue() != null) {
+			owner_link_property.getValue().linkedObjectProperty().removeListener(ownerChangeListener);
+		}
 		
 		super.dispose();
 	}

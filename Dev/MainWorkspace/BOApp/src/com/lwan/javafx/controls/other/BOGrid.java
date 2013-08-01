@@ -20,13 +20,14 @@ import com.lwan.bo.ModifiedEventListener;
 import com.lwan.bo.ModifiedEventType;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.controls.bo.BOComboBox;
-import com.lwan.javafx.controls.bo.BODatePicker;
+import com.lwan.javafx.controls.bo.BODateEdit;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.bo.binding.BoundCellValue;
 import com.lwan.javafx.controls.bo.binding.ComputedCellValue;
 import com.lwan.javafx.controls.bo.binding.BoundControl;
 import com.lwan.javafx.controls.bo.binding.BoundProperty;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
+import com.lwan.util.CollectionUtil;
 import com.lwan.util.FxUtils;
 import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.CallbackEx;
@@ -34,7 +35,6 @@ import com.lwan.util.wrappers.Disposable;
 import com.lwan.util.wrappers.Procedure;
 import com.sun.javafx.scene.control.skin.TableViewSkin;
 import com.sun.javafx.scene.control.skin.VirtualScrollBar;
-
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -660,6 +660,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 				if(aItems.contains(record)) {
 					aItems.remove(record);
 				} else {
+					if (item != null && record == item) {
+						// The existing item is gone...
+						item = null;
+					}
 					existing.remove();
 				}
 			}
@@ -667,9 +671,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 			getItems().addAll(aItems);
 			
 			// Attempt to reselect what was previously selected
-			if (item != null) {
-				getSelectionModel().select(item);
-			}
+			getSelectionModel().select(item);
 			
 			// make sure editing is still in sync
 			if (gridModeProperty().getValue() == MODE_RECORD) {
@@ -754,12 +756,23 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 			setCellFactory(getReadOnlyCellFactory());
 		}
 		
-		public <B extends BusinessObject> void setAsCombobox(BOSet<B> set, String keyPath, String attributePath) {
+		public <B extends BusinessObject> void setAsCombobox(BOSet<B> set, String keyPath, String attributePath, boolean editable) {
 			params.clear();
 			
 			params.put("keyPath", keyPath);
 			params.put("attributePath", attributePath);
 			params.put("set", set);
+			params.put("editable", editable);
+			
+			setCellFactory(getComboboxCellFactory());
+		}
+		
+		public <B extends BusinessObject> void setAsComboBox(Object[] values, String[] displayValues, boolean editable) {
+			params.clear();
+			
+			params.put("values", values);
+			params.put("displayValues", displayValues);
+			params.put("editable", editable);
 			
 			setCellFactory(getComboboxCellFactory());
 		}
@@ -1155,18 +1168,30 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 			boolean release = !linkIsActive();
 			try {
 				initBinding();
-				BusinessObject bo = set.findChildByAttribute(
-						(String)col.getParam("keyPath"), getBindingProperty().get());
-				if (bo == null) {
-					return "";
-				}
-				BOAttribute<?> attr = bo.findAttributeByPath(
-						(String)col.getParam("attributePath"));
-				if (attr == null) {
-					return "";
-				}
 				
-				return attr.asString();
+				if (set == null) {
+					Object[] values = col.getParam("values");					
+					int index = CollectionUtil.indexOf(getBindingProperty().get(), values);
+					if (index == -1) {
+						return "";
+					} else {
+						String[] displayValues = col.getParam("displayValues");
+						return displayValues[index];
+					}
+				} else {
+					BusinessObject bo = set.findChildByAttribute(
+							(String)col.getParam("keyPath"), getBindingProperty().get());
+					if (bo == null) {
+						return "";
+					}
+					BOAttribute<?> attr = bo.findAttributeByPath(
+							(String)col.getParam("attributePath"));
+					if (attr == null) {
+						return "";
+					}
+					
+					return attr.asString();
+				}					
 			} finally {
 				if (release) {
 					releaseBinding();
@@ -1189,18 +1214,25 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 			}
 		}
 
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void createCombobox() {
 			if (!linkIsActive()) {
 				throw new RuntimeException("Inactive link on createCombobox()");
 			}
 			
 			combobox = new BOComboBox<>(getBindingProperty());
+			combobox.setEditable((boolean)getColumn().getParam("editable"));
 			combobox.setMinWidth(getWidth() - getGraphicTextGap() * 2);
 			
 			GridColumn column = getColumn();
 			BOSet<R> set = column.getParam("set");
-			combobox.setSource(set, (String)column.getParam("keyPath"), 
-					(String)column.getParam("attributePath"), null);
+			if (set == null) {
+				((BOComboBox)combobox).addAllItems((Object[])column.getParam("values"), 
+						(String[])column.getParam("displayValues"));
+			} else {
+				combobox.setSource(set, (String)column.getParam("keyPath"), 
+						(String)column.getParam("attributePath"), null);
+			}
 			
 			combobox.focusedProperty().addListener(new ChangeListener<Boolean>() {
 				public void changed(ObservableValue<? extends Boolean> arg0,
@@ -1262,7 +1294,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 	}
 	
 	public class DatePickerGridCell extends CustomGridCell {
-		private BODatePicker datePicker;
+		private BODateEdit datePicker;
 		
 		@SuppressWarnings("unchecked")
 		protected BoundProperty<Date> getBindingProperty() {
@@ -1273,9 +1305,14 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 		protected String getDisplayValue() {
 			boolean release = !linkIsActive();
 			try {
-				initBinding();				
-				return DateFormat.getDateInstance(DateFormat.SHORT, App.getLocale()).format(
-						getBindingProperty().get());
+				initBinding();
+				Date value = getBindingProperty().get();
+				if (value == null) {
+					return "";
+				} else {
+					return DateFormat.getDateInstance(DateFormat.SHORT, App.getLocale()).format(
+							getBindingProperty().get());
+				}
 			} finally {
 				if (release) {
 					releaseBinding();
@@ -1298,7 +1335,7 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 		}
 		
 		protected void createDatePicker() {
-			datePicker = new BODatePicker(getBindingProperty());
+			datePicker = new BODateEdit(getBindingProperty());
 			
 			datePicker.getTextField().focusedProperty().addListener(new ChangeListener<Boolean>() {
 				public void changed(ObservableValue<? extends Boolean> arg0,
@@ -1393,5 +1430,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 
 	public BOLinkEx<R> getSelectedLink() {
 		return selectedLink;
+	}
+
+	@Override
+	public BOSetControl<R> getController() {
+		return getView().getGridControl();
 	}
 }

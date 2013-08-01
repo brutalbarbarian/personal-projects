@@ -8,15 +8,15 @@ import com.lwan.eaproj.bo.ref.BOContactDetail;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.controls.panes.TGridPane;
 import com.lwan.javafx.interfaces.BoundFrame;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.FxUtils;
 
 import javafx.scene.Parent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-public class FrameContactDetails extends GridPane implements BoundFrame<BOContactDetail>{
+public class FrameContactDetails extends TGridPane implements BoundFrame<BOContactDetail>{
 	public BOLinkEx<BOContactDetail> link;
 	private Parent alignNode;
 	
@@ -54,7 +54,7 @@ public class FrameContactDetails extends GridPane implements BoundFrame<BOContac
 		txtPhone = new BOTextField(link, "Phone");
 		txtMobile = new BOTextField(link, "Mobile");
 		txtFax = new BOTextField(link, "Fax");
-		txtSite = new BOTextField(link, "Email");
+		txtSite = new BOTextField(link, "Site");
 		
 		add(new AlignedControlCell(Lng._("Address"), txtAddress1, alignNode, 0), 0, 0, 2, 1);
 		add(new AlignedControlCell("", txtAddress2, alignNode, 0), 0, 1, 2, 1);
@@ -68,7 +68,7 @@ public class FrameContactDetails extends GridPane implements BoundFrame<BOContac
 		add(new AlignedControlCell("Phone", txtPhone, alignNode, 0), 0, 5);
 		add(new AlignedControlCell("Mobile", txtMobile, alignNode, 1), 1, 5);
 		add(new AlignedControlCell("Fax", txtFax, alignNode, 0), 0, 6);
-		add(new AlignedControlCell("Site", txtSite, alignNode, 1), 1, 6);
+		add(new AlignedControlCell("Email", txtSite, alignNode, 1), 1, 6);
 		
 		FxUtils.setAllColumnHGrow(this, Priority.SOMETIMES);
 	}

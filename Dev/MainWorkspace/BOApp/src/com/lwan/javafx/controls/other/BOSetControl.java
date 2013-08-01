@@ -4,7 +4,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import com.lwan.bo.BOAttribute;
@@ -14,6 +16,8 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.app.Lng;
+import com.lwan.javafx.controls.bo.BOComboBox;
+import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.Disposable;
 
@@ -24,16 +28,25 @@ public class BOSetControl<T extends BusinessObject> implements EventHandler<Acti
 	protected BOLinkEx<T> selectedLink;
 	protected BOLinkEx<BOSet<T>> setLink;
 	
+	public String saveLabel, newLabel, cancelLabel, deleteLabel, refreshLabel, clearLabel;
+	
 	public BOSetControl(BOLinkEx<BOSet<T>> setLink, BOLinkEx<T> selectedLink,
 			BOSetControlTarget<T> target) {
 		this.target = target;
 		this.setLink = setLink;
-		this.selectedLink = selectedLink; 
+		this.selectedLink = selectedLink;
+		
+		saveLabel = Lng._("Save");
+		newLabel = Lng._("New");
+		cancelLabel = Lng._("Cancel");
+		deleteLabel = Lng._("Delete");
+		refreshLabel = Lng._("Refresh");
+		clearLabel = Lng._("Clear");
 		
 		btnPrimary = new Button();
 		btnSecondary = new Button();
-		btnRefresh = new Button(Lng._("Refresh"));
-		btnClearParams = new Button(Lng._("Clear"));
+		btnRefresh = new Button();
+		btnClearParams = new Button();
 		
 		btnPrimary.setOnAction(this);
 		btnSecondary.setOnAction(this);
@@ -125,23 +138,34 @@ public class BOSetControl<T extends BusinessObject> implements EventHandler<Acti
 	
 	public void doDisplayState() {
 		boolean inEditState = inEditState();
+		boolean isActive = setLink.getLinkedObject() != null &&
+				setLink.getLinkedObject().isActive();
+		
+		btnRefresh.setText(refreshLabel);
+		btnClearParams.setText(clearLabel);
 		
 		T item = selectedLink.getLinkedObject();
 		
 		btnRefresh.setDisable(inEditState);
 		btnClearParams.setDisable(inEditState);
-		if (inEditState) {
-			btnPrimary.setText(Lng._("Save"));
-			btnSecondary.setText(Lng._("Cancel"));
+		if (isActive && inEditState) {
+			btnPrimary.setText(saveLabel);
+			btnSecondary.setText(cancelLabel);
 			
 			btnPrimary.setDisable(!allowSave(item));
 			btnSecondary.setDisable(false);
 		} else {
-			btnPrimary.setText(Lng._("Create"));
-			btnSecondary.setText(Lng._("Delete"));
+			btnPrimary.setText(newLabel);
+			btnSecondary.setText(deleteLabel);
 			
-			btnPrimary.setDisable(!allowCreate());
-			btnSecondary.setDisable(item == null || !allowDelete(item));
+			if (!isActive) {
+				btnPrimary.setDisable(true);
+				btnSecondary.setDisable(true);
+			} else {
+				btnPrimary.setDisable(!allowCreate());
+				btnSecondary.setDisable(item == null || !allowDelete(item));
+			}
+			
 		}
 		
 		// disable all params if in edit state
@@ -221,20 +245,19 @@ public class BOSetControl<T extends BusinessObject> implements EventHandler<Acti
 					// reload selected
 					selected.setActive(false);
 					selected.ensureActive();
-					// keep the same selected...
-					select(index);
 				} else {	// either canceling a new record...or deleting an existing one
 					
 					selected.setActive(false);
 					if (selected.isFromDataset()) {
-						selected.trySave();	// this should delete the record...
+//						selected.trySave();	// this should delete the record...
+						operationSave();
 					}
 					if (index >= setLink.getLinkedObject().getActiveCount()) {
 						index = setLink.getLinkedObject().getActiveCount() - 1;
 					}
-					// select whatever is still avaliable
-					select(index);
 				}
+				select(-1);
+				select(index);
 			} else if (btn == btnRefresh) {
 				setLink.getLinkedObject().setActive(false);
 				setLink.getLinkedObject().ensureActive();
@@ -252,6 +275,7 @@ public class BOSetControl<T extends BusinessObject> implements EventHandler<Acti
 				}
 			}
 		} catch (RuntimeException e) {
+			e.printStackTrace();
 			FxUtils.ShowErrorDialog(target.getWindow(), e.getMessage());
 //			System.out.println("Error:" + e.getMessage());
 		}
@@ -261,5 +285,36 @@ public class BOSetControl<T extends BusinessObject> implements EventHandler<Acti
 	@Override
 	public void dispose() {
 		setLink.removeListener(this);
+	}
+	
+	public void setHotkeyControls(final Node n) {
+		n.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>(){
+			public void handle(KeyEvent arg0) {
+				if (arg0.isControlDown()) {
+					switch (arg0.getText()) {
+					case "n":	// new
+						if (!target.inEditState()) {
+							activate(getPrimaryButton());
+						}
+						break;
+					case "s":	// save
+						if (target.inEditState()) {
+							// check what's focused
+							Node focused = n.getScene().getFocusOwner();
+							if (focused instanceof BOTextField) {
+								BOTextField txtField = (BOTextField)focused;
+								txtField.dataBindingProperty().endEdit(true);
+							} else if (focused instanceof BOComboBox<?>) {
+								BOComboBox<?> cb = (BOComboBox<?>)focused;
+								cb.forceCommit();
+							}
+							
+							activate(getPrimaryButton());
+							getPrimaryButton().requestFocus();
+						}
+					}
+				}
+			}			
+		});
 	}
 }

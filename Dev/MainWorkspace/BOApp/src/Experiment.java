@@ -11,6 +11,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.commons.io.FileUtils;
 
+import com.lwan.javafx.controls.panes.TBorderPane;
+import com.lwan.javafx.controls.panes.THBox;
 import com.lwan.util.IOUtil;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -23,8 +25,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -41,17 +41,17 @@ public class Experiment extends Application{
 		final TextArea txtOut = new TextArea();
 		txtOut.setEditable(false);
 		
-		HBox txt = new HBox(10);
+		THBox txt = new THBox(10);
 		txt.getChildren().addAll(txtIn, txtOut);
-		HBox.setHgrow(txtIn, Priority.SOMETIMES);
-		HBox.setHgrow(txtOut, Priority.SOMETIMES);
+		THBox.setHgrow(txtIn, Priority.SOMETIMES);
+		THBox.setHgrow(txtOut, Priority.SOMETIMES);
 		
 		Button btnProperties = new Button("Generate Properties");
 		Button btnSQLtoJava = new Button("SQL to Java");
 		Button btnJavatoSQL = new Button("Java to SQL");
+		Button btnCreateStoredProc = new Button("Create Java StoredProc");
 		
-		
-		ToolBar tb = ToolBarBuilder.create().items(btnProperties, btnSQLtoJava, btnJavatoSQL).build();
+		ToolBar tb = ToolBarBuilder.create().items(btnProperties, btnSQLtoJava, btnJavatoSQL, btnCreateStoredProc).build();
 		MenuBar mb = new MenuBar();
 		
 		Menu mSQL = new Menu("_SQL");
@@ -65,7 +65,7 @@ public class Experiment extends Application{
 		mb.getMenus().addAll(mSQL, mProject);
 		
 		
-		BorderPane pane = new BorderPane();
+		TBorderPane pane = new TBorderPane();
 		
 		pane.setTop(mb);
 		pane.setCenter(txt);
@@ -165,6 +165,12 @@ public class Experiment extends Application{
 				
 				txtOut.setText(out);
 			}
+		});
+		
+		btnCreateStoredProc.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent arg0) {
+				
+			}			
 		});
 		
 		miStoredProcs.setOnAction(new EventHandler<ActionEvent>() {

@@ -1,41 +1,43 @@
 package com.lwan.eaproj.app.panes.pages;
 
-import com.lwan.eaproj.app.panes.PaneCustomerEdit;
 import com.lwan.eaproj.app.panes.PaneCustomerFind;
 
 import javafx.scene.layout.Pane;
 
 public class PageCustomer extends PageBase{
-//	PaneCustomerFind paneCustomerFind;
-	PaneCustomerEdit pCustomerEdit;
+	PaneCustomerFind pCustomerFind;
 
 	@Override
 	public void dispose() {
-		pCustomerEdit.dispose();
+		pCustomerFind.dispose();
 	}
 
 	@Override
 	protected Pane buildPage() {
-		pCustomerEdit = new PaneCustomerEdit();
-		return pCustomerEdit;
+		pCustomerFind = new PaneCustomerFind();
+		return pCustomerFind;
 	}
 
 	@Override
 	protected void initialise(String... params) {
-		// TODO Auto-generated method stub
-		
+		// TODO
 	}
 
 	@Override
 	public boolean requiresSave() {
-		// TODO Auto-generated method stub
-		return false;
+		return pCustomerFind.getState().isEditState();
 	}
 
 	@Override
 	public boolean requestSave() {
-		// TODO Auto-generated method stub
-		return false;
+//		if (pCustomerFind.getState().isEditState()) {
+//			try {
+//				pCustomerFind.getController().activate(pCustomerFind.getController().getPrimaryButton());
+//			} catch (RuntimeException e) {
+//				return false;
+//			}
+//		}
+		return true;
 	}
 
 }

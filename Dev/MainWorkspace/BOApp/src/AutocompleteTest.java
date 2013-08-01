@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import com.lwan.javafx.app.util.AutocompleteController;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.util.CollectionUtil;
 
 import javafx.application.Application;
@@ -13,7 +14,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
@@ -86,7 +86,7 @@ public class AutocompleteTest extends Application{
 		
 		Button btn = new Button("Do Something");
 		
-		VBox box = new VBox();
+		TVBox box = new TVBox();
 		box.getChildren().addAll(tf, btn);
 		
 		Scene sc = new Scene(box);

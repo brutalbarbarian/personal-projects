@@ -120,6 +120,11 @@ public class BOComboBox <T> extends ComboBox<T> implements BoundControl<T> {
 		
 	}
 	
+	@Override
+	protected double computeMaxWidth(double height) {
+		return Double.MAX_VALUE;
+	}
+	
 	private long lastEventRefreshed;
 	@SuppressWarnings("unchecked")
 	protected void populateFromSet() {

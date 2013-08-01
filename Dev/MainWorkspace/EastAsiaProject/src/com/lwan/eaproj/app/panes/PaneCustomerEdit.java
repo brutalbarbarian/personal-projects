@@ -12,14 +12,11 @@ import com.lwan.eaproj.bo.ref.BOCustomer;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.ComboBox;
-import com.lwan.javafx.controls.other.BOSetControl;
 import javafx.scene.Node;
 
 public class PaneCustomerEdit extends PaneEditBase<BOCustomer>{
 	FrameCustomer frCustomer;
 	BOCustomerSetRef setCustomerRef;
-	
-	BOSetControl<BOCustomer> setControl;
 	
 	@Override
 	protected void initSearchFields(ComboBox<String> cb) {
@@ -42,9 +39,6 @@ public class PaneCustomerEdit extends PaneEditBase<BOCustomer>{
 	@Override
 	public void dispose() {
 		setCustomerRef.dispose();
-		
-		// effectively cleaning the cache
-		BOCustomerCache.getCache().forceClear();
 		
 		super.dispose();
 	} 

@@ -4,6 +4,7 @@ import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
+import com.lwan.bo.ModifiedEventType;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
@@ -77,6 +78,7 @@ public class BoundProperty <T> extends SimpleObjectProperty<T> implements Modifi
 		super(owner, "DataBinding");
 		
 		handlingModified = false;
+		link.addListener(this);
 		attributeLinkproperty().setValue(link);
 		pathProperty().setValue(path);
 		buildBindings();
@@ -119,7 +121,7 @@ public class BoundProperty <T> extends SimpleObjectProperty<T> implements Modifi
 		if (oldAttr == newAttr) {
 			return false;	// do nothing.
 		}
-				
+
 		// Unbind previous attribute if exists
 		if (oldAttr != null) {
 			oldAttr.removeListener(this);
@@ -151,7 +153,12 @@ public class BoundProperty <T> extends SimpleObjectProperty<T> implements Modifi
 	}
 
 	public void handleModified(ModifiedEvent event) {
-		setModifiedValue(getEffectiveValue());
+		if (event.getCaller() == getLinkedAttribute()) {
+			setModifiedValue(getEffectiveValue());
+		} else if ((event.getType() == ModifiedEventType.Link &&
+				event.getSource() != getAttributeLink())) {
+			buildAttributeLinks();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

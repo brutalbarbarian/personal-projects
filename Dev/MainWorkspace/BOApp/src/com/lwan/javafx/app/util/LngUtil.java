@@ -10,6 +10,16 @@ public class LngUtil {
 		return CollectionUtil.toArray(translate(it, variables), String.class);
 	}
 	
+	public static String[] translateArray(String[] it, int start, int end, String...variables) {
+		int length = end - start + 1;
+		String[] result = new String[length];
+		for (int i = 0; i < length; i++) {
+			result[i] = Lng._(it[i + start], variables);
+		}
+		
+		return result;
+	}
+	
 	public static Iterable<String> translate (String[] it, String... variables) {
 		return translate(CollectionUtil.getIterable(it), variables);
 	}

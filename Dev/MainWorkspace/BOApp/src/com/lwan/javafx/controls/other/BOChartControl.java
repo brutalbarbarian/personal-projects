@@ -40,12 +40,9 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -65,6 +62,9 @@ import com.lwan.javafx.app.State;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.ComboBox;
 import com.lwan.javafx.controls.bo.BOTextField;
+import com.lwan.javafx.controls.panes.TBorderPane;
+import com.lwan.javafx.controls.panes.THBox;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.javafx.scene.control.DateAxis;
 import com.lwan.javafx.scene.control.SimpleTextInputDialog;
@@ -276,7 +276,7 @@ public class BOChartControl <T extends BusinessObject> {
 		// after previous scene is hidden (if it is hidden), display a loading screen
 		// finally display the new scene
 
-		final BorderPane root = new BorderPane();
+		final TBorderPane root = new TBorderPane();
 		root.getStyleClass().add(CSS_ROOTPANE);
 		if (scene == SCENE_OPTION) {			
 			ListView<String> list = new ListView<>(
@@ -714,12 +714,12 @@ public class BOChartControl <T extends BusinessObject> {
 	
 	static final String[] ATTRIBUTE_DATE_GROUPS = {"Days", 
 		"Weeks", "Months", "Years"};
-	private class AttributeSelector extends VBox {		
+	private class AttributeSelector extends TVBox {		
 		Attribute prevAttribute;
 		int mode;
 		ComboBox<Attribute> cbItems;
 		List<Attribute> attrs;
-		HBox mainRow;
+		AlignedControlCell mainRow;
 		State owner;
 		
 		String key;
@@ -826,7 +826,7 @@ public class BOChartControl <T extends BusinessObject> {
 							});
 							cbDate.setSelected(0);
 							
-							HBox dateRow = new AlignedControlCell(Lng._("Group by:"), cbDate, (Parent)owner);
+							AlignedControlCell dateRow = new AlignedControlCell(Lng._("Group by:"), cbDate, (Parent)owner);
 							cbDate.setMaxWidth(Double.MAX_VALUE);
 							dateRow.getStyleClass().add(CSS_HBOX);
 							
@@ -836,7 +836,7 @@ public class BOChartControl <T extends BusinessObject> {
 							BOLinkEx<BOAttribute<Number>> link = new BOLinkEx<>();
 							link.setLinkedObject(dummy);
 							BOTextField textField = new BOTextField(link, "");
-							HBox.setHgrow(textField, Priority.SOMETIMES);
+							THBox.setHgrow(textField, Priority.SOMETIMES);
 							if (mode == MODE_ORDERED_DISCRETE) {
 								textField.setPromptText("<NONE>");
 								extra = "";
@@ -861,7 +861,7 @@ public class BOChartControl <T extends BusinessObject> {
 								}								
 							});
 							
-							HBox rangeRow = new AlignedControlCell("Range:", textField, (Parent)owner);
+							AlignedControlCell rangeRow = new AlignedControlCell("Range:", textField, (Parent)owner);
 							rangeRow.getStyleClass().add(CSS_HBOX);
 							
 							getChildren().add(rangeRow);
@@ -898,7 +898,7 @@ public class BOChartControl <T extends BusinessObject> {
 		
 	}
 	
-	abstract class GraphSetupScreen extends BorderPane implements State {
+	abstract class GraphSetupScreen extends TBorderPane implements State {
 		Button btnShow, btnSave, btnCancel;
 		List<AttributeSelector> selectors;
 		
@@ -954,14 +954,14 @@ public class BOChartControl <T extends BusinessObject> {
 				}
 			});
 			
-			VBox centre = new VBox();
+			TVBox centre = new TVBox();
 			centre.getStyleClass().add(CSS_VBOX);
 			centre.setFillWidth(true);			
 			centre.getChildren().addAll(selectors);									
 			
 			setCenter(centre);
 			
-			HBox toolbar = new HBox();
+			THBox toolbar = new THBox();
 			toolbar.setAlignment(Pos.CENTER_RIGHT);
 			toolbar.getChildren().addAll(btnShow, btnSave);
 			toolbar.getStyleClass().add(CSS_TOOLBAR);
@@ -1023,7 +1023,7 @@ public class BOChartControl <T extends BusinessObject> {
 		}
 	}
 	
-	private class TemplateScreen extends BorderPane{
+	private class TemplateScreen extends TBorderPane{
 		ListView<String> listTypes;
 		ListView<String> listTemplates;
 		Button btnDelete, btnCreate;
@@ -1040,7 +1040,7 @@ public class BOChartControl <T extends BusinessObject> {
 			listTemplates = new ListView<>();
 			listTemplates.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-			HBox pane = new HBox();
+			THBox pane = new THBox();
 			pane.getStyleClass().add(CSS_HBOX);
 			pane.getChildren().addAll(listTypes, listTemplates);
 
@@ -1120,7 +1120,7 @@ public class BOChartControl <T extends BusinessObject> {
 				}
 			});
 
-			HBox toolbar = new HBox();
+			THBox toolbar = new THBox();
 			toolbar.getStyleClass().add(CSS_TOOLBAR);
 			toolbar.setAlignment(Pos.CENTER_RIGHT);
 			toolbar.getChildren().addAll(btnDelete, btnCreate);			

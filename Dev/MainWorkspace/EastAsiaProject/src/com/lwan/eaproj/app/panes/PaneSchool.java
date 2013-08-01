@@ -2,10 +2,7 @@ package com.lwan.eaproj.app.panes;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.eaproj.app.EAConstants;
@@ -20,6 +17,8 @@ import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOTextArea;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.other.GridView;
+import com.lwan.javafx.controls.panes.TGridPane;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.CollectionUtil;
 import com.lwan.util.FxUtils;
@@ -27,31 +26,31 @@ import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.CallbackEx;
 
 public class PaneSchool extends PaneGridBase<BOSchool>{
-	GridPane editPane;
+	TGridPane editPane;
 	BOTextField tfSchoolName, tfContactName;
 	BOTextArea taNotes;
 	FrameContactDetails frContactDetails;
 	
 	AlignedControlCell accSchoolName, accContactName;
-	VBox paneGeneral, paneContact;
+	TVBox paneGeneral, paneContact;
 	
 	BOLinkEx<BOContactDetail> linkCDT;
 	
 	
 	@Override
 	protected Node initEditPane() {
-		editPane = new GridPane();
+		editPane = new TGridPane();
 		
-		paneGeneral = new VBox();
-		tfSchoolName = new BOTextField(getSelectedLink(), "SchoolName");
-		taNotes = new BOTextArea(getSelectedLink(), "Notes");
+		paneGeneral = new TVBox();
+		tfSchoolName = new BOTextField(getMainLink(), "SchoolName");
+		taNotes = new BOTextArea(getMainLink(), "Notes");
 		accSchoolName = new AlignedControlCell(Lng._("School Name"), tfSchoolName, paneGeneral);
 		paneGeneral.getChildren().addAll(accSchoolName, new Label(Lng._("Notes")), taNotes);
-		VBox.setVgrow(taNotes, Priority.SOMETIMES);
+		TVBox.setVgrow(taNotes, Priority.SOMETIMES);
 		
 		
-		paneContact = new VBox();
-		tfContactName = new BOTextField(getSelectedLink(), "ContactName");
+		paneContact = new TVBox();
+		tfContactName = new BOTextField(getMainLink(), "ContactName");
 		accContactName = new AlignedControlCell(Lng._("Contact"), tfContactName, paneContact, 0);
 		linkCDT = new BOLinkEx<>();
 		frContactDetails = new FrameContactDetails(paneContact, linkCDT);

@@ -9,6 +9,7 @@ import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.LngUtil;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.other.GridView;
+import com.lwan.javafx.controls.panes.TVBox;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.FxUtils;
 
@@ -19,14 +20,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 public class PaneUser extends PaneGridBase<BOUser> {
 	private BOTextField txtUserName, txtDescription;
 	private Button btnChangePassword, btnValidateOldPass;
 	private PasswordField pfValidation, pfNewPass, pfValidateNewPass;	
-	private VBox details;
+	private TVBox details;
 	
 	private AlignedControlCell accUserName, accValidation, accNewPass, 
 			accValidateNewPass, accDescription;
@@ -75,19 +75,19 @@ public class PaneUser extends PaneGridBase<BOUser> {
 	
 	@Override
 	protected Node initEditPane() {
-		details = new VBox();
+		details = new TVBox();
 		details.setSpacing(10);
 		details.setPadding(new Insets(5));
 		
-		VBox.setVgrow(details, Priority.NEVER);
+		TVBox.setVgrow(details, Priority.NEVER);
 		
-		txtUserName = new BOTextField(getSelectedLink(), "UserName");
+		txtUserName = new BOTextField(getMainLink(), "UserName");
 		pfValidation = new PasswordField();
 		pfNewPass = new PasswordField();
 		pfNewPass.setPromptText(Lng._("Type the new password."));
 		pfValidateNewPass = new PasswordField();
 		pfValidateNewPass.setPromptText(Lng._("Type the new password again."));
-		txtDescription = new BOTextField(getSelectedLink(), "Description");
+		txtDescription = new BOTextField(getMainLink(), "Description");
 		
 		accUserName = new AlignedControlCell(Lng._("Username"), txtUserName, details);
 		accValidation = new AlignedControlCell(Lng._("Old Password"), pfValidation, details);
@@ -101,14 +101,14 @@ public class PaneUser extends PaneGridBase<BOUser> {
 		btnChangePassword.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent arg0) {
 				passwordState = NOT_VALIDATED;
-				displayState();
+				displayPaneState();
 			}			
 		});
 		btnValidateOldPass.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent arg0) {
 				if (gridView.getSelectedLink().getLinkedObject().checkPassword(pfValidation.getText())) {
 					passwordState = VALIDATED;
-					displayState();
+					displayPaneState();
 				} else {
 					FxUtils.ShowErrorDialog(getScene().getWindow(), Lng._("Incorrect password."));
 				}
@@ -140,8 +140,8 @@ public class PaneUser extends PaneGridBase<BOUser> {
 		}
 	}
 	
-	protected void displayState() {
-		super.displayState();
+	public void displayPaneState() {
+		super.displayPaneState();
 		
 		if (passwordState != NOT_SHOWING) {
 			FxUtils.setVisibleAndManaged(btnChangePassword, false);

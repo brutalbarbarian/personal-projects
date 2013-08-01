@@ -34,6 +34,7 @@ public class AppEastAsia extends App {
 		s.setTitle(Lng._("East Asia Management System"));
 		PaneLogin login  = new PaneLogin();
 		Scene mainScene = new Scene(login);
+		mainScene.getStylesheets().addAll(getStyleshets());
 		s.setScene(mainScene);
 	}	
 	
@@ -59,6 +60,8 @@ public class AppEastAsia extends App {
 							Stage stage = getMainStage();
 							stage.setWidth(EAConstants.MAIN_WIDTH);
 							stage.setHeight(EAConstants.MAIN_HEIGHT);
+							stage.setMinWidth(EAConstants.MAIN_MIN_WIDTH);
+							stage.setMinHeight(EAConstants.MAIN_MIN_HEIGHT);
 							stage.centerOnScreen();
 							stage.show();
 							
