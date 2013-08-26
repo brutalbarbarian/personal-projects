@@ -63,10 +63,10 @@ public class BOTransaction extends BODbObject{
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_TRN"), BOTransaction.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_TRN"), BOTransaction.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_TRN"), BOTransaction.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_TRN"), BOTransaction.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_TRN"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_TRN"), SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_TRN"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_TRN"), SP_DELETE);
 	}
 	
 	protected void verifyState() throws BOException{

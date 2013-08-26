@@ -7,7 +7,6 @@ import com.lwan.bo.db.DbRecordSet;
 import com.lwan.eaproj.app.panes.base.PaneEditBase;
 import com.lwan.eaproj.app.panes.base.PaneGridFind;
 import com.lwan.javafx.app.Lng;
-import com.lwan.javafx.app.util.BOCtrlUtil;
 import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.javafx.controls.bo.BOCheckBox;
 import com.lwan.javafx.controls.bo.BOTextField;
@@ -81,6 +80,11 @@ public class PaneCustomerFind extends PaneGridFind<DbRecord>{
 	@Override
 	protected PaneEditBase<?> getNewEditForm() {
 		return new PaneCustomerEdit();
+	}
+
+	@Override
+	protected String getChildName() {
+		return Lng._("Customer");
 	}
 
 }

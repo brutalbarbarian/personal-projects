@@ -38,10 +38,10 @@ public class BOCompany extends BODbObject implements ContactDetailOwner{
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_COM"), BOCompany.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_COM"), BOCompany.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_COM"), BOCompany.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_COM"), BOCompany.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_COM"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_COM"), SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_COM"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_COM"), SP_DELETE);
 	}
 
 	@Override

@@ -118,9 +118,9 @@ public class PaneMain extends TBorderPane{
 		case PAGE_CUSTOMERS:
 			return new PageCustomer();
 		case PAGE_EMPLOYEES:
-			
+			return null;
 		case PAGE_INVOICES:
-			
+			return null;
 		case PAGE_WORK:
 			return new PageWork();
 		}

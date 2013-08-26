@@ -17,22 +17,6 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 	public static final int SP_UPDATE = 2;
 	public static final int SP_DELETE = 3;
 	
-	//	How should inheritance work in terms of BusinessObjects?
-	//	Table B inherits of Table A.
-	//	Thus think of it as object A and B, where B inherits from A
-	//
-	//	When loading... the base stored proc should be called first, followed by its direct descendant, and so on.
-	//	When Saving, should save the base, followed by its direct descendant, and so on.
-	//	When deleting, should delete the lowest member of the hierarchy, up towards the base.
-	//
-	//	Overall... this means multiple stored procs need to be run... how would that work?
-	//	Current design... only the bottom most level of stored proc will be run...i.e. only the leaf will be able to run its stored proc, as the same property is shared between all levels of the hierachy
-	//
-	//	a solution would be to make that property not shared... only way to do that would be to
-	//	use method extensions as opposed to properties...
-	//
-	//	Requirements
-	//	Each level of a hierarchy should have its own set of stored procs.
 	class StoredProcSet {
 		StoredProc update, insert, delete, select;
 		
@@ -54,13 +38,20 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 			case SP_DELETE : delete = sp; break;
 			}
 		}
+		
+		void clear() {
+			update = null;
+			insert = null;
+			delete = null;
+			select = null;
+		}
 	}
 	
-	private HashMap<String, StoredProcSet> storedProcs;
+	private StoredProcSet storedProcs;
 	
-	private HashMap<String, StoredProcSet> storedProcs () {
+	private StoredProcSet storedProcs () {
 		if (storedProcs == null) {
-			storedProcs = new HashMap<String, StoredProcSet>();
+			storedProcs = new StoredProcSet();
 		}
 		return storedProcs;
 	}
@@ -77,14 +68,8 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 	 * @param sp
 	 * @param type
 	 */
-	protected void setSP(StoredProc sp, Class<? extends BODbObject> key, int type) {
-		String className = key.getName();
-		StoredProcSet sps = storedProcs().get(className);
-		if (sps == null) {
-			sps = new StoredProcSet();
-			storedProcs().put(className, sps);
-		}
-		sps.set(type, sp);
+	protected void setSP(StoredProc sp, int type) {
+		storedProcs().set(type, sp);
 	}
 	
 	/**
@@ -93,11 +78,8 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 	 * @param type
 	 * @return
 	 */
-	protected StoredProc getSP (int type, Class<?> key) {
-		String className = key.getName();
-		StoredProcSet sps = storedProcs().get(className);
-		if (sps == null) return null;
-		return sps.get(type);
+	protected StoredProc getSP (int type) {
+		return storedProcs().get(type);
 	}
 	
 	public BODbObject(BusinessObject owner, String name) {
@@ -158,7 +140,7 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 		StoredProc sp = null;
 		try {
 			while (c != BODbObject.class) {
-				sp = getSP(type, c);
+				sp = getSP(type);
 				executeStoredProc(sp);
 				
 				c = c.getSuperclass();
@@ -167,7 +149,7 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 			sp = null;
 		} catch (SQLException e) {
 			// If this was thrown, impossible for sp to be null
-			throw new SQLException(sp.getClass().getName(), e);
+			throw new SQLException(sp.getName() + ":" + e.getMessage(), e);
 		}
 	}
 
@@ -221,7 +203,7 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 		Class<?> c = getClass();
 		boolean result = false;
 		while (c != BODbObject.class) {
-			StoredProc sp = getSP(SP_SELECT, c);
+			StoredProc sp = getSP(SP_SELECT);
 			c = c.getSuperclass();
 			if (sp != null) {
 				try {
@@ -280,6 +262,7 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 			if (attr != null) {	
 				param.set(attr.getValue());
 			} else {
+				System.out.println(this.getClass().getName() + ":" + sp.getName());
 				// if attr is null... something serious has gone wrong... bad stored proc or bad boobject.
 				throw new SQLException("Attribute for param '" + param.name() + "' not found.");
 			}

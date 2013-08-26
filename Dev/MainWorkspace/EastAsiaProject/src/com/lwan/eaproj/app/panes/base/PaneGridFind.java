@@ -6,6 +6,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -20,6 +22,18 @@ public abstract class PaneGridFind <T extends BusinessObject> extends PaneGridBa
 	public PaneGridFind() {
 		result = false;
 		allowSelect = false;
+		
+		gridView.getGrid().setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				if (e.getButton() == MouseButton.PRIMARY &&
+						e.getClickCount() == 2) {
+					// Has something selected
+					if (getMainLink().getLinkedObject() != null) {
+						activate(bEdit);
+					}
+				}
+			}			
+		});
 	}
 	
 	@Override
@@ -31,8 +45,8 @@ public abstract class PaneGridFind <T extends BusinessObject> extends PaneGridBa
 	@Override
 	protected void initToolbar() {
 		bSelect = new Button(Lng._("Select"));
-		bNew = new Button(Lng._("New Customer"));
-		bEdit = new Button(Lng._("Edit Customer"));
+		bNew = new Button(Lng._("New " + getChildName()));
+		bEdit = new Button(Lng._("Edit " + getChildName()));
 		bCancel = new Button(Lng._("Cancel"));
 		
 		bSelect.setOnAction(this);
@@ -42,6 +56,8 @@ public abstract class PaneGridFind <T extends BusinessObject> extends PaneGridBa
 		
 		toolbar = new ToolBar(bSelect, bNew, bEdit, bCancel);
 	}
+	
+	protected abstract String getChildName();
 
 	@Override
 	public void handle(ActionEvent arg0) {

@@ -60,10 +60,10 @@ public class BOCustomer extends BODbObject implements ContactDetailOwner{
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_CUS"), BOCustomer.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_CUS"), BOCustomer.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_CUS"), BOCustomer.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_CUS"), BOCustomer.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_CUS"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_CUS"), SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_CUS"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_CUS"), SP_DELETE);
 	}
 
 	@Override

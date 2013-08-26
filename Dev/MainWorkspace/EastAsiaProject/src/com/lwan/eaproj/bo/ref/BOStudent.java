@@ -64,10 +64,10 @@ public class BOStudent extends BODbObject{
 	
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_STU"), BOStudent.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_STU"), BOStudent.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_STU"), BOStudent.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_STU"), BOStudent.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_STU"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_STU"), SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_STU"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_STU"), SP_DELETE);
 	}
 
 	@Override

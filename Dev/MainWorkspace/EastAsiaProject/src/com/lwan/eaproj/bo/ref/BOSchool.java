@@ -44,10 +44,10 @@ public class BOSchool extends BODbObject implements ContactDetailOwner{
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_SCH"), BOSchool.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_SCH"), BOSchool.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_SCH"), BOSchool.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_SCH"), BOSchool.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_SCH"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_SCH"), SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_SCH"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_SCH"), SP_DELETE);
 	}
 
 	@Override

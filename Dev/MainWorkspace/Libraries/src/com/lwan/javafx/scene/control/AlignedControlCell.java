@@ -1,13 +1,13 @@
 package com.lwan.javafx.scene.control;
 
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.VPos;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.text.TextAlignment;
 
 /**
  * Control row for a labeled control.
@@ -38,44 +38,14 @@ public class AlignedControlCell extends HBox{
 		
 		getChildren().addAll(label, control);
 		
+		HBox.setHgrow(control, Priority.ALWAYS);
+		
 		gridColumn = -1;
 	}
 	
 	public AlignedControlCell(String caption, Node ctrl, Parent parent, int column) {
 		this(caption, ctrl, parent);
 		gridColumn = column;
-	}
-
-	private static final double MIN_CONTROL_WIDTH = 40;
-	private static final double MIN_LABEL_WIDTH = 7;
-	
-	@Override
-	protected void layoutChildren() {
-		double labelWidth = getMaxPrefWidth();
-		double minTotalWidth = getMaxMinWidth();
-		Insets padding = getPadding();
-		double actualWidth = getWidth();
-		double actualHeight = getHeight();
-		
-		double usedArea;
-		
-		double ctrlWidth = minTotalWidth - labelWidth -  padding.getLeft() - padding.getRight() - getSpacing();		
-		if (ctrlWidth < MIN_CONTROL_WIDTH) {
-			labelWidth = minTotalWidth - MIN_CONTROL_WIDTH - padding.getLeft() - padding.getRight() - getSpacing();
-		}
-		
-		if (labelWidth < MIN_LABEL_WIDTH) {
-			label.setVisible(false);
-			usedArea = 0;
-		} else {
-			label.setVisible(true);
-			usedArea = labelWidth + getSpacing();
-			layoutInArea(label, padding.getLeft(), padding.getTop(), labelWidth,
-					actualHeight - padding.getBottom() - padding.getTop(), 0, HPos.LEFT, VPos.TOP);
-		}
-		
-		layoutInArea(control, padding.getLeft() + usedArea, padding.getTop(), actualWidth - padding.getRight() -
-				padding.getLeft() - usedArea, actualHeight - padding.getBottom() - padding.getTop(), 0, HPos.LEFT, VPos.TOP);
 	}
 	
 	@Override
@@ -84,38 +54,9 @@ public class AlignedControlCell extends HBox{
 		return super.computePrefHeight(width);
 	}
 	
-	protected double getMaxMinWidth(Node curr, Node ceiling, Node caller, boolean goingUp) {
-		double result = Double.MAX_VALUE;
-		if (!curr.isVisible()) {
-			// do nothing.
-		} else if (curr instanceof AlignedControlCell) {
-			return ((AlignedControlCell) curr).getWidth(); 
-		} else if (curr instanceof Parent) {
-			for (Node child : ((Parent)curr).getChildrenUnmodifiable()) {
-				if (child == caller) {
-					continue;	// this is what called this, don't reiterate down
-				}
-				if (gridColumn >= 0 && curr instanceof GridPane &&
-						GridPane.getColumnIndex(child) != gridColumn) {
-					continue;	// we only accept the correct column
-				}
-				double min = getMaxMinWidth(child, ceiling, curr, false);
-				if (min < result) {
-					result = min;
-				}
-			}
-		}
-		if (goingUp && ceiling != null && curr != ceiling && curr.getParent() != null) {
-			double min = getMaxMinWidth(curr.getParent(), ceiling, curr, true);
-			if (min > result) {
-				result = min;
-			}
-		}
-		return result;
-	}
-	
-	protected double getMaxMinWidth() {
-		return getMaxMinWidth(this, parent, null, true);
+	@Override
+	protected double computeMaxWidth(double height) {
+		return Double.MAX_VALUE;
 	}
 	
 	protected double getMaxPrefWidth() {
@@ -163,10 +104,18 @@ public class AlignedControlCell extends HBox{
 	class AlignedLabel extends Label {
 		AlignedLabel(String caption) {
 			super(caption);
+			
+			setTextAlignment(TextAlignment.RIGHT);
+			setAlignment(Pos.BASELINE_RIGHT);
 		}
 		
 		public double getComputedPrefWidth() {
 			return super.computePrefWidth(-1);
+		}
+		
+		@Override
+		protected double computeMinWidth(double height) {
+			return getMaxPrefWidth();
 		}
 	}
 }

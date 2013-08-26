@@ -17,6 +17,8 @@ public class BOWorkItem extends BODbObject {
 	private BODbAttribute<String> comments;
 	private BODbAttribute<Integer> quantity;
 	
+	private BODbAttribute<Double> avaliableQuantity;
+	
 	private BOAttribute<Double> totalPrice;
 	
 	private BOLink<BOProduct> product;
@@ -45,6 +47,9 @@ public class BOWorkItem extends BODbObject {
 	public BOAttribute<Double> totalPrice() {
 		return totalPrice;
 	}
+	public BOAttribute<Double> avaliableQuantity() {
+		return avaliableQuantity;
+	}
 	
 	public BOProduct getProduct() {
 		return product.getReferencedObject();
@@ -67,10 +72,10 @@ public class BOWorkItem extends BODbObject {
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_WKI"), BOWorkItem.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_WKI"), BOWorkItem.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_WKI"), BOWorkItem.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_WKI"), BOWorkItem.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_WKI"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_WKI"), SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_WKI"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_WKI"), SP_DELETE);
 	}
 
 	@Override
@@ -79,7 +84,7 @@ public class BOWorkItem extends BODbObject {
 		productID = addAsChild(new BODbAttribute<Integer>(this, "ProductID", "prd_id", AttributeType.Integer));
 		workID = addAsChild(new BODbAttribute<Integer>(this, "WorkID", "wrk_id", AttributeType.Integer));
 		
-		status = addAsChild(new BODbAttribute<Integer>(this, "Status", "wrk_status", AttributeType.Integer));
+		status = addAsChild(new BODbAttribute<Integer>(this, "Status", "wki_status", AttributeType.Integer));
 		// price each?
 		price = addAsChild(new BODbAttribute<Double>(this, "Price", "wki_price", AttributeType.Currency));
 		comments = addAsChild(new BODbAttribute<String>(this, "Comments", "wki_comments", AttributeType.String));
@@ -90,6 +95,7 @@ public class BOWorkItem extends BODbObject {
 		
 		// Calculated
 		totalPrice = addAsChild(new BOAttribute<Double>(this, "TotalPrice", AttributeType.Currency));
+		avaliableQuantity = addAsChild(new BODbAttribute<Double>(this, "AvaliableQuantity", "wki_avaliable", AttributeType.Double));
 	}
 
 	@Override

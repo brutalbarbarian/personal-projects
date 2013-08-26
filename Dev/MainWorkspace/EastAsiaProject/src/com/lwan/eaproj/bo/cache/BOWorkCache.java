@@ -28,6 +28,7 @@ public class BOWorkCache extends BODbSet<BOWork>{
 		if (cache == null) {
 			cache = new BOWorkCache();
 		}
+		cache.ensureActive();
 		return cache;
 	}
 

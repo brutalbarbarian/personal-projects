@@ -67,10 +67,10 @@ public class BOContactDetail extends BODbObject{
 	
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_CDT"), BOContactDetail.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_CDT"),	 BOContactDetail.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_CDT"), BOContactDetail.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_CDT"), BOContactDetail.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_CDT"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_CDT"),	 SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_CDT"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_CDT"), SP_DELETE);
 	}
 	
 	@Override

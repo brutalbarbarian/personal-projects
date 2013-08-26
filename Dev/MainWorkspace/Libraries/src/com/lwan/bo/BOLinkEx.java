@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.util.Callback;
 
 
 /**
@@ -22,6 +23,7 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 	private Property<BOLinkEx<?>> owner_link_property;
 	private Property<String> owner_link_path_property;
 	private ChangeListener<BusinessObject> ownerChangeListener; 
+	private Callback<BOSet<?>, BOSet<?>> ownerCallback; 
 	
 	public Property<T> linkedObjectProperty () {
 		if (linked_object_property == null) {
@@ -38,10 +40,20 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 				public void changed(
 						ObservableValue<? extends BusinessObject> arg0,
 						BusinessObject oldValue, BusinessObject newValue) {
+					T oldLinkedObject = getLinkedObject();
+					T newLinkedObject = null;
 					if (newValue != null && owner_link_path_property != null) {
-						setLinkedObject((T)newValue.findChildByPath(ownerLinkPathProperty().getValue()));
-					} else {
-						setLinkedObject(null);
+						newLinkedObject = (T)newValue.findChildByPath(ownerLinkPathProperty().getValue());
+					}
+					
+					if (ownerCallback != null && newLinkedObject != null) {
+						newLinkedObject = (T)ownerCallback.call((BOSet<?>)newLinkedObject);
+					}
+					
+					setLinkedObject(newLinkedObject);
+					
+					if (ownerCallback != null && oldLinkedObject != null) {
+						oldLinkedObject.dispose();
 					}
 				}
 			};
@@ -59,6 +71,10 @@ public class BOLinkEx<T extends BusinessObject> extends BOLink<T>{
 			});
 		}
 		return owner_link_property;
+	}
+	
+	public void setSetRefCallback(Callback<BOSet<?>, BOSet<?>> callback) {
+		ownerCallback = callback;
 	}
 	
 	public Property<String> ownerLinkPathProperty() {

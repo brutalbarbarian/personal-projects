@@ -250,4 +250,12 @@ public class StoredProc {
 		result = null;
 		return res;
 	}
+	
+	public String getName() {
+		if (getClass() == StoredProc.class) {
+			return statements.get(0);
+		} else {
+			return getClass().getName();
+		}
+	}
 }

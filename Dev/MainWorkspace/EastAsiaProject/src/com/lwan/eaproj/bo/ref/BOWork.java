@@ -102,10 +102,10 @@ public class BOWork extends BODbObject {
 
 	@Override
 	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_WRK"), BOWork.class, SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_WRK"), BOWork.class, SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_WRK"), BOWork.class, SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_WRK"), BOWork.class, SP_DELETE);
+		setSP(DbUtil.getDbStoredProc("PS_WRK"), SP_SELECT);
+		setSP(DbUtil.getDbStoredProc("PI_WRK"), SP_INSERT);
+		setSP(DbUtil.getDbStoredProc("PU_WRK"), SP_UPDATE);
+		setSP(DbUtil.getDbStoredProc("PD_WRK"), SP_DELETE);
 	}
 	
 	@Override
@@ -134,7 +134,7 @@ public class BOWork extends BODbObject {
 		workID = addAsChild(new BODbAttribute<Integer>(this, "WorkID", "wrk_id", AttributeType.ID));
 		customerID = addAsChild(new BODbAttribute<Integer>(this, "CustomerID", "cus_id", AttributeType.ID));
 		companyID = addAsChild(new BODbAttribute<Integer>(this, "CompanyID", "com_id", AttributeType.ID));
-		userIDCreated = addAsChild(new BODbAttribute<Integer>(this, "UserIDCreated", "usr_id_create", AttributeType.ID));
+		userIDCreated = addAsChild(new BODbAttribute<Integer>(this, "UserIDCreated", "usr_id_created", AttributeType.ID));
 		
 		customerID.AllowNulls().setValue(false);
 		companyID.AllowNulls().setValue(false);
@@ -143,7 +143,7 @@ public class BOWork extends BODbObject {
 		workStage = addAsChild(new BODbAttribute<Integer>(this, "WorkStage", "wrk_stage", AttributeType.Integer));
 		
 		dateCreated = addAsChild(new BODbAttribute<Date>(this, "DateCreated", "wrk_date_create", AttributeType.Date));
-		dateRequired = addAsChild(new BODbAttribute<Date>(this, "DateRequired", "wrk_date_required", AttributeType.Date));
+		dateRequired = addAsChild(new BODbAttribute<Date>(this, "DateRequired", "wrk_date_due", AttributeType.Date));
 		
 		privateComment = addAsChild(new BODbAttribute<String>(this, "PrivateComment", "wrk_notes", AttributeType.String));
 		

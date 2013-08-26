@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.sp.PA_PKC_new_id;
 import com.lwan.javafx.app.sp.PA_SP_QUERY;
 import com.lwan.jdbc.GConnection;
@@ -90,6 +91,7 @@ public class DbUtil {
 				getStoredProcCache().put("PA_SP_QUERY", spQuery = new PA_SP_QUERY());
 			}
 			spQuery.getParamByName("@sp_name").set(name);
+			spQuery.getParamByName("@database_name").set(App.getKey(App.KEY_DB_MYSQL_DATABASE));
 			ResultSet rs = null;
 			try {
 				spQuery.execute(GConnection.getConnection());

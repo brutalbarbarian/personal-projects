@@ -77,7 +77,7 @@ public class FrameWork extends FrameBoundBase<BOWork>{
 		pDetails = new TVBox();
 		pMoney = new TVBox();
 		
-		tfUserCreated = new BOTextField(link, "UserCreated.UserName");
+		tfUserCreated = new BOTextField(link, "UserCreated/UserName");
 		tfUserCreated.setEnabled(false);
 		tfWorkID = new BOTextField(link, "WorkID");
 		tfWorkID.setPrefColumnCount(4);
@@ -174,7 +174,7 @@ public class FrameWork extends FrameBoundBase<BOWork>{
 		tpTabs = new TabPane();
 		
 		buildNotes();
-		buildItems();
+		buildTabItems();
 		
 		tpTabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		tpTabs.getTabs().addAll(tabItems, tabNotes);
@@ -207,7 +207,7 @@ public class FrameWork extends FrameBoundBase<BOWork>{
 	
 	GridView<BOWorkItem> gridWorkItems;
 	
-	protected void buildItems() {
+	protected void buildTabItems() {
 		linkWorkItems = new BOLinkEx<>();
 		linkWorkItems.setLinkOwner(getMainLink());
 		linkWorkItems.setOwnerLinkPath("WorkItems");

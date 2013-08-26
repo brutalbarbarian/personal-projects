@@ -1,8 +1,7 @@
 package com.lwan.eaproj.app.panes;
 
+import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.layout.FlowPane;
-
 import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.db.DbRecord;
@@ -10,7 +9,6 @@ import com.lwan.bo.db.DbRecordSet;
 import com.lwan.eaproj.app.EAConstants;
 import com.lwan.eaproj.app.panes.base.PaneEditBase;
 import com.lwan.eaproj.app.panes.base.PaneGridFind;
-import com.lwan.eaproj.app.panes.pages.PageWork;
 import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.app.util.DbUtil;
@@ -20,6 +18,7 @@ import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BODateEdit;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.other.GridView;
+import com.lwan.javafx.controls.panes.TFlowPane;
 import com.lwan.javafx.scene.control.AlignedControlCell;
 import com.lwan.util.CollectionUtil;
 
@@ -38,10 +37,10 @@ public class PaneWorkFind extends PaneGridFind<DbRecord>{
 
 	@Override
 	protected PaneEditBase<?> getNewEditForm() {
-		return null;
+		return new PaneWorkEdit();
 	}
 
-	FlowPane pTop;
+	TFlowPane pTop;
 	BOTextField tfCustomerName, tfValueMin, tfValueMax;
 	BODateEdit deDueDateStart, deDueDateEnd;
 	BOComboBox<Integer> cbUser, cbStage;
@@ -56,7 +55,7 @@ public class PaneWorkFind extends PaneGridFind<DbRecord>{
 		tfValueMin = new BOTextField(link, "@wrk_value_min");
 		tfValueMax = new BOTextField(link, "@wrk_value_max");
 		deDueDateStart = new BODateEdit(link, "@wrk_date_due_start");
-		deDueDateEnd = new BODateEdit(link, "@wrk_due_date_end");
+		deDueDateEnd = new BODateEdit(link, "@wrk_date_due_end");
 		cbUser = new BOComboBox<>(link, "@usr_id_created");
 		cbStage = new BOComboBox<>(link, "@wrk_stage");
 		chkHasOutstanding = new BOCheckBox(Lng._("Has Outstanding"), link, "@wrk_has_outstanding");
@@ -68,7 +67,7 @@ public class PaneWorkFind extends PaneGridFind<DbRecord>{
 		LngUtil.translateArray(EAConstants.WRK_STAGE_STRINGS, EAConstants.WRK_STAGE_DECLINED, 
 				EAConstants.WRK_STAGE_COMPELTED));
 		
-		pTop = new FlowPane();
+		pTop = new TFlowPane();
 		
 		accCustomerName = new AlignedControlCell(Lng._("Customer Name"), tfCustomerName, pTop);
 		accValueMin = new AlignedControlCell(Lng._("Min Value"), tfValueMin, pTop);
@@ -78,6 +77,11 @@ public class PaneWorkFind extends PaneGridFind<DbRecord>{
 		accUser = new AlignedControlCell(Lng._("Owner"), cbUser, pTop);
 		accStage = new AlignedControlCell(Lng._("Stage"), cbStage, pTop);
 		
+		
+		accUser.prefWidthProperty().bind(accCustomerName.widthProperty());
+		accStage.prefWidthProperty().bind(accCustomerName.widthProperty());
+		
+		pTop.setPadding(new Insets(2));
 		pTop.getChildren().addAll(accCustomerName, accUser, accDueDateStart, accDueDateEnd,
 				accStage, accValueMin, accValueMax, chkHasOutstanding);
 		
@@ -108,6 +112,11 @@ public class PaneWorkFind extends PaneGridFind<DbRecord>{
 				EAConstants.WRK_STAGE_STRINGS, EAConstants.WRK_STAGE_DECLINED, EAConstants.WRK_STAGE_COMPELTED), false);
 		
 		return result;
+	}
+
+	@Override
+	protected String getChildName() {
+		return Lng._("Work");
 	}
 
 }

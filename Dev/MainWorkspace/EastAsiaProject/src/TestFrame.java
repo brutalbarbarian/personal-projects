@@ -4,7 +4,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import com.lwan.bo.BOLinkEx;
+import com.lwan.eaproj.app.frames.FrameInvoice;
 import com.lwan.eaproj.app.frames.FrameWork;
+import com.lwan.eaproj.bo.ref.BOInvoice;
 import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.eaproj.bo.ref.BOWork;
 import com.lwan.javafx.app.App;
@@ -32,14 +34,15 @@ public class TestFrame extends App{
 	protected void initialiseStage(Stage stage) {
 		BOUserSet.setActiveUser("admin", "");
 		
-		BOLinkEx<BOWork> link = new BOLinkEx<>();
-		BOWork work = new BOWork(null);
-		work.ensureActive();
+		BOLinkEx<BOInvoice> link = new BOLinkEx<>();
+		BOInvoice invoice = new BOInvoice(null);
+		invoice.ensureActive();
 		
+		invoice.workID().setValue(6);
 
-		FrameWork frame = new FrameWork(link);
+		FrameInvoice frame = new FrameInvoice(link);
 		
-		link.setLinkedObject(work);
+		link.setLinkedObject(invoice);
 		
 		stage.setScene(new Scene (frame));
 		
