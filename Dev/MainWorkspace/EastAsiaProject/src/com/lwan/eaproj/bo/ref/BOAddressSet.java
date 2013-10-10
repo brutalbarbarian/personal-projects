@@ -4,10 +4,8 @@ import com.lwan.bo.BusinessObject;
 
 public class BOAddressSet extends BODocumentItemSet<BOAddress>{
 
-	public BOAddressSet(BusinessObject owner, String name, String childIdName,
-			String childIdFieldName) {
-		super(owner, name, childIdName, childIdFieldName);
-		// TODO Auto-generated constructor stub
+	public BOAddressSet(BusinessObject owner, String name) {
+		super(owner, name);
 	}
 
 
