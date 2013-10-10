@@ -997,5 +997,5 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 * 
 	 * @param source
 	 */
-	public abstract void handleModified(ModifiedEvent source);
+	public void handleModified(ModifiedEvent source) {};
 }
