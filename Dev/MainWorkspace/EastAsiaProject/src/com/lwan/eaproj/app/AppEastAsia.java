@@ -6,6 +6,8 @@ import com.lwan.eaproj.app.panes.PaneLogin;
 import com.lwan.eaproj.app.panes.PaneMain;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
+import com.lwan.util.containers.Params;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -16,9 +18,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class AppEastAsia extends App {
-	public static final int STATE_LOGIN_SUCCESS = 1 + APP_MESSAGE_LAST;
-	public static final int STATE_LOGIN_CANCEL = 2 + APP_MESSAGE_LAST;
-	public static final int STATE_LOGOUT = 3 + APP_MESSAGE_LAST;
+	private enum AppMessages {
+		loginSuccess, loginCancel, logout, changePage;
+	}
+	
+	public static final AppMessages STATE_LOGIN_SUCCESS = AppMessages.loginSuccess;
+	public static final AppMessages STATE_LOGIN_CANCEL = AppMessages.loginCancel;
+	public static final AppMessages STATE_LOGOUT = AppMessages.logout;
+	public static final AppMessages PAGE_CHANGE_REQUEST = AppMessages.changePage;
 
 
 	@Override
@@ -35,15 +42,14 @@ public class AppEastAsia extends App {
 		PaneLogin login  = new PaneLogin();
 		Scene mainScene = new Scene(login);
 		mainScene.getStylesheets().addAll(getStyleshets());
-		s.setScene(mainScene);
+		s.setScene(mainScene);		
 	}	
 	
-	protected void processState(int state) throws Exception {
+	protected void processState(Enum<?> state, Params params) throws Exception {
 		
-		super.processState(state);
+		super.processState(state, params);
 
-		switch (state) {
-		case STATE_LOGIN_SUCCESS :
+		if (state == STATE_LOGIN_SUCCESS) {
 			// Change to main view
 			// fade out...
 			FadeTransition fade = new FadeTransition(Duration.millis(EAConstants.FADE_DURATION), 
@@ -64,7 +70,10 @@ public class AppEastAsia extends App {
 							stage.setMinHeight(EAConstants.MAIN_MIN_HEIGHT);
 							stage.centerOnScreen();
 							stage.show();
-							
+
+							// Attempt to load the alerts page
+							notifyMessage(PAGE_CHANGE_REQUEST, new Params(PageConstants.PAGE_NAME, 
+									PageConstants.PAGE_ALERTS));
 							return null;
 						}				
 					};
@@ -73,13 +82,14 @@ public class AppEastAsia extends App {
 			});
 			fade.play();			
 			
-			break;				
-		case STATE_LOGIN_CANCEL :
+		} else if (state == STATE_LOGIN_CANCEL) {
 			requestTerminate();			
-			break;
-		case STATE_LOGOUT :
-			
-			break;
+		} else if (state == STATE_LOGOUT) {
+			// TODO
+		} else if (state == PAGE_CHANGE_REQUEST) {
+			PaneMain pane = (PaneMain) getMainStage().getScene().getRoot();
+			pane.getPageControl().trySetActivePage(
+					params.getValueDefault(PageConstants.PAGE_NAME, ""), params);
 		}
 	}
 

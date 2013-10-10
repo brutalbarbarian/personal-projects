@@ -156,6 +156,10 @@ public class BOWork extends BODbObject {
 		paidValue = addAsChild(new BOAttribute<Double>(this, "PaidValue", AttributeType.Currency, true, false));
 		remainingValue = addAsChild(new BOAttribute<Double>(this, "RemainingValue", AttributeType.Currency, true, false));
 		
+		totalValue.triggersModifyProperty().setValue(false);
+		paidValue.triggersModifyProperty().setValue(false);
+		remainingValue.triggersModifyProperty().setValue(false);
+		
 		// Create sets
 		workItems = addAsChild(new BOWorkItemSet(this, "WorkItems"));
 	}

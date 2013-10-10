@@ -7,6 +7,7 @@ import com.lwan.bo.BOAttribute;
 import com.lwan.bo.BOLink;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
+import com.lwan.bo.ModifiedEventType;
 import com.lwan.bo.db.BODbAttribute;
 import com.lwan.bo.db.BODbObject;
 import com.lwan.eaproj.app.EAConstants;
@@ -93,7 +94,9 @@ public class BOInvoice extends BODbObject {
 		userCreated = addAsChildLink(new BOLink<BOUser>(this, "userCreated"), BOUserSet.getSet(), "UserIDCreated");
 		work = addAsChildLink(new BOLink<BOWork>(this, "work"), BOWorkCache.getCache(), "WorkID");
 		
+		// Calculated fields
 		totalValue = addAsChild(new BOAttribute<Double>(this, "TotalValue", AttributeType.Currency));
+		totalValue.triggersModifyProperty().setValue(false);
 	}
 
 	@Override
@@ -106,8 +109,9 @@ public class BOInvoice extends BODbObject {
 	protected void computeTotalValue(){
 		double value = 0;
 		for (BOInvoiceItem item : invoiceItems()) {
-			value = value + item.price().getValue() * item.quantity().getValue();
+			value = value + item.price().asDouble() * item.quantity().asDouble();
 		}
+		totalValue.setValue(value);
 	}
 
 	@Override
@@ -119,7 +123,15 @@ public class BOInvoice extends BODbObject {
 	
 	@Override
 	public void handleModified(ModifiedEvent source) {
-
+		if (source.isAttribute()) {
+			String name = source.getName();
+			if (name.equals("Quantity") || name.equals("Price")) {
+				computeTotalValue();
+			}
+		} else if (source.getType() == ModifiedEventType.Active &&
+				source.getSource() instanceof BOInvoiceItem) {
+			computeTotalValue();
+		}
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.lwan.eaproj.bo.ref;
 
 import com.lwan.bo.AttributeType;
+import com.lwan.bo.BOException;
 import com.lwan.bo.BOLink;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
@@ -90,6 +91,11 @@ public class BOInvoiceItem extends BODbObject {
 	public void clearAttributes() {
 		quantity.setValue(0.0);
 	}
+	
+	@Override
+	protected void verifyState() throws BOException {
+		super.verifyState();
+	}
 
 	@Override
 	public void handleModified(ModifiedEvent source) {
@@ -100,6 +106,12 @@ public class BOInvoiceItem extends BODbObject {
 					workItem.avaliableQuantity().asDouble() 
 					+ GenericsUtil.Coalice(quantity.previousValueProperty().getValue(), 0d) 
 					- quantity.asDouble());
+		} else if (source.getSource() == workItemID) {
+			BOWorkItem workItem = workItem();
+			if (workItem != null) {
+				quantity.assign(workItem.avaliableQuantity());
+				price.assign(workItem.price());
+			}
 		}
 	}
 

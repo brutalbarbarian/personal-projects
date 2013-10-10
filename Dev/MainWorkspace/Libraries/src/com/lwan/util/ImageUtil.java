@@ -30,17 +30,16 @@ public final class ImageUtil {
 	 * @param img
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public static BufferedImage imageFXToAWT (Image img) {
-		if (img == null) {
-			return null;
-		}
-		com.sun.prism.Image imgP = (com.sun.prism.Image) img.impl_getPlatformImage();
-		if (imgP != null) {
-			return com.sun.prism.BufferedImageTools.exportBufferedImage(imgP, "");
-		} else {
+//		if (img == null) {
+//			return null;
+//		}
+//		com.sun.prism.Image imgP = (com.sun.prism.Image) img.impl_getPlatformImage();
+//		if (imgP != null) {
+//			return com.sun.prism.BufferedImageTools.exportBufferedImage(imgP, "");
+//		} else {
 			return null;	
-		}
+//		}
 	}
 	
 	public static byte[] imageToByteArray (BufferedImage img, String format) throws IOException {

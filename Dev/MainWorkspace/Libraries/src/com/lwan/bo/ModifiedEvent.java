@@ -109,6 +109,21 @@ public class ModifiedEvent {
 	}
 	
 	/**
+	 * Get the name of the source
+	 * Effectively the same as calling getSource().getName()
+	 * Will return empty string if getSource() == null
+	 * 
+	 * @return
+	 */
+	public String getName() {
+		if (source == null) {
+			return "";
+		} else {
+			return source.getName();
+		}
+	}
+	
+	/**
 	 * Get the tags associated with this event. If the value is null, will return an empty string instead.
 	 * 
 	 * @return

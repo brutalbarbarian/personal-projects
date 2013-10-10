@@ -4,43 +4,33 @@ import java.util.Collection;
 import java.util.Vector;
 
 import com.lwan.eaproj.app.AppEastAsia;
-import com.lwan.eaproj.app.EAConstants;
 import com.lwan.eaproj.app.panes.pages.PageAlerts;
-import com.lwan.eaproj.app.panes.pages.PageBase;
 import com.lwan.eaproj.app.panes.pages.PageCustomer;
+import com.lwan.eaproj.app.panes.pages.PageInvoice;
 import com.lwan.eaproj.app.panes.pages.PageWork;
 import com.lwan.javafx.app.App;
 import com.lwan.javafx.app.Lng;
+import com.lwan.javafx.controls.pagecontrol.LoadingPage;
+import com.lwan.javafx.controls.pagecontrol.PageController;
+import com.lwan.javafx.controls.pagecontrol.PageData;
 import com.lwan.javafx.controls.panes.TBorderPane;
-import com.lwan.javafx.controls.panes.TVBox;
-import com.lwan.util.CollectionUtil;
-
-import javafx.animation.FadeTransition;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ReadOnlyIntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuBarBuilder;
-import javafx.scene.control.MenuBuilder;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.MenuItemBuilder;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
 
 public class PaneMain extends TBorderPane{
-	public static final int PAGE_ALERTS = 0;
-	public static final int PAGE_CUSTOMERS = 1;
-	public static final int PAGE_WORK = 2;
-	public static final int PAGE_INVOICES = 3;
-	public static final int PAGE_EMPLOYEES = 4;
 	
 	public static final Scene createScene() {
 		PaneMain mainapp = new PaneMain();
@@ -50,130 +40,70 @@ public class PaneMain extends TBorderPane{
 		return scene;
 	}
 	
-	private static String[] navButtonLabels = {"Alerts", "Customers", "Work", "Invoices", "Employees"};
-	private EventHandler<ActionEvent> menuHandler, navHandler;
-	private ToggleButton[] navButtons;
-	private ToggleGroup navButtonGroup;
-	private IntegerProperty pageProperty;
-	private PageBase currentPage;
-	
-	/**
-	 * The page the app is currently displaying.
-	 * 
-	 * @return
-	 */
-	public ReadOnlyIntegerProperty pageProperty() {
-		return _pageProperty();
-	}
-	
-	private IntegerProperty _pageProperty() {
-		if (pageProperty == null) {
-			pageProperty = new SimpleIntegerProperty(this, "Page", -1);
-		}
-		return pageProperty;
-	}
-	
-	public void requestPage(final int page, final String... params) {
-		if (page != getPage() && // only change if the page is actually different.
-				// check save state of current page
-				(currentPage == null || !currentPage.requiresSave() || currentPage.requestSave())) {
-			// add new page in
-			FadeTransition fadeOut = new FadeTransition(Duration.millis(
-					currentPage == null? 0 : EAConstants.FADE_DURATION), currentPage);
-			fadeOut.setFromValue(1.0);
-			fadeOut.setToValue(0.0);
-			
-			fadeOut.setOnFinished(new EventHandler<ActionEvent>() {
-				public void handle(ActionEvent e) {					
-					if (currentPage != null) {
-						// remove previous page..
-						getChildren().remove(currentPage);
-						currentPage.dispose();
-					}
-					currentPage = getAppPage(page, params);
-					setCenter(currentPage);
-					FadeTransition fadeIn = new FadeTransition(
-							Duration.millis(EAConstants.FADE_DURATION), currentPage);
-					fadeIn.setFromValue(0.0);
-					fadeIn.setToValue(1.0);
-					fadeIn.play();
-				}				
-			});
-			fadeOut.play();
-			
-			// synchronize changes
-			_pageProperty().set(page);
-		}
-		// ensure ui button group is synchronised
-		if (navButtonGroup.getSelectedToggle() != navButtons[getPage()]) {
-			navButtonGroup.selectToggle(navButtons[getPage()]);
-		}
-	}
-	
-	protected PageBase getAppPage(int page, String... params) {
-		// We don't cache any app pages... they're always created dynamically...
-		switch(page) {
-		case PAGE_ALERTS:
-			return new PageAlerts();
-		case PAGE_CUSTOMERS:
-			return new PageCustomer();
-		case PAGE_EMPLOYEES:
-			return null;
-		case PAGE_INVOICES:
-			return null;
-		case PAGE_WORK:
-			return new PageWork();
-		}
-		
-		return null;
-	}
-	
-	public int getPage() {
-		return pageProperty().getValue();
-	}
+	private EventHandler<ActionEvent> menuHandler;
 	
 	public PaneMain() {
 
 		initialiseControls();
-		
-		requestPage(PAGE_ALERTS);
 	}
+	
+	public PageController getPageControl() {
+		return pageControl;
+	}
+	
+	private PageControl pageControl;
 	
 	protected void initialiseControls() {
 		// create the menu bar
-		MenuBar menubar = MenuBarBuilder.create().menus(initialiseMenu()).build();			
-		setTop(menubar);
+
+		mbMain = new MenuBar();
+		mbMain.getMenus().addAll(initialiseMenu());
+		
+		setTop(mbMain);
 		
 		// create the navigation bar
-		TVBox navigationBar = new TVBox();
-		navigationBar.setMaxHeight(Double.MAX_VALUE);
-		navigationBar.getStyleClass().add("navigation-bar");
-//		navigationBar.setId("navigation-bar");
+		pageControl = new PageControl();
+		PageData<?> root = pageControl.getRootData();
+		root.getChildren().add(new PageAlerts(root));
+		root.getChildren().add(new PageCustomer(root));		
+		root.getChildren().add(new PageWork(root));
+		root.getChildren().add(new PageInvoice(root));
+
+		pageControl.initOrientation(Orientation.VERTICAL);
+		pageControl.setLoadingPage(new SimpleLoadingPage());
 		
-		navHandler = new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent e) {
-				ToggleButton btn = (ToggleButton) e.getSource();
-				int index = CollectionUtil.indexOf(btn, navButtons);
-				
-				requestPage(index);
-			}
-		};
+		setLeft(pageControl.getControlPane());
+		setCenter(pageControl.getDisplayArea());
+	}
+	
+	protected class SimpleLoadingPage extends LoadingPage {
+		ProgressIndicator prog;
 		
-		navButtons = new ToggleButton[navButtonLabels.length];
-		navButtonGroup = new ToggleGroup();
-		int i = 0;
-		for (String title : navButtonLabels) {
-			ToggleButton btn = new ToggleButton(Lng._(title));
-			btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			btn.getStyleClass().add("navigation-bar-button");
-			btn.setUserData(title);
-			btn.setOnAction(navHandler);
-			btn.setToggleGroup(navButtonGroup);
-			navButtons[i++] = btn;
-			navigationBar.getChildren().add(btn);
+		SimpleLoadingPage() {
+			prog = new ProgressIndicator();
+			
+			prog.maxWidthProperty().bind(Bindings.divide(widthProperty(), 4));
+	        prog.maxHeightProperty().bind(Bindings.divide(heightProperty(), 4));
+			
+			getChildren().add(prog);
 		}
 		
-		setLeft(navigationBar);
+		public void startLoading() {}
+		public void update(double offset) {}
+		public void stop() {}		
+	}
+	
+	protected class PageControl extends PageController {
+		Insets insets = new Insets(0, 0, 0, 5);
+		
+		protected Toggle createPageButton(PageData<?> data) {
+			return new ToggleButton(data.getDisplayTitle());
+		}
+
+		@Override
+		protected Insets getPadding(PageData<?> data) {
+			return insets;
+		}		
 	}
 	
 	protected void showUsersScreen() {
@@ -256,48 +186,69 @@ public class PaneMain extends TBorderPane{
 		}		
 	}
 	
+	protected MenuBar mbMain;
+	protected Menu muFile;
+	protected MenuItem miFile_changeUsers, miFile_exit;
+	protected Menu muMaintain;
+	protected MenuItem miMaintainProducts, miMaintainUsers, miMaintainCompanies, miMaintainSchools;
+	
+	
 	protected Collection<Menu> initialiseMenu() {
 		menuHandler = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				MenuItem src = (MenuItem)e.getSource();
-				switch (src.getUserData().toString()) {
-				case "logoff" :
-					AppEastAsia.notifyState(AppEastAsia.STATE_LOGOUT);
-					break;
-				case "exit" :
+				if (src == miFile_changeUsers) {
+					AppEastAsia.notifyMessage(AppEastAsia.STATE_LOGOUT, null);
+				} else if (src == miFile_exit) {
 					AppEastAsia.requestTerminate();
-					break;
-				case "users" :
+				} else if (src == miMaintainUsers) {
 					showUsersScreen();
-					break;
-				case "companies" :
+				} else if (src == miMaintainCompanies) {
 					showCompanyScreen();
-					break;
-				case "school" :
+				} else if (src == miMaintainSchools) {
 					showSchoolScreen();
-					break;
-				case "products" :
+				} else if (src == miMaintainProducts) {
 					showProductScreen();
 				}
 			}
 		};
 		
 		Vector<Menu> menu = new Vector<>();
+		
+		{	// muFile
+			muFile = new Menu(Lng._("_Files"));
+			menu.add(muFile);
+			
+			miFile_changeUsers = new MenuItem(Lng._("Change _Users"));
+			miFile_changeUsers.setOnAction(menuHandler);
+			muFile.getItems().add(miFile_changeUsers);
+			
+			miFile_exit = new MenuItem(Lng._("E_xit"));
+			miFile_exit.setOnAction(menuHandler);
+			muFile.getItems().add(miFile_exit);			
+		}
+		
+		{	// muMaintain
+			muMaintain = new Menu(Lng._("_Maintain"));
+			menu.add(muMaintain);
+			
+			miMaintainProducts = new MenuItem(Lng._("_Products"));
+			miMaintainProducts.setOnAction(menuHandler);
+			muMaintain.getItems().add(miMaintainProducts);
+			
+			miMaintainUsers = new MenuItem(Lng._("_Users"));
+			miMaintainUsers.setOnAction(menuHandler);
+			muMaintain.getItems().add(miMaintainUsers);
+			
+			miMaintainCompanies = new MenuItem(Lng._("_Companies"));
+			miMaintainCompanies.setOnAction(menuHandler);
+			muMaintain.getItems().add(miMaintainCompanies);
+			
+			miMaintainSchools = new MenuItem(Lng._("Schools"));
+			miMaintainSchools.setOnAction(menuHandler);
+			muMaintain.getItems().add(miMaintainSchools);
+		}
 
-		MenuItemBuilder<?> menuItemBuilder = MenuItemBuilder.create();
-		
-		menu.add(MenuBuilder.create().text(Lng._("_File")).items(
-				menuItemBuilder.text(Lng._("Change _Users")).userData("logoff").onAction(menuHandler).build(),
-				menuItemBuilder.text(Lng._("E_xit")).userData("exit").onAction(menuHandler).build()
-				).build());
-		
-		menu.add(MenuBuilder.create().text(Lng._("_Maintain")).items(
-				menuItemBuilder.text(Lng._("_Products")).userData("products").onAction(menuHandler).build(),
-				menuItemBuilder.text(Lng._("_Users")).userData("users").onAction(menuHandler).build(),
-				menuItemBuilder.text(Lng._("_Companies")).userData("companies").onAction(menuHandler).build(),
-				menuItemBuilder.text(Lng._("_Schools")).userData("school").onAction(menuHandler).build()
-				).build());
-		
 		return menu;
 	}
 }

@@ -35,6 +35,7 @@ public class AlignedControlCell extends HBox{
 		control = ctrl;
 		label = new AlignedLabel(caption);
 		setSpacing(5);	// default
+		setMinHeight(USE_PREF_SIZE);
 		
 		getChildren().addAll(label, control);
 		
@@ -46,12 +47,6 @@ public class AlignedControlCell extends HBox{
 	public AlignedControlCell(String caption, Node ctrl, Parent parent, int column) {
 		this(caption, ctrl, parent);
 		gridColumn = column;
-	}
-	
-	@Override
-	protected double computeMinHeight(double width) {
-		// We don't want this cell compressing.
-		return super.computePrefHeight(width);
 	}
 	
 	@Override
@@ -105,16 +100,17 @@ public class AlignedControlCell extends HBox{
 		AlignedLabel(String caption) {
 			super(caption);
 			
+			setMinWidth(USE_PREF_SIZE);
 			setTextAlignment(TextAlignment.RIGHT);
 			setAlignment(Pos.BASELINE_RIGHT);
 		}
 		
 		public double getComputedPrefWidth() {
-			return super.computePrefWidth(-1);
+			return super.computePrefWidth(USE_COMPUTED_SIZE);
 		}
 		
 		@Override
-		protected double computeMinWidth(double height) {
+		protected double computePrefWidth(double height) {
 			return getMaxPrefWidth();
 		}
 	}

@@ -7,7 +7,7 @@ import com.lwan.bo.BOSet;
 import com.lwan.bo.db.DbRecord;
 import com.lwan.bo.db.DbRecordSet;
 import com.lwan.eaproj.app.EAConstants;
-import com.lwan.eaproj.app.panes.base.PaneEditBase;
+import com.lwan.eaproj.app.PageConstants;
 import com.lwan.eaproj.app.panes.base.PaneGridFind;
 import com.lwan.eaproj.bo.ref.BOUserSet;
 import com.lwan.javafx.app.Lng;
@@ -25,19 +25,8 @@ import com.lwan.util.CollectionUtil;
 public class PaneWorkFind extends PaneGridFind<DbRecord>{
 
 	@Override
-	protected void setSearchField(PaneEditBase<?> pane) {
-		pane.setSearchField("WorkID");
-		pane.setParamValue(getMainLink().findAttributeByName("wrk_id").asInteger());
-	}
-
-	@Override
 	protected String getEditFormName() {
 		return Lng._("Work Edit");
-	}
-
-	@Override
-	protected PaneEditBase<?> getNewEditForm() {
-		return new PaneWorkEdit();
 	}
 
 	TFlowPane pTop;
@@ -119,4 +108,18 @@ public class PaneWorkFind extends PaneGridFind<DbRecord>{
 		return Lng._("Work");
 	}
 
+	@Override
+	protected String getIDField() {
+		return "WorkID";
+	}
+
+	@Override
+	protected Integer getID() {
+		return getMainLink().findAttributeByName("wrk_id").asInteger();
+	}
+
+	@Override
+	protected String getPageBaseName() {
+		return PageConstants.PAGE_WORK;
+	}
 }

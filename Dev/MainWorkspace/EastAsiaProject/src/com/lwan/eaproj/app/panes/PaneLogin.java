@@ -89,10 +89,10 @@ public class PaneLogin extends TStackPane implements EventHandler<ActionEvent> {
 	@Override
 	public void handle(ActionEvent e) {		
 		if (e.getSource() == btnCancel) {
-			AppEastAsia.notifyState(AppEastAsia.STATE_LOGIN_CANCEL);
+			AppEastAsia.notifyMessage(AppEastAsia.STATE_LOGIN_CANCEL, null);
 		} else {
 			if (BOUserSet.setActiveUser(txtUser.getText(), txtPassword.getText())) {
-				AppEastAsia.notifyState(AppEastAsia.STATE_LOGIN_SUCCESS);	
+				AppEastAsia.notifyMessage(AppEastAsia.STATE_LOGIN_SUCCESS, null);	
 			} else {
 				FxUtils.ShowErrorDialog(getScene().getWindow(), 
 						Lng._("Invalid username or password."));

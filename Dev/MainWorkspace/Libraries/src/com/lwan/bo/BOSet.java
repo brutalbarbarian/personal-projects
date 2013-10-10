@@ -173,7 +173,7 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 	 */
 	public T findChildByAttribute(String attrName, Object value, int childNum, boolean forceString) {
 		int found = 0;
-		for (T child : childIterable()) {
+		for (T child : this) {
 			Object attr = child.findChildByName(attrName);
 			if (attr == null) {
 				throw new IllegalArgumentException("Cannot find child by name '" + attrName + "'");

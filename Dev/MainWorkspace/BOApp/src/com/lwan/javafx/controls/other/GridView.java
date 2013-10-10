@@ -82,7 +82,7 @@ public class GridView <B extends BusinessObject> extends TBorderPane implements 
 						public void handle(ActionEvent arg0) {
 							MenuItem item = (MenuItem) arg0.getSource();
 							if (item.getUserData().equals("showFooter")) {
-								footer.setVisible(((CheckMenuItem)item).isSelected());
+								FxUtils.setVisibleAndManaged(footer, ((CheckMenuItem)item).isSelected());
 							} else if (item.getUserData().equals("primary")) {
 								gridControl.activate(gridControl.getPrimaryButton());
 							} else if (item.getUserData().equals("secondary")) {

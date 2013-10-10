@@ -4,6 +4,7 @@ import com.lwan.bo.BOLinkEx;
 import com.lwan.bo.BOSet;
 import com.lwan.bo.db.DbRecord;
 import com.lwan.bo.db.DbRecordSet;
+import com.lwan.eaproj.app.PageConstants;
 import com.lwan.eaproj.app.panes.base.PaneEditBase;
 import com.lwan.eaproj.app.panes.base.PaneGridFind;
 import com.lwan.javafx.app.Lng;
@@ -67,24 +68,28 @@ public class PaneCustomerFind extends PaneGridFind<DbRecord>{
 	}
 
 	@Override
-	protected void setSearchField(PaneEditBase<?> pane) {
-		pane.setSearchField("CustomerID");
-		pane.setParamValue(getMainLink().findAttributeByName("cus_id").asInteger());
-	}
-
-	@Override
 	protected String getEditFormName() {
 		return Lng._("Customer Edit");
 	}
 
 	@Override
-	protected PaneEditBase<?> getNewEditForm() {
-		return new PaneCustomerEdit();
+	protected String getChildName() {
+		return Lng._("Customer");
 	}
 
 	@Override
-	protected String getChildName() {
-		return Lng._("Customer");
+	protected String getIDField() {
+		return "CustomerID";
+	}
+
+	@Override
+	protected Integer getID() {
+		return getMainLink().findAttributeByName("cus_id").asInteger();
+	}
+
+	@Override
+	protected String getPageBaseName() {
+		return PageConstants.PAGE_CUSTOMERS;
 	}
 
 }

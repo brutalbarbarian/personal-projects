@@ -39,3 +39,11 @@ alter table TM_INV_invoice
 add constraint FK_INV_USR
 foreign key(usr_id_create)
 references TR_USR_user(usr_id);
+
+insert TX_PKC_primary_key_counter
+(pkc_name, pkc_id_next)
+values ('inv_id', 1);
+
+insert TX_PKC_primary_key_counter
+(pkc_name, pkc_id_next)
+values ('ini_id', 1);

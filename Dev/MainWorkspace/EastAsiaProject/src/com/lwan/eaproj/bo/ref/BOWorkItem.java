@@ -80,11 +80,11 @@ public class BOWorkItem extends BODbObject {
 
 	@Override
 	protected void createAttributes() {
-		workItemID = addAsChild(new BODbAttribute<Integer>(this, "WorkItemID", "wki_id", AttributeType.Integer));
-		productID = addAsChild(new BODbAttribute<Integer>(this, "ProductID", "prd_id", AttributeType.Integer));
-		workID = addAsChild(new BODbAttribute<Integer>(this, "WorkID", "wrk_id", AttributeType.Integer));
+		workItemID = addAsChild(new BODbAttribute<Integer>(this, "WorkItemID", "wki_id", AttributeType.ID));
+		productID = addAsChild(new BODbAttribute<Integer>(this, "ProductID", "prd_id", AttributeType.ID));
+		workID = addAsChild(new BODbAttribute<Integer>(this, "WorkID", "wrk_id", AttributeType.ID));
 		
-		status = addAsChild(new BODbAttribute<Integer>(this, "Status", "wki_status", AttributeType.Integer));
+		status = addAsChild(new BODbAttribute<Integer>(this, "Status", "wki_status", AttributeType.ID));
 		// price each?
 		price = addAsChild(new BODbAttribute<Double>(this, "Price", "wki_price", AttributeType.Currency));
 		comments = addAsChild(new BODbAttribute<String>(this, "Comments", "wki_comments", AttributeType.String));
@@ -96,6 +96,9 @@ public class BOWorkItem extends BODbObject {
 		// Calculated
 		totalPrice = addAsChild(new BOAttribute<Double>(this, "TotalPrice", AttributeType.Currency));
 		avaliableQuantity = addAsChild(new BODbAttribute<Double>(this, "AvaliableQuantity", "wki_avaliable", AttributeType.Double));
+		
+		totalPrice.triggersModifyProperty().setValue(false);
+		avaliableQuantity.triggersModifyProperty().setValue(false);
 	}
 
 	@Override

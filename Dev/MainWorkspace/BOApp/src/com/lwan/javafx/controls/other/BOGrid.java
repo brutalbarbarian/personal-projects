@@ -40,6 +40,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -669,6 +670,10 @@ public class BOGrid<R extends BusinessObject> extends TableView<R> implements Mo
 			}
 			// Any remaining items, add them all
 			getItems().addAll(aItems);
+			
+			ObservableList<R> items = getItems();
+			setItems(null);
+			setItems(items);
 			
 			// Attempt to reselect what was previously selected
 			getSelectionModel().select(item);

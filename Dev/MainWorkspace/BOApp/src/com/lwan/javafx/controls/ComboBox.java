@@ -240,6 +240,22 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		});
 	}
 	
+	@Override
+	protected double computePrefWidth(double height) {
+		return getComboBoxSkin().getDisplayNode().prefWidth(height);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected ComboBoxListViewSkin<ComboBox<T>> getComboBoxSkin() {
+		return (ComboBoxListViewSkin<ComboBox<T>>)super.getSkin();
+	}
+
+	
+	@Override
+	protected double computeMaxWidth(double height) {
+		return Double.MAX_VALUE;
+	}
+	
 	private boolean ensuringEditingFocus;
 	private Runnable focusRunner;
 	
@@ -309,11 +325,11 @@ public class ComboBox <T> extends javafx.scene.control.ComboBox<ComboBoxItem<T>>
 		return bulkUpdateState > 0;
 	}
 	
-	@Override
-	protected double computeMaxWidth(double height) {
-		// let it expand as far as it likes?
-		return Double.MAX_VALUE;
-	}
+//	@Override
+//	protected double computeMaxWidth(double height) {
+//		// let it expand as far as it likes?
+//		return Double.MAX_VALUE;
+//	}
 	
 	/**
 	 * Call to end the bulk update process. 

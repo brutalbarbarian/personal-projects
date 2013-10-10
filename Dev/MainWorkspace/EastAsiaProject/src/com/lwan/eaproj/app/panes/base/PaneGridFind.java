@@ -3,20 +3,16 @@ package com.lwan.eaproj.app.panes.base;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-
-import com.lwan.bo.BOSet;
 import com.lwan.bo.BusinessObject;
-import com.lwan.javafx.app.App;
+import com.lwan.eaproj.app.AppEastAsia;
+import com.lwan.eaproj.app.PageConstants;
 import com.lwan.javafx.app.Lng;
 import com.lwan.util.FxUtils;
+import com.lwan.util.containers.Params;
 
 public abstract class PaneGridFind <T extends BusinessObject> extends PaneGridBase<T> implements EventHandler<ActionEvent> {
 	public PaneGridFind() {
@@ -70,49 +66,25 @@ public abstract class PaneGridFind <T extends BusinessObject> extends PaneGridBa
 			result = btn == bSelect;
 			getScene().getWindow().hide();
 		} else if (btn == bEdit || btn == bNew) {
-			Stage stage = new Stage(StageStyle.UTILITY);
-			stage.initOwner(getScene().getWindow());
-			stage.initModality(Modality.WINDOW_MODAL);
-			stage.setTitle(getEditFormName());
-			
-			PaneEditBase<?> pane = getNewEditForm();
-			try {
-				if (btn == bEdit) {
-					setSearchField(pane);
-					pane.reopenDataset();
-				} else {
-					BOSet<?> set = pane.getSetLink().getLinkedObject();
-					if (set != null) {
-//						BusinessObject child = 
-						set.createNewChild();
-						// there really should only be one.
-						pane.select(0);
-					}
-				}
-				
-				Scene sc = new Scene(pane);
-				sc.getStylesheets().addAll(App.getStyleshets());
-				
-				stage.setScene(sc);
-				stage.setWidth(1000);
-				stage.setHeight(800);
-				stage.showAndWait();
-			} finally {
-				pane.dispose();
+			Params params;
+			if (btn == bEdit) {
+				params = new Params(
+						PageConstants.PAGE_NAME, getPageBaseName() + PageConstants.SUBPAGE_EDIT,
+						getIDField(), getID());
+			} else {
+				params = new Params(
+						PageConstants.PAGE_NAME, getPageBaseName() + PageConstants.SUBPAGE_EDIT,
+						PageConstants.PARAM_CREATE, true);
 			}
 			
-			// refresh the grid
-			link.getLinkedObject().reload();
-			gridView.refreshGrid();
-			
-			displayPaneState();
+			AppEastAsia.notifyMessage(AppEastAsia.PAGE_CHANGE_REQUEST, params);
 		}
 	}
 	
-	protected abstract void setSearchField(PaneEditBase<?> pane);
+	protected abstract String getIDField();
+	protected abstract Integer getID();
 	protected abstract String getEditFormName();
-	protected abstract PaneEditBase<?> getNewEditForm();
-	
+	protected abstract String getPageBaseName();
 	
 	private boolean result;
 	public boolean getResult() {

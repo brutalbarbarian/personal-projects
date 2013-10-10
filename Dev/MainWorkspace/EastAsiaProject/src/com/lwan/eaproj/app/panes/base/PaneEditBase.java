@@ -1,5 +1,8 @@
 package com.lwan.eaproj.app.panes.base;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -28,6 +31,7 @@ import com.lwan.bo.ModifiedEventType;
 import com.lwan.javafx.app.Lng;
 import com.lwan.javafx.art.RecordNavigationArt;
 import com.lwan.javafx.controls.ComboBox;
+import com.lwan.javafx.controls.ComboBoxItem;
 import com.lwan.javafx.controls.bo.BOTextField;
 import com.lwan.javafx.controls.bo.binding.StringBoundProperty;
 import com.lwan.javafx.controls.other.BOSetControl;
@@ -35,6 +39,8 @@ import com.lwan.javafx.controls.other.BOSetControlTarget;
 import com.lwan.javafx.controls.panes.TBorderPane;
 import com.lwan.javafx.interfaces.BoundBasePane;
 import com.lwan.javafx.interfaces.PaneState;
+import com.lwan.util.CollectionUtil;
+import com.lwan.util.CollectionUtil.MapRunner;
 import com.lwan.util.StringUtil;
 import com.lwan.util.wrappers.Disposable;
 
@@ -172,6 +178,18 @@ public abstract class PaneEditBase <B extends BusinessObject> extends TBorderPan
 	
 	public void setSearchField(String paramName) {
 		cbSearchFields.setSelected(paramName);
+	}
+	
+	public List<String> getSearchFieldNames() {
+		return CollectionUtil.Map(cbSearchFields.getItems(), new MapRunner<ComboBoxItem<String>, List<String>>() {
+			public void run(ComboBoxItem<String> item, List<String> result) {
+				result.add(item.getValue());
+			}
+
+			public List<String> getBaseInstance() {
+				return new ArrayList<String>();
+			}			
+		});
 	}
 	
 	public void setParamValue(Object value) {

@@ -21,6 +21,7 @@ import com.lwan.util.FxUtils;
 import com.lwan.util.GenericsUtil;
 import com.lwan.util.IOUtil;
 import com.lwan.util.StringUtil;
+import com.lwan.util.containers.Params;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -39,14 +40,15 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 public abstract class App extends Application{
+	private enum AppMessages {
+		terminate, restart;
+	}
 	// Application messages
-	public static final int TERMINATE_REQUEST = 0;
-	public static final int RESTART_REQUEST = 1;
-	
-	// Use to space out the messages so there's no collision of messages
-	protected static final int APP_MESSAGE_LAST = RESTART_REQUEST;
+	public static final AppMessages TERMINATE_REQUEST = AppMessages.terminate;
+	public static final AppMessages RESTART_REQUEST = AppMessages.restart;
 	
 	// File names
 	public static final String KEY_FILENAME = "keys.ini";
@@ -101,6 +103,14 @@ public abstract class App extends Application{
 		
 	@Override
 	public void start(Stage s) throws Exception {
+		s.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent event) {
+				// let requestTerinate do the terminating rather then the window event
+				event.consume();	
+				requestTerminate();
+			}			
+		});
+		
 		// Initialize database
 		initDatabase();
 		
@@ -119,37 +129,41 @@ public abstract class App extends Application{
 	
 	protected abstract void initialiseStage(Stage stage);
 	
-	public static void notifyState(final int state) {
-		System.out.println("notified:" + state);
+	public static void notifyMessage(final Enum<?> state, Params params) {
+		System.out.println("notified:" + state.getClass().getCanonicalName() + "." + state);
 		
 		// Run in a seperate thread.
-		Platform.runLater(new NotifyTask(state));
+		Platform.runLater(new NotifyTask(state, params));
 	}
 
 	// Used for notifyState only.
 	private static class NotifyTask extends Task<Void> {
-		int state;
+		Enum<?> state;
+		Params params;
 		
-		NotifyTask(int state) {
+		NotifyTask(Enum<?> state, Params params) {
 			this.state = state;
+			if (params == null) {
+				this.params = new Params();
+			} else {
+				this.params = params;
+			}
 		}
 		
 		protected Void call() throws Exception {			
-			getApp().processState(state);
+			getApp().processState(state, params);
 			
 			return null;
 		}
 	}
 	
-	protected void processState(int state) throws Exception {
-		switch (state) {
-		case TERMINATE_REQUEST :
+	protected void processState(Enum<?> state, Params params) throws Exception {
+		if (state == TERMINATE_REQUEST) {
 			if (allowTerminate()) {
 //				getMainStage().close();
 				Platform.exit();
 			}
-			break;
-		case RESTART_REQUEST:
+		} else if (state == RESTART_REQUEST) {
 			if (allowTerminate()) {
 				Platform.exit();
 				Platform.runLater(new Runnable(){
@@ -158,7 +172,6 @@ public abstract class App extends Application{
 					}
 				});			
 			}
-			break;
 		}
 	}
 	
@@ -370,11 +383,11 @@ public abstract class App extends Application{
 	}
 	
 	public static void requestTerminate() {
-		notifyState(TERMINATE_REQUEST);
+		notifyMessage(TERMINATE_REQUEST, null);
 	}
 
 	public static void requestRestart() {
-		notifyState(RESTART_REQUEST);
+		notifyMessage(RESTART_REQUEST, null);
 	}
 	
 	public static Collection<String> getStyleshets() {

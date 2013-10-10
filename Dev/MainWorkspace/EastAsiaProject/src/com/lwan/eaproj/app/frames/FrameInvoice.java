@@ -7,6 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -253,7 +254,7 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 		gridWorkItems.getGrid().getColumnByField("Status").setAsComboBox(stageValues, stageDisplayStrings, false);
 		
 		gridInvoiceItems = new GridView<>("frame_invoice_invoice_items", linkInvoiceItems,
-				new String[]{"WorkItem/Product/Name", "WorkItem/Avaliable", "WorkItem/Status", "Quantity"},
+				new String[]{"WorkItem/Product/Name", "WorkItem/AvaliableQuantity", "WorkItem/Status", "Quantity"},
 				LngUtil.translateArray(new String[]{"Product", "Avaliable", "Stage", "Quantity"}), null);
 		gridInvoiceItems.getGrid().setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent e) {
@@ -278,6 +279,16 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 				}
 			}
 		});
+		gridWorkItems.getSelectedLink().addListener(new ModifiedEventListener() {
+			public void handleModified(ModifiedEvent event) {
+				if (event.getType() == ModifiedEventType.Link) {
+					linkDisplayWorkItem.setLinkedObject(gridWorkItems.getSelectedLink().getLinkedObject());
+					
+					doBuildAttributeLinks();
+					doDisplayState();
+				}
+			}			
+		});
 		
 		gridInvoiceItems.getGrid().focusedProperty().addListener(new ChangeListener<Boolean> () {
 			public void changed(ObservableValue<? extends Boolean> arg0,
@@ -287,6 +298,7 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 					if (item != null) {
 						linkDisplayWorkItem.setLinkedObject(item.workItem());
 						doBuildAttributeLinks();
+						doDisplayState();
 					}
 				}
 			}			
@@ -298,15 +310,12 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 					BOWorkItem item = gridWorkItems.getGrid().getSelectionModel().getSelectedItem();
 					linkDisplayWorkItem.setLinkedObject(item);
 					doBuildAttributeLinks();
+					doDisplayState();
 				}
 			}			
 		});
 		
 		gridInvoiceItems.getGrid().getColumnByField("WorkItem/Status").setAsComboBox(stageValues, stageDisplayStrings, false);
-		
-		// Ensure both have the same width
-		gridInvoiceItems.prefWidthProperty().bind(gridWorkItems.widthProperty());
-		gridWorkItems.prefWidthProperty().bind(gridInvoiceItems.widthProperty());
 		
 		pItemButtons = new TVBox();
 		pItemButtons.getChildren().addAll(bAddInvoiceItem, bRemoveInvoiceItem);
@@ -378,8 +387,8 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 		tpInvoiceItemComments.setMinWidth(0);
 		tpWorkItemComments.setMinWidth(0);
 		
-		tpInvoiceItemDetails.enforceMinHeight = true;
-		tpWorkItemDetails.enforceMinHeight = true;
+		tpInvoiceItemDetails.setMinHeight(Control.USE_PREF_SIZE);
+		tpWorkItemDetails.setMinHeight(Control.USE_PREF_SIZE);
 		
 		pInvoiceItem = new TVBox();
 		pInvoiceItem.getChildren().addAll(tpInvoiceItemDetails, tpInvoiceItemComments);
@@ -394,8 +403,8 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 		pInvoiceItems.setOrientation(Orientation.VERTICAL);
 		pInvoiceItems.getItems().addAll(pItemGrids, pItemDetails);
 		
-		pInvoiceItem.prefWidthProperty().bind(pWorkItem.widthProperty());
-		pWorkItem.prefWidthProperty().bind(pInvoiceItem.widthProperty());
+		gridInvoiceItems.prefWidthProperty().bind(gridWorkItems.widthProperty());
+		gridWorkItems.prefWidthProperty().bind(gridInvoiceItems.widthProperty());
 		
 		tabItems = new Tab(Lng._("Items"));
 		tabItems.setContent(pInvoiceItems);
@@ -409,15 +418,23 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 			ini.price().assign(item.price());
 			
 			linkWorkItems.getLinkedObject().reload();
+			
+			gridInvoiceItems.requestFocus();
+			gridInvoiceItems.getGrid().select(ini);
 		}
 	}
 	
 	protected void removeInvoiceItem() {
 		BOInvoiceItem item = gridInvoiceItems.getSelectedLink().getLinkedObject();
 		if (item != null) {
+			BOWorkItem wit = item.workItem();
 			// TODO
+			item.setActive(false);
 			
 			linkWorkItems.getLinkedObject().reload();
+			
+			gridWorkItems.requestFocus();
+			gridWorkItems.getGrid().select(wit);
 		}
 	}
 	
@@ -437,12 +454,19 @@ public class FrameInvoice extends FrameBoundBase<BOInvoice>{
 		bAddInvoiceItem.setDisable(!isActive || gridWorkItems.getSelectedLink().getLinkedObject() == null);
 		bRemoveInvoiceItem.setDisable(!isActive || gridInvoiceItems.getSelectedLink().getLinkedObject() == null);
 		
+		BOInvoiceItem iit = gridInvoiceItems.getSelectedLink().getLinkedObject();
+		BOWorkItem wit = linkDisplayWorkItem.getLinkedObject();
+		boolean showInvoiceItems = !(iit == null || iit.workItem() != wit);
+		
+		pInvoiceItem.setVisible(showInvoiceItems);
+		pInvoiceItem.setManaged(showInvoiceItems);
 	}
 
 	@Override
 	public void doBuildAttributeLinks() {
 		taComments.dataBindingProperty().buildAttributeLinks();
-		BOCtrlUtil.buildAttributeLinks(pMain);
+		BOCtrlUtil.buildAttributeLinks(pDetails);
+		BOCtrlUtil.buildAttributeLinks(pFinance);
 		
 		BOCtrlUtil.buildAttributeLinks(pWorkItemDetails);
 		BOCtrlUtil.buildAttributeLinks(pInvoiceItemDetails);

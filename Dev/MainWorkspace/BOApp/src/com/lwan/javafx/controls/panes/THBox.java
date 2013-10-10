@@ -13,5 +13,10 @@ public class THBox extends HBox {
 		super(spacing);
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Override
+	protected void layoutChildren() {
+		super.layoutChildren();
+	}
 
 }

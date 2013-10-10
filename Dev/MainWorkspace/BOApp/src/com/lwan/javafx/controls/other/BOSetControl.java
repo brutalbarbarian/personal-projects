@@ -16,9 +16,9 @@ import com.lwan.bo.BusinessObject;
 import com.lwan.bo.ModifiedEvent;
 import com.lwan.bo.ModifiedEventListener;
 import com.lwan.javafx.app.Lng;
+import com.lwan.javafx.app.util.DialogUtils;
 import com.lwan.javafx.controls.bo.BOComboBox;
 import com.lwan.javafx.controls.bo.BOTextField;
-import com.lwan.util.FxUtils;
 import com.lwan.util.wrappers.Disposable;
 
 public class BOSetControl<T extends BusinessObject> implements EventHandler<ActionEvent>, ModifiedEventListener, Disposable {
@@ -223,10 +223,10 @@ public class BOSetControl<T extends BusinessObject> implements EventHandler<Acti
 		return target.inEditState();
 	}
 	
-	public void activate(Button btn) {
+	public boolean activate(Button btn) {
 		try {
 			if (btn.isDisabled()) {
-				return;	// Do nothing
+				return false;	// Do nothing
 			}
 			boolean inEditState = inEditState();
 			if (btn == btnPrimary) {
@@ -274,10 +274,13 @@ public class BOSetControl<T extends BusinessObject> implements EventHandler<Acti
 					activate(btnRefresh);
 				}
 			}
+			
+			return true;
 		} catch (RuntimeException e) {
-			e.printStackTrace();
-			FxUtils.ShowErrorDialog(target.getWindow(), e.getMessage());
+			DialogUtils.showException(e);
+//			FxUtils.ShowErrorDialog(target.getWindow(), e.getMessage());
 //			System.out.println("Error:" + e.getMessage());
+			return false;	// failed
 		}
 	}
 	
