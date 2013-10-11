@@ -7,9 +7,11 @@ import java.util.HashMap;
 
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.State;
+import com.lwan.javafx.app.util.DbUtil;
 import com.lwan.jdbc.GConnection;
 import com.lwan.jdbc.Parameter;
 import com.lwan.jdbc.StoredProc;
+import com.lwan.util.StringUtil;
 
 public abstract class BODbObject extends BusinessObject implements BODbCustomObject{
 	public static final int SP_SELECT = 0;
@@ -70,6 +72,10 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 	 */
 	protected void setSP(StoredProc sp, int type) {
 		storedProcs().set(type, sp);
+	}
+	
+	protected String getTableCode() {
+		return null;	// Override to autocreate stored procs
 	}
 	
 	/**
@@ -187,7 +193,15 @@ public abstract class BODbObject extends BusinessObject implements BODbCustomObj
 	 * UpdateStoredProc, InsertStoredProc and DeleteStoredProc from this method.
 	 * 
 	 */
-	protected abstract void createStoredProcs();
+	protected void createStoredProcs() {
+		String code = getTableCode();
+		if (!StringUtil.isNullOrBlank(code)) {
+			setSP(DbUtil.getDbStoredProc("PS_" + code), SP_SELECT);
+			setSP(DbUtil.getDbStoredProc("PI_" + code), SP_INSERT);
+			setSP(DbUtil.getDbStoredProc("PU_" + code), SP_UPDATE);
+			setSP(DbUtil.getDbStoredProc("PD_" + code), SP_DELETE);
+		}
+	}
 
 	@Override
 	protected void doDelete() {

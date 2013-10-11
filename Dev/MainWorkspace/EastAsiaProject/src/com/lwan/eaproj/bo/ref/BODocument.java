@@ -23,6 +23,7 @@ public abstract class BODocument extends BODbObject{
 	public static final int DOC_TYPE_WORK = 2;
 	public static final int DOC_TYPE_INVOICE = 3;
 	public static final int DOC_TYPE_SCHOOL = 4;
+	public static final int DOC_TYPE_COMPANY = 5;
 	
 	
 	private BODbAttribute<Integer> documentID, documentType;
@@ -99,8 +100,8 @@ public abstract class BODocument extends BODbObject{
 		
 		notes = addAsChild(new BODbAttribute<String>(this, "Notes", "doc_notes", AttributeType.String));
 		
-		addresses = addAsChild(new BOAddressSet(this, "Addresses"));
-		contacts = addAsChild(new BOContactSet(this, "Contacts"));
+		addresses = addAsChild(new BOAddressSet(this));
+		contacts = addAsChild(new BOContactSet(this));
 		
 		userCreated = addAsChildLink(new BOLink<BOUser>(this, "UserCreated"), BOUserSet.getSet(), "UserIDCreated");
 		userChanged = addAsChildLink(new BOLink<BOUser>(this, "UserChanged"), BOUserSet.getSet(), "UserIDChanged");
@@ -118,18 +119,14 @@ public abstract class BODocument extends BODbObject{
 	
 	@Override
 	public void clearAttributes() {
+		super.clearAttributes();
+		
 		BOUser user = BOUserSet.getActiveUser();
 		userIDCreated.assign(user.userID());
 		userIDOwner.assign(user.userID());
 		
 		dateCreated.setValue(DateUtil.getCurrentDate());
 		documentType.setValue(getDocumentType());
-		
-		addresses.clear();
-		contacts.clear();
-		notes.clear();
-		userIDChanged.clear();
-		dateChanged.clear();
 	}
 	
 	protected abstract int getDocumentType();

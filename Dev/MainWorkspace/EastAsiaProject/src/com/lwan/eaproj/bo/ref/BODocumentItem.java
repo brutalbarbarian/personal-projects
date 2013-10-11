@@ -27,10 +27,12 @@ public abstract class BODocumentItem <D extends BODocument> extends BODbObject{
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void ensureIDExists() {
 		documentID.assign(document().documentID());
 		if (occurrence.isNull()) {
-			// TODO
+			occurrence.setValue(((BODocumentItemSet<BODocumentItem<D>>)
+					getOwner()).getNextNum());
 		}
 	}
 	
@@ -53,8 +55,6 @@ public abstract class BODocumentItem <D extends BODocument> extends BODbObject{
 	}
 
 	@Override
-	public void clearAttributes() {
-		// TODO
-	}
+	public void clearAttributes() {}
 	
 }

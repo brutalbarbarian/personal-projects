@@ -3,7 +3,6 @@ package com.lwan.eaproj.bo.ref;
 import com.lwan.bo.AttributeType;
 import com.lwan.bo.BusinessObject;
 import com.lwan.bo.db.BODbAttribute;
-import com.lwan.javafx.app.util.DbUtil;
 
 public class BOAddress extends BODocumentItem<BODocument> {
 	private BODbAttribute<String> address1, address2, city, postcode;
@@ -19,11 +18,9 @@ public class BOAddress extends BODocumentItem<BODocument> {
 	public BODbAttribute<String> postcode() {
 		return postcode;
 	}
-
 	
-	public BOAddress(BusinessObject owner, String name) {
-		super(owner, name);
-		// TODO Auto-generated constructor stub
+	public BOAddress(BusinessObject owner) {
+		super(owner, "Address");
 	}
 
 	@Override
@@ -37,11 +34,8 @@ public class BOAddress extends BODocumentItem<BODocument> {
 	}
 	
 	@Override
-	protected void createStoredProcs() {
-		setSP(DbUtil.getDbStoredProc("PS_ADR"), SP_SELECT);
-		setSP(DbUtil.getDbStoredProc("PI_ADR"), SP_INSERT);
-		setSP(DbUtil.getDbStoredProc("PU_ADR"), SP_UPDATE);
-		setSP(DbUtil.getDbStoredProc("PD_ADR"), SP_DELETE);
+	protected String getTableCode() {
+		return "ADR";
 	}
 
 

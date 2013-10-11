@@ -1,24 +1,22 @@
 package com.lwan.eaproj.bo.ref;
 
 import com.lwan.bo.BusinessObject;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOAddressSet extends BODocumentItemSet<BOAddress>{
 
-	public BOAddressSet(BusinessObject owner, String name) {
-		super(owner, name);
+	public BOAddressSet(BusinessObject owner) {
+		super(owner, "Addresses");
 	}
-
 
 	@Override
 	protected void createStoredProcs() {
-		// TODO Auto-generated method stub
-		
+		selectStoredProcProperty().setValue(DbUtil.getDbStoredProc("PS_ADR_for_document"));
 	}
 
 	@Override
 	protected BOAddress createChildInstance(Object id) {
-		// TODO Auto-generated method stub
-		return null;
+		return new BOAddress(this);
 	}
 
 }
