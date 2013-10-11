@@ -990,7 +990,14 @@ public abstract class BusinessObject implements ModifiedEventListener, Disposabl
 	 * to its neutral state, without losing its identity or losing any connections
 	 * to its parent.
 	 */
-	public abstract void clearAttributes();
+	public void clearAttributes() {
+		// Clear all attributes
+		for (BusinessObject child : getChildren()) {
+			if (child.isAttribute()) {
+				child.clear();
+			}
+		}
+	}
 	
 	/**
 	 * Event thrown when something down the hierarchy is modified.

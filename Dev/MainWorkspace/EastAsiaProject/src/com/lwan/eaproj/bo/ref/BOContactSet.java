@@ -1,33 +1,21 @@
 package com.lwan.eaproj.bo.ref;
 
-import java.util.function.Consumer;
-
 import com.lwan.bo.BusinessObject;
+import com.lwan.javafx.app.util.DbUtil;
 
 public class BOContactSet extends BODocumentItemSet<BOContact> {
-
-	public BOContactSet(BusinessObject owner, String name, String childIdName,
-			String childIdFieldName) {
-		super(owner, name, childIdName, childIdFieldName);
-		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	public void forEach(Consumer<? super BOContact> action) {
-		// TODO Auto-generated method stub
-		
+	public BOContactSet(BusinessObject owner) {
+		super(owner, "Contacts");
 	}
 
 	@Override
 	protected void createStoredProcs() {
-		// TODO Auto-generated method stub
-		
+		selectStoredProcProperty().setValue(DbUtil.getDbStoredProc("PS_CON_for_document"));
 	}
 
 	@Override
 	protected BOContact createChildInstance(Object id) {
-		// TODO Auto-generated method stub
-		return null;
+		return new BOContact(this);
 	}
 
 }

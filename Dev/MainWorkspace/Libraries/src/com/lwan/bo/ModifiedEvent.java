@@ -58,6 +58,17 @@ public class ModifiedEvent {
 		return source.isAttribute();
 	}
 	
+	public boolean isAttribute(Class<? extends BusinessObject> ownerClass, String... name) {
+		if (isAttribute() && getAttributeOwner().getClass().equals(ownerClass)) {
+			for (String s : name) {
+				if (getSource().getName().equalsIgnoreCase(s)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Get the owner of the source if the source is a BOAttribute.
 	 * Will return null otherwise.

@@ -92,6 +92,16 @@ public abstract class BOSet<T extends BusinessObject> extends BusinessObject imp
 		children = new Vector<Entry>();
 		_childIdNameProperty().setValue(childIdName);
 	}
+	
+	public int getNextNum() {	
+		int max = Integer.MIN_VALUE;
+		String idName = childIDNameProperty().getValue();
+		for (T child : this) {
+			BOAttribute<?> attr = child.findAttributeByName(idName);
+			max = Math.max(attr.asInteger(), max);
+		}
+		return Math.max(max + 1, 1);
+	}
 
 	/**
 	 * Reinitialises this set as the type specified.
